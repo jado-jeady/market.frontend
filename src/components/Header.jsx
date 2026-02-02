@@ -6,6 +6,8 @@ const Header = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const userdata = localStorage.getItem('user');
+  console.log('Header User Data:', userdata);
 
   const handleLogout = () => {
     logout();
@@ -13,15 +15,15 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm fixed top-0 right-0 left-64 z-10">
-      <div className="flex items-center justify-between px-6 py-4">
+    <header className="bg-white border-b border-gray-200 shadow-sm max-h-16 fixed top-0 right-0 left-45 z-10">
+      <div className="flex items-center justify-between px-6 py-1">
         {/* Search Bar */}
-        <div className="flex-1 max-w-2xl">
+        <div className="flex-1 max-w-xl">
           <div className="relative">
             <input
               type="text"
               placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+              className="w-full pl-10 pr-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
             />
             <svg
               className="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
@@ -64,8 +66,8 @@ const Header = () => {
                 {user?.name?.charAt(0).toUpperCase() || 'A'}
               </div>
               <div className="text-left hidden md:block">
-                <p className="text-sm font-medium text-gray-900">{user?.name || 'Admin'}</p>
-                <p className="text-xs text-gray-500">{user?.role || 'Administrator'}</p>
+                <p className="text-sm font-medium text-gray-900">{localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).username : 'Admin'}</p>
+                <p className="text-xs text-gray-500">{localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).role : 'Administrator'}</p>
               </div>
               <svg
                 className={`w-4 h-4 text-gray-600 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}

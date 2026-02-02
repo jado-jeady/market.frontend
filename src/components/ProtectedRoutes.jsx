@@ -1,19 +1,21 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+const ProtectedRoute = ({ children, allowedRole }) => {
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user'));
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
+  if (!user) {
+    console.log(`Token: ${token}, User: ${user?.role || 'undefined'} allowedRole: ${allowedRole}`);
+    alert('You must be logged in to access this page.');
+    return <Navigate to="/" replace />;
+
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  // if role is not allowed, block access
+  if (allowedRole && user.role !== allowedRole) {
+    console.log(` From second if cloese ,User role: ${user.role} is not allowed to access this route. Required role: ${allowedRole}`);
+    alert('Access Denied: You do not have permission to view this page.');
+    return <Navigate to="/" replace />;
   }
 
   return children;

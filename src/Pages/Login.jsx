@@ -23,10 +23,14 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    if (credentials.username === 'admin' && credentials.password === 'admin') {
-        localStorage.setItem('user', JSON.stringify({ username: 'admin', role: 'admin' }));
+    if (credentials.username === 'admin' && credentials.password === 'admin' ) {
+        localStorage.setItem('user', JSON.stringify({ username: 'admin', role: 'admin', password: 'admin', token: 'admin-token'}));
         localStorage.setItem('isAuthenticated', 'true');
-        navigate('/dashboard');
+        navigate('/admin/dashboard');
+      }else if(credentials.username === 'user' && credentials.password === 'user'){
+        localStorage.setItem('user', JSON.stringify({ username: 'user', role: 'user', password: 'user',token: 'user-token' }));
+        localStorage.setItem('isAuthenticated', 'true');
+        navigate('/user/dashboard');
       } else {
         setError('Invalid username or password. Try admin/admin for demo.');
         

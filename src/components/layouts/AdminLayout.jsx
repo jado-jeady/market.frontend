@@ -1,8 +1,8 @@
 import { Outlet } from 'react-router-dom';
-import Sidebar from '../Sidebar';
+import Sidebar from '../AdminSidebar';
 import Header from '../Header';
 
-const Layout = () => {
+const AdminLayout = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
@@ -16,4 +16,4 @@ const Layout = () => {
   );
 };
 
-export default Layout;
+export default AdminLayout;
