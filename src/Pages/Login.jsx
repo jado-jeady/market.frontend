@@ -20,55 +20,67 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
+    
     e.preventDefault();
     setError('');
     setLoading(true);
-    if (credentials.username === 'admin' && credentials.password === 'admin' ) {
-        localStorage.setItem('user', JSON.stringify({ username: 'admin', role: 'admin', password: 'admin', token: 'admin-token'}));
-        localStorage.setItem('isAuthenticated', 'true');
-        navigate('/admin/dashboard');
-      }else if(credentials.username === 'user' && credentials.password === 'user'){
-        localStorage.setItem('user', JSON.stringify({ username: 'user', role: 'user', password: 'user',token: 'user-token' }));
-        localStorage.setItem('isAuthenticated', 'true');
-        navigate('/user/dashboard');
-      } else {
-        setError('Invalid username or password. Try admin/admin for demo.');
-        
-      }
-
-    // try {
-    //   // Replace with your actual API endpoint
-    //   const response = await fetch(import.meta.env.VITE_API_URL + '/api/login', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify(credentials),
-    //   });
-
-    //   if (response.ok) {
-    //     const data = await response.json();
-    //     // Store token or user data
-    //     localStorage.setItem('user', JSON.stringify(data));
+    
+    // if (credentials.username === 'admin' && credentials.password === 'admin' ) {
+    //     localStorage.setItem('user', JSON.stringify({ username: 'admin', role: 'admin', password: 'admin', token: 'admin-token'}));
     //     localStorage.setItem('isAuthenticated', 'true');
-    //     navigate('/dashboard');
-    //   } else {
-    //     setError('Invalid username or password');
-    //   }
-    // } catch (err) {
-    //   // For demo purposes, allow login without API
-    //   console.log('API not available, using demo login');
-    //   if (credentials.username === 'admin' && credentials.password === 'admin') {
-    //     localStorage.setItem('user', JSON.stringify({ username: 'admin', role: 'admin' }));
+    //     navigate('/admin/dashboard');
+    //   }else if(credentials.username === 'user' && credentials.password === 'user'){
+    //     localStorage.setItem('user', JSON.stringify({ username: 'user', role: 'user', password: 'user',token: 'user-token' }));
     //     localStorage.setItem('isAuthenticated', 'true');
-    //     navigate('/dashboard');
+    //     navigate('/user/dashboard');
     //   } else {
     //     setError('Invalid username or password. Try admin/admin for demo.');
-    //     console.error('Login error:', err);
+        
     //   }
-    // } finally {
-    //   setLoading(false);
-    // }
+
+    try {
+      // Replace with your actual API endpoint
+      const response = await fetch(import.meta.env.VITE_API_URL + '/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      if (response.ok) {
+        
+        const data = await response.json();
+        
+        // Store token or user data
+        localStorage.setItem('user', JSON.stringify(data));
+        localStorage.setItem('isAuthenticated', 'true');
+
+
+        if (data.data?.user?.role === "Admin"){
+        navigate('/admin/dashboard');
+        }
+        else if(data?.data?.user?.role==="Cashier"){
+          navigate('/user/dashboard');
+        }
+        }else {
+          
+        setError('Invalid username or password');
+      }
+    } catch (err) {
+      // For demo purposes, allow login without API
+      console.log('API not available, using demo login'+err);
+      if (credentials.username === 'admin' && credentials.password === 'admin') {
+        localStorage.setItem('user', JSON.stringify({ username: 'admin', role: 'admin' }));
+        localStorage.setItem('isAuthenticated', 'true');
+        navigate('/dashboard');
+      } else {
+        setError('Invalid username or password. Try admin/admin for demo.');
+        console.error('Login error:', err);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const [showPassword, setShowPassword] = useState(false);
@@ -157,7 +169,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gray-700 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full  bg-gray-300 md:bg-gray-700 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>

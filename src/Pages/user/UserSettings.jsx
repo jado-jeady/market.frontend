@@ -9,7 +9,7 @@ const UserSettings = () => {
   ];
 
   return (
-    <div className='pt-20'>
+    <div className=''>
       <SubMenu items={subMenuItems} />
       <Outlet />
     </div>

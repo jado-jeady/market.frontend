@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       // TODO: Replace with your actual API endpoint
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(import.meta.env.VITE_API_URL +'/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(userData));
       return { success: true };
     } catch (error) {
-      console.error('Login error:', error);
+      
       return { success: false, error: error.message };
     }
   };
@@ -53,6 +53,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('isAuthenticated');
   };
 
   const value = {

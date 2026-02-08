@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import LowStockAlerts from './LowStockAlerts';
 
 // quickLinks.js or inside your component file
 const quickLinks = [
@@ -210,10 +211,19 @@ const UserDashboard = () => {
       </div>
 
       {/* Low Stock Alerts */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Low Stock Alerts</h2>
-          <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+      <div className="bg-gray-100 rounded-lg gap-6 grid grid-cols-3 shadow-md p-2">
+        {/* stock alert table  */}
+        <div className='shadow-lg p-4 col-span-2 rounded-lg'>
+       <LowStockAlerts></LowStockAlerts>
+
+        </div>
+
+        {/* Soo to expire items */}
+        <di className="p-4 shadow-lg">
+        <div className='this is also something special'>
+          <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-bold text-gray-900">Soon To Expire alert </h2>
+          <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
             {stats.lowStockItems} Items
           </span>
         </div>
@@ -221,28 +231,29 @@ const UserDashboard = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Product</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Current Stock</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Min Required</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Action</th>
+                <th className="px-4 py-3 text-left text-[0.625rem] font-semibold text-gray-600 uppercase">Product</th>
+                <th className="px-4 py-3 text-left text-[0.625rem] font-semibold text-gray-600 uppercase">Exp. Date</th>
+                <th className="px-4 py-3 text-left text-[0.625rem] font-semibold text-gray-600 uppercase">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {[1, 2, 3].map((item, index) => (
                 <tr key={item} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm text-gray-900">Product Name {item}</td>
-                  <td className="px-4 py-3 text-sm">
+                  <td className="px-4 py-3 text-xs text-gray-900">Product Name {item}</td>
+                  <td className="px-4 py-3 text-xs">
                     <span className="text-red-600 font-semibold">{stockLevels[index]}</span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">10</td>
+                  
                   <td className="px-4 py-3 text-sm">
-                    <button className="text-primary-600 hover:text-primary-700 font-medium">Restock</button>
+                    <button className="text-blue-600 hover:text-primary-700 text-xs font-medium">Restock</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        </div>
+        </di>
       </div>
     </div>
   );

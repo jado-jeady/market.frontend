@@ -4,7 +4,7 @@ const DailySales = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Daily Sales Report</h1>
+        <h3 className="text-xl font-bold text-gray-900">Daily Sales Report</h3>
         <p className="text-gray-600 mt-1">{today}</p>
       </div>
 

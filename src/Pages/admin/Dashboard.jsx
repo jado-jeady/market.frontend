@@ -64,7 +64,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div className="p-6 ">
       {/* Statistics Cards */}
       <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {statCards.map((card, index) => (
@@ -74,13 +74,13 @@ const Dashboard = () => {
           >
             <div className={`bg-gradient-to-r ${card.color} p-4 text-white`}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-3xl">{card.icon}</span>
+                <span className="text-1xl">{card.icon}</span>
                 <span className="text-sm text-gray-700 bg-white bg-opacity-30 px-2 py-1 rounded">
                   {card.change}
                 </span>
               </div>
-              <h3 className="text-sm font-medium opacity-90">{card.title}</h3>
-              <p className="text-3xl font-bold mt-2">{card.value}</p>
+              <h3 className="text-xs font-medium opacity-90">{card.title}</h3>
+              <p className="text-lg font-bold mt-2">{card.value}</p>
             </div>
           </div>
         ))}

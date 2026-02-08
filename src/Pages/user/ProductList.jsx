@@ -33,43 +33,41 @@ const ProductList = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-1 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Product List</h1>
-          <p className="text-gray-600 mt-1">Browse and manage all products</p>
+          <h3 className="text-xl font-bold text-gray-900">Product List</h3>
+          <p className="text-gray-600 text-xs mt-1">Browse and manage all products</p>
         </div>
         <div className="flex space-x-3">
-          <button className="px-4 py-2 border-2 border-gray-600 text-gray-600 rounded-lg hover:bg-gray-50 transition">
+          <button className="px-2 py-2 border-2 border-gray-600 text-gray-600 rounded-lg hover:bg-gray-50 transition">
             Export List
           </button>
-          <button className="px-6 py-2 bg-gray-600 to-secondary-600 text-white rounded-lg hover:from-gray-700 hover:to-secondary-700 transition shadow-md">
-            Add New Product
-          </button>
+          
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+      <div className="bg-white rounded-lg shadow-md p-2 mb-3">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <input
             type="text"
             placeholder="Search products..."
-            className="px-4 py-2 border border-gray-300 rounded-lg  text-gray-500 focus:ring-2 focus:ring-gray-500 outline-none"
+            className="px-4 py-2 border border-gray-300 rounded-lg text-xs text-gray-500 focus:ring-2 focus:ring-gray-500 outline-none"
           />
-          <select className="px-4 py-2 border border-gray-300 text-gray-500 rounded-lg focus:ring-2 focus:ring-gray-500 outline-none">
+          <select className="px-4 py-2 border border-gray-300  text-xs text-gray-500 rounded-lg focus:ring-2 focus:ring-gray-500 outline-none">
             <option>All Categories</option>
             <option>Electronics</option>
             <option>Clothing</option>
             <option>Food & Beverages</option>
             <option>Home & Garden</option>
           </select>
-          <select className="px-4 py-2 border border-gray-300 text-gray-500 rounded-lg focus:ring-2 focus:ring-gray-500 outline-none">
+          <select className="px-4 py-2 border text-xs border-gray-300 text-gray-500 rounded-lg focus:ring-2 focus:ring-gray-500 outline-none">
             <option>All Status</option>
             <option>In Stock</option>
             <option>Low Stock</option>
             <option>Out of Stock</option>
           </select>
-          <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+          <button className="px-4 py-2 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
             Apply Filters
           </button>
         </div>
@@ -95,7 +93,7 @@ const ProductList = () => {
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <h3 className="font-semibold text-sm  text-gray-900">Product Name {item}</h3>
+                    <h3 className="font-semibold text-xs  text-gray-900">Product Name {item}</h3>
                     <p className="text-xs text-gray-500">SKU: PRD-{2000 + item}</p>
                   </div>
                   <span className={`text-xs font-medium ${stockColor}`}>
@@ -104,26 +102,26 @@ const ProductList = () => {
                 </div>
 
                 <div className="space-y-2 mb-3">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xs">
                     <span className="text-gray-600">Price:</span>
                     <span className="font-semibold text-gray-600">${(Math.random() * 100 + 10).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xs">
                     <span className="text-gray-600">Stock:</span>
                     <span className="font-semibold text-gray-500 ">{stock} units</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xs">
                     <span className="text-gray-600">Category:</span>
-                    <span className="text-gray-900">{item % 2 === 0 ? 'Electronics' : 'Clothing'}</span>
+                    <span className="text-gray-900 text-xs">{item % 2 === 0 ? 'Electronics' : 'Clothing'}</span>
                   </div>
                 </div>
 
                 {/* Actions */}
                 <div className="flex space-x-2">
-                  <button className="flex-1 py-2 bg-gray-50 text-gray-600 rounded hover:bg-gray-100 transition text-sm font-medium">
+                  <button className="flex-1 py-2 bg-gray-50 text-gray-600 rounded hover:bg-gray-100 transition text-xs font-medium">
                     Edit
                   </button>
-                  <button className="flex-1 py-2 bg-secondary-50 text-secondary-600 rounded hover:bg-secondary-100 transition text-sm font-medium">
+                  <button className="flex-1 py-2 bg-gray-50 text-blue-600  rounded hover:bg-gray-100 transition text-xs font-medium">
                     View
                   </button>
                 </div>

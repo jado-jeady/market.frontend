@@ -1,21 +1,19 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const userdata = localStorage.getItem('user');
-  console.log('Header User Data:', userdata);
-
+  
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm max-h-16 fixed top-0 right-0 left-45 z-10">
+    <header className="bg-white border-b border-gray-200 shadow-sm max-h-16 fixed top-0 right-0 left-40 z-10">
       <div className="flex items-center justify-between px-6 py-1">
         {/* Search Bar */}
         <div className="flex-1 max-w-xl">
@@ -62,8 +60,8 @@ const Header = () => {
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded-lg transition"
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-semibold">
-                {user?.name?.charAt(0).toUpperCase() || 'A'}
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-gray-700 font-semibold">
+                {user?.data.name?.charAt(0).toUpperCase() || 'A'}
               </div>
               <div className="text-left hidden md:block">
                 <p className="text-sm font-medium text-gray-900">{localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).username : 'Admin'}</p>
@@ -82,22 +80,21 @@ const Header = () => {
             {/* Dropdown Menu */}
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 animate-fade-in">
-                <a
-                  href="#"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                <Link to={'#'}
+                  className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 transition"
                 >
                   Profile
-                </a>
-                <a
-                  href="#"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                </Link>
+                <Link
+                 to={'/admin/settings'}
+                  className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 transition"
                 >
                   Settings
-                </a>
+                </Link>
                 <div className="border-t border-gray-200 my-2"></div>
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+                  className="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 transition"
                 >
                   Logout
                 </button>

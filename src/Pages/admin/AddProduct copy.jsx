@@ -45,16 +45,20 @@ const AddProduct = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Add New Product</h1>
-        <p className="text-gray-600 mt-1">Fill in the product details below</p>
+        <h3 className="text-xl font-bold  text-gray-900">Add New Product</h3>
+        <p className="text-gray-600 text-sm mt-1">Fill in the product details below</p>
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-4xl">
+        
+      <div className=' grid-cols-2'>
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
+          <h2 className="text-sm font-semibold text-gray-900 mb-4">Basic Information</h2>
+      
+            
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-2">
                 Product Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -63,13 +67,13 @@ const AddProduct = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full px-4 py-2 text-gray-500 border text-xs border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
                 placeholder="Enter product name"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-2">
                 SKU <span className="text-red-500">*</span>
               </label>
               <input
@@ -78,13 +82,13 @@ const AddProduct = () => {
                 value={formData.sku}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full px-4 text-gray-500 text-xs py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
                 placeholder="Product SKU"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-2">
                 Category <span className="text-red-500">*</span>
               </label>
               <select
@@ -92,7 +96,7 @@ const AddProduct = () => {
                 value={formData.category}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full px-4 text-xs text-gray-500 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
               >
                 <option value="">Select Category</option>
                 <option value="electronics">Electronics</option>
@@ -104,7 +108,7 @@ const AddProduct = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-2">
                 Barcode
               </label>
               <input
@@ -112,13 +116,13 @@ const AddProduct = () => {
                 name="barcode"
                 value={formData.barcode}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full px-4 py-2 text-gray-500 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
                 placeholder="Barcode number"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-2">
                 Description
               </label>
               <textarea
@@ -126,22 +130,24 @@ const AddProduct = () => {
                 value={formData.description}
                 onChange={handleChange}
                 rows="3"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full text-xs text-gray-500 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
                 placeholder="Product description"
               />
             </div>
           </div>
         </div>
 
+          {/* Pricing And Stock */}
+
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Pricing & Stock</h2>
+          <h2 className="text-sm font-semibold text-gray-900 mb-4">Pricing & Stock</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-2">
                 Selling Price <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-2.5 text-gray-500">$</span>
+                <span className="absolute  left-3 top-2.5 text-gray-500">$</span>
                 <input
                   type="number"
                   name="price"
@@ -149,14 +155,14 @@ const AddProduct = () => {
                   onChange={handleChange}
                   required
                   step="0.01"
-                  className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                  className="w-full text-gray-500 pl-8 text-xs pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
                   placeholder="0.00"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block  text-xs font-medium text-gray-700 mb-2">
                 Cost Price
               </label>
               <div className="relative">
@@ -167,14 +173,14 @@ const AddProduct = () => {
                   value={formData.costPrice}
                   onChange={handleChange}
                   step="0.01"
-                  className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                  className="w-full pl-8 text-gray-500 text-xs pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
                   placeholder="0.00"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-2">
                 Initial Stock Quantity <span className="text-red-500">*</span>
               </label>
               <input
@@ -183,13 +189,13 @@ const AddProduct = () => {
                 value={formData.stock}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full px-4 py-2 text-xs text-gray-500 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
                 placeholder="0"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-2">
                 Minimum Stock Level
               </label>
               <input
@@ -197,18 +203,19 @@ const AddProduct = () => {
                 name="minStock"
                 value={formData.minStock}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full px-4 py-2 text-xs text-gray-500 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
                 placeholder="Alert threshold"
               />
             </div>
           </div>
         </div>
-
+      </div>
+        {/* Suppliers */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Supplier Information</h2>
+          <h2 className="text-sm font-semibold text-gray-900 mb-4">Supplier Information</h2>
           <div className="grid grid-cols-1 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-2">
                 Supplier Name
               </label>
               <input
@@ -216,7 +223,7 @@ const AddProduct = () => {
                 name="supplier"
                 value={formData.supplier}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full text-xs px-4 py-2 text-gray-500 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
                 placeholder="Supplier name"
               />
             </div>
@@ -225,9 +232,9 @@ const AddProduct = () => {
 
         {/* Product Image Upload */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Product Image</h2>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-500 transition cursor-pointer">
-            <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <h2 className="text-sm font-semibold text-gray-900 mb-4">Product Image</h2>
+          <div className="border-2 text-gray-500 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-500 transition cursor-pointer">
+            <svg className="w-12 h-12 text-xs text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <p className="text-gray-600 mb-2">Click to upload or drag and drop</p>
@@ -245,7 +252,7 @@ const AddProduct = () => {
           </button>
           <button
             type="submit"
-            className="px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-lg hover:from-primary-700 hover:to-secondary-700 transition shadow-md"
+            className="px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-600 text-white rounded-lg hover:from-primary-700 hover:to-secondary-700 transition shadow-md"
           >
             Add Product
           </button>

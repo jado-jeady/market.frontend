@@ -20,6 +20,17 @@ const AdminSidebar = () => {
         </svg>
       ),
     },
+
+ {
+      name: 'Products',
+      path: '/admin/products',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
+    },
+
     {
       name: 'Stock',
       path: '/admin/stock',
@@ -39,6 +50,15 @@ const AdminSidebar = () => {
       ),
     },
     {
+      name: 'Day close',
+      path: '/admin/day-closing',
+      icon: (
+        <svg className='w-5 h-5' xmlns="http://www.w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+</svg>
+      ),
+    },
+    {
       name: 'Management',
       path: '/admin/management',
       icon: (
@@ -51,18 +71,19 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-gradient-to-b from-primary-700 to-primary-900 text-white min-h-screen fixed left-0 top-0 shadow-xl">
+    <div className="w-40 bg-gradient-to-b from-primary-700 to-primary-900 text-white min-h-screen fixed left-0 top-0 shadow-xl">
       {/* Logo */}
-      <div className="p-6 border-b border-primary-600">
+       {/* Logo */}
+      <div className="p-2 border-b shadow-sm border-secondary-600">
         <div className="flex items-center space-x-3">
-          <div className="w-20 h-20 bg-gray-300 rounded-lg flex items-center justify-center">
-            <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-15 h-16 bg-gray-300 rounded-lg flex p-0 items-center justify-center">
+            <svg className="w-15 h-15 text-[#E50619]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
           </div>
           <div>
-            <h2 className="text-xl font-bold text-red-300">Marketplace</h2>
-            <p className="text-xs text-red-200">Admin Panel</p>
+            <h3 className="text-lg  text-gray-700 font-bold">POS</h3>
+            <p className="text-xs text-red-400">Admin</p>
           </div>
         </div>
       </div>
@@ -75,7 +96,7 @@ const AdminSidebar = () => {
               <NavLink
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                  `flex items-center space-x-3 px-4 text-xs py-3 rounded-lg transition-all duration-200 ${
                     isActive
                       ? 'bg-secondary-500 text-white shadow-lg transform scale-105'
                       : 'text-primary-100 hover:bg-primary-600 hover:text-white'

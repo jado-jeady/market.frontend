@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const AllStock = () => {
   const [products, setProducts] = useState([]);
@@ -35,55 +36,55 @@ const AllStock = () => {
     <div className="p-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Stock Inventory</h1>
-          <p className="text-gray-600 mt-1">Manage and track all product inventory</p>
+          <h3 className="text-xl font-bold text-gray-900">Stock Inventory</h3>
+          <p className="text-gray-600 text-xs mt-1">Manage and track all product inventory</p>
         </div>
-        <button className="px-6 py-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-lg hover:from-primary-700 hover:to-secondary-700 transition shadow-md">
+        <Link to="/admin/products/add" className="px-6 py-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-lg hover:from-primary-700 hover:to-secondary-700 transition shadow-md">
           Add New Product
-        </button>
+        </Link>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
-          <p className="text-gray-600 text-sm">Total Products{}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{products.length}</p>
+        <div className="bg-white rounded-lg shadow p-2 border-l-4 border-blue-500">
+          <p className="text-xs text-gray-600">Total Products</p>
+          <p className="text-sm font-bold text-gray-900 mt-1">{products.length}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
-          <p className="text-gray-600 text-sm">In Stock</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">987</p>
+        <div className="bg-white rounded-lg shadow p-2 border-l-4 border-green-500">
+          <p className="text-gray-600 text-xs">In Stock</p>
+          <p className="text-sm font-bold text-gray-900 mt-1">987</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
-          <p className="text-gray-600 text-sm">Low Stock</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">45</p>
+        <div className="bg-white rounded-lg shadow p-2 border-l-4 border-yellow-500">
+          <p className="text-gray-600 text-xs">Low Stock</p>
+          <p className="text-sm font-bold text-gray-900 mt-1">45</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
-          <p className="text-gray-600 text-sm">Out of Stock</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">12</p>
+        <div className="bg-white rounded-lg shadow p-2 border-l-4 border-red-500">
+          <p className="text-gray-600 text-xs">Out of Stock</p>
+          <p className="text-sm font-bold text-gray-900 mt-1">12</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className=" rounded-lg shadow-md p-1 mb-2">
+        <div className="grid grid-cols-1 text-gray-500 text-xs md:grid-cols-4 gap-4">
           <input
             type="text"
             placeholder="Search products..."
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+            className="px-2 h-7 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
           />
-          <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none">
+          <select className="px-2 py-1 border h-7 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none">
             <option>All Categories</option>
             <option>Electronics</option>
             <option>Clothing</option>
             <option>Food</option>
           </select>
-          <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none">
+          <select className="px-2 py-1 h-7 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none">
             <option>All Stock Status</option>
             <option>In Stock</option>
             <option>Low Stock</option>
             <option>Out of Stock</option>
           </select>
-          <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+          <button className="px-2 py-1 h-7 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
             Apply Filters
           </button>
         </div>
@@ -93,15 +94,15 @@ const AllStock = () => {
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gradient-to-r from-primary-600 to-secondary-600 text-white">
+            <thead className="bg-gradient-to-r text-sm from-primary-600 to-secondary-600 text-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Product ID</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Name</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Category</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Price</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Quantity</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Status</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                <th className="px-6 py-3 text-left font-semibold">Product ID</th>
+                <th className="px-6 py-3 text-left font-semibold">Name</th>
+                <th className="px-6 py-3 text-left font-semibold">Category</th>
+                <th className="px-6 py-3 text-left font-semibold">Price</th>
+                <th className="px-6 py-3 text-left font-semibold">Quantity</th>
+                <th className="px-6 py-3 text-left font-semibold">Status</th>
+                <th className="px-6 py-3 text-left font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -112,28 +113,28 @@ const AllStock = () => {
 
                 return (
                   <tr key={item} className="hover:bg-gray-50 transition">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                    <td className="px-2 py-2 text-xs font-medium text-gray-900">
                       PRD-{2000 + item}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
+                    <td className="px-2 py-2 text-xs text-gray-700">
                       Product Name {item}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
+                    <td className="px-2 py-2 text-xs text-gray-700">
                       {item % 3 === 0 ? 'Electronics' : item % 3 === 1 ? 'Clothing' : 'Food'}
                     </td>
-                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                    <td className="px-2 py-2 text-xs font-semibold text-gray-900">
                       ${(Math.random() * 100 + 10).toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
+                    <td className="px-2 py-2 text-xs text-gray-700">
                       {quantity}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-2 py-2">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}>
                         {status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm">
-                      <button className="text-primary-600 hover:text-primary-700 font-medium mr-3">
+                    <td className="px-6 py-4 text-xs">
+                      <button className="text-blue-600 hover:text-primary-700 font-medium mr-3">
                         Edit
                       </button>
                       <button className="text-red-600 hover:text-red-700 font-medium">
@@ -157,7 +158,7 @@ const AllStock = () => {
             <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
               Previous
             </button>
-            <button className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition">
+            <button className="px-4 py-2 bg-gray-400 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition">
               1
             </button>
             <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">

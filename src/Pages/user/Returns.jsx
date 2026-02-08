@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 const Returns = () => {
   const [returns, setReturns] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showReturnModal, setShowReturnModal] = useState(false);
 
   useEffect(() => {
     const fetchReturns = async () => {
@@ -15,7 +14,7 @@ const Returns = () => {
           setReturns(data);
         }
       } catch (error) {
-        console.error('Error fetching returns:', error);
+        console.error('Error fetching returns:',returns, error);
       } finally {
         setLoading(false);
       }
@@ -40,7 +39,6 @@ const Returns = () => {
           <p className="text-gray-600 mt-1">Manage product returns and exchanges</p>
         </div>
         <button
-          onClick={() => setShowReturnModal(true)}
           className="px-6 py-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-lg hover:from-primary-700 hover:to-secondary-700 transition shadow-md"
         >
           Process Return

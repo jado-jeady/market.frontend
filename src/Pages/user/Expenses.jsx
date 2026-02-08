@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Expenses = () => {
   return (
     <div className="p-6">
@@ -28,25 +30,38 @@ const Expenses = () => {
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gradient-to-r from-primary-600 to-secondary-600 text-white">
+          <thead className="bg-gradient-to-r text-xs text-gray-300 from-gray-600 to-gray-600 text-white">
             <tr>
               <th className="px-6 py-3 text-left text-sm font-semibold">Date</th>
               <th className="px-6 py-3 text-left text-sm font-semibold">Category</th>
+              
+              <th className="px-6 py-3 text-left text-sm font-semibold">Bill Number</th>
               <th className="px-6 py-3 text-left text-sm font-semibold">Description</th>
               <th className="px-6 py-3 text-left text-sm font-semibold">Amount</th>
+              
               <th className="px-6 py-3 text-left text-sm font-semibold">Status</th>
+              
+              <th className="px-6 py-3 text-left text-sm font-semibold">Details</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y text-gray-500 text-xs divide-gray-200">
             {[...Array(8)].map((_, i) => (
               <tr key={i} className="hover:bg-gray-50">
-                <td className="px-6 py-4 text-sm">2024-01-{String(i + 15).padStart(2, '0')}</td>
-                <td className="px-6 py-4 text-sm">{i % 3 === 0 ? 'Rent' : i % 3 === 1 ? 'Utilities' : 'Supplies'}</td>
-                <td className="px-6 py-4 text-sm">Expense description {i + 1}</td>
-                <td className="px-6 py-4 text-sm font-semibold text-red-600">-${(Math.random() * 500 + 50).toFixed(2)}</td>
+                <td className="px-6 py-4 ">2024-01-{String(i + 15).padStart(2, '0')}</td>
+                <td className="px-6 py-4">{i % 3 === 0 ? 'Rent' : i % 3 === 1 ? 'Utilities' : 'Supplies'}</td>
+                <td className="px-6 py-4">INV-{String(i + 100).padStart(3, '0')}</td>
+                <td className="px-6 py-4">Expense description {i + 1}</td>
+                <td className="px-6 py-4 font-semibold text-red-600">-${(Math.random() * 500 + 50).toFixed(2)}</td>
                 <td className="px-6 py-4">
                   <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                     Paid
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                    <Link to={"#"} className="text-blue-600 hover:text-primary-700 font-medium">
+                      View
+                    </Link>
                   </span>
                 </td>
               </tr>
