@@ -17,7 +17,7 @@ import Management from './Pages/admin/Management';
 import AdminSettings from './Pages/admin/Settings';
 import ProdcutTransfer from './Pages/admin/ProdcutTransfer'
 import AdminDayClosingPage from './Pages/admin/AdminDayClosingPage';
-import Stock from './Pages/admin/Stock';
+import Stock from './Pages/admin/Stock/Stock';
 import AdminProductList from './Pages/admin/AdminProductList';
 
 
@@ -40,8 +40,8 @@ import LoyaltyPoints from './Pages/user/LoyaltyPoints';
 import SearchCustomer from './Pages/user/SearchCustomer';
 import AllSales from './Pages/user/AllSales';
 import Returns from './Pages/user/Returns';
-import StockIn from './Pages/admin/StockIn';
-import StockOut from './Pages/admin/StockOut';
+import StockIn from './Pages/admin/Stock/StockIn';
+import StockOut from './Pages/admin/Stock/StockOut';
 import RemovedStock from './Pages/admin/RemovedStock';
 import AddProduct from './Pages/admin/AddProduct';
 import Products from './Pages/admin/Products';

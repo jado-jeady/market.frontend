@@ -88,7 +88,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex bg-gray-100 flex-col">
       <div className="flex items-center justify-center bg-gradient-to-br from-secondary-500 to-primary-500 min-h-screen">
-        <div className="bg-white p-3 rounded-lg shadow-2xl w-full max-w-md my-5">
+        <div className="bg-white p-5 md:p-10 md:text-xs rounded-lg shadow-2xl md:w-full max-w-md my-5">
           <div className="text-center">
             <img
               src={avatar}
@@ -103,7 +103,7 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6 py-6 px-6">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="username" className="block text-xs font-medium text-gray-700 mb-2">
                 Username
               </label>
               <input
@@ -113,13 +113,13 @@ const Login = () => {
                 value={credentials.username}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-800 focus:border-gray-500 outline-none transition"
+                className="w-full px-4 py-3 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-800 focus:border-gray-500 outline-none transition"
                 placeholder="Enter your username"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-xs font-medium text-gray-700 mb-2">
                 Password
               </label>
 
@@ -131,7 +131,7 @@ const Login = () => {
                   value={credentials.password}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 pr-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-800 focus:border-gray-500 outline-none transition"
+                  className="w-full px-4 py-3 pr-11 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-800 focus:border-gray-500 outline-none transition"
                   placeholder="Enter your password"
                 />
 {/* 
@@ -169,7 +169,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full  bg-gray-300 md:bg-gray-700 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full  bg-gray-300 bg-gray-600 md:bg-gray-700 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>

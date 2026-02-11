@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { getAllProducts } from '../../Utils/product.util';
+import { createSale } from '../../Utils/sales.util';
+
 
 const NewSale = () => {
   const [products, setProducts] = useState([]);
@@ -11,6 +13,9 @@ const NewSale = () => {
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [customerQuery, setCustomerQuery] = useState('');
   const [customerSuggestions, setCustomerSuggestions] = useState([]);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+const [processingSale, setProcessingSale] = useState(false);
+
 
   const MOCK_CUSTOMERS = [
   { id: 1, name: 'John Doe', phone: '0788123456' },
@@ -50,6 +55,7 @@ const NewSale = () => {
         }
       } catch (err) {
         toast.error('Error loading products');
+        console.error('Fetch products error:', err);
       } finally {
         setLoadingProducts(false);
       }
@@ -120,57 +126,80 @@ const NewSale = () => {
 
   /* ===================== TOTALS ===================== */
   const calculateTotal = () =>
-    cart.reduce((total, item) => total + (item.selling_price * item.quantity), 0);
+  cart.reduce(
+    (total, item) => total + item.selling_price * item.quantity,
+    0
+  );
 
-  const calculateTax = () => calculateTotal() * 0.1;
+const totalItems = cart.length;
+
+const totalQuantity = cart.reduce(
+  (sum, item) => sum + item.quantity,
+  0
+);
 
   /* ===================== CHECKOUT ===================== */
- const handleCheckout = async () => {
+ const handleCheckout = () => {
   if (cart.length === 0) {
-    toast.warning('Cart is empty');
+    toast.warning("Cart is empty");
     return;
   }
 
-  const payload = {
-    customer_id: selectedCustomer?.id || null,
-    customer_name: customerQuery || 'Walk-in',
-    payment_method: paymentMethod,
-    items: cart.map(item => ({
-      product_id: item.id,
-      quantity: item.quantity,
-      unit_price: item.selling_price
-    }))
-  };
-  console.log('Checkout payload:', payload);
-
-  try {
-    const token = JSON.parse(localStorage.getItem('user'))?.data?.token;
-
-    const res = await fetch(import.meta.env.VITE_API_URL + '/api/sales', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.message || 'Sale failed');
-    }
-
-    toast.success('Sale completed successfully');
-    setCart([]);
-    setCustomerQuery('');
-    setSelectedCustomer(null);
-    setPaymentMethod('cash');
-  } catch (error) {
-    toast.error(error.message || 'Error processing sale');
-  }
+  setShowInvoiceModal(true);
 };
 
+// confirm print sale 
+// ======================================================
+const confirmAndPrintSale = async () => {
+  try {
+    setProcessingSale(true);
+
+    const payload = {
+      customer_id: selectedCustomer?.id || null,
+      customer_name: customerQuery || "Walk-in",
+      payment_method: paymentMethod,
+      items: cart.map((item) => ({
+        product_id: item.id,
+        quantity: item.quantity,
+        unit_price: item.selling_price,
+      })),
+    };
+
+    const response = await createSale(payload);
+
+    if (!response.success) {
+      throw new Error(response.message || "Sale failed");
+    }
+
+    toast.success("Sale completed successfully", { autoClose: 2000 });
+
+    // ✅ IMPORTANT: refresh products
+
+    const res = await getAllProducts();
+    if (res?.success) {
+      setProducts(res.data);
+    } else {
+      toast.error('Failed to refresh products');
+    }
+    
+  
+
+
+    window.print();
+
+
+    setCart([]);
+    setCustomerQuery("");
+    setSelectedCustomer(null);
+    setPaymentMethod("cash");
+    setShowInvoiceModal(false);
+
+  } catch (error) {
+    toast.error(error.message || "Error processing sale");
+  } finally {
+    setProcessingSale(false);
+  }
+};
 
   /* ===================== FILTERED PRODUCTS ===================== */
   const filteredProducts = products.filter(product =>
@@ -381,23 +410,24 @@ const NewSale = () => {
             {cart.length > 0 && (
               <>
                 <div className="p-4 border-t text-xs text-gray-700">
-                  <div className="flex justify-between">
+                  {/* <div className="flex justify-between">
                     <span>Subtotal</span>
                     <span>{calculateTotal()} frw</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tax (10%)</span>
-                    <span>{calculateTax()} frw</span>
-                  </div>
+                  </div> */}
+                  {/* <div className="flex justify-between">
+                    <span>Tax (18%)</span>
+                    <span>{} frw</span>
+                  </div> */}
                   <div className="flex justify-between font-bold">
                     <span>Total</span>
-                    <span>{calculateTotal() + calculateTax()} frw</span>
+                    <span>{calculateTotal() } frw</span>
                   </div>
                 </div>
 
                 <div className="p-4">
                   <button
-                    onClick={handleCheckout}
+                  onClick={handleCheckout}
+                  
                     className="w-full py-3 bg-gray-500 text-white rounded-lg font-semibold"
                   >
                     Complete Sale
@@ -409,6 +439,97 @@ const NewSale = () => {
         </div>
 
       </div>
+      {showInvoiceModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg shadow-xl w-96 p-6 print-area">
+
+      <h2 className="text-lg text-gray-600 font-semibold text-center mb-4">
+        Tyga Nation Supermarket !
+      </h2>
+
+      <div className="text-sm text-gray-600 space-y-2">
+
+  <div className="flex justify-between">
+    <span>Customer:</span>
+    <span>{customerQuery || "Walk-in"}</span>
+  </div>
+
+  <div className="flex justify-between">
+    <span>Payment:</span>
+    <span className="uppercase">{paymentMethod}</span>
+  </div>
+
+  <hr className="my-2" />
+
+  {/* ITEM LIST */}
+  <div className="max-h-40 overflow-y-auto border rounded p-2 space-y-2 bg-gray-50">
+
+    {cart.map((item) => (
+      <div key={item.id} className="text-xs border-b pb-1">
+
+        <div className="flex justify-between font-medium">
+          <span>{item.name}</span>
+          <span>
+            P/U: {item.selling_price} frw
+            
+          </span>
+        </div>
+
+        <div className="flex justify-between text-gray-600">
+          <span>
+            {item.quantity} × {item.selling_price} frw
+          </span>
+          <span>
+           total {(item.selling_price * item.quantity)} frw
+          </span>
+        </div>
+
+      </div>
+    ))}
+
+  </div>
+
+  <hr className="my-2" />
+
+  <div className="flex justify-between">
+    <span>Total Items:</span>
+    <span>{totalItems}</span>
+  </div>
+
+  <div className="flex justify-between">
+    <span>Total Quantity:</span>
+    <span>{totalQuantity}</span>
+  </div>
+
+  <div className="flex justify-between font-bold pt-2 text-base">
+    <span>Grand Total:</span>
+    <span>{calculateTotal()} frw</span>
+  </div>
+
+</div>
+
+
+      <div className="flex gap-3 mt-6">
+        <button
+          onClick={() => setShowInvoiceModal(false)}
+          className="flex-1 py-2 text-sm bg-red-400 rounded"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={confirmAndPrintSale}
+          disabled={processingSale}
+          className="flex-1 py-1 text-sm bg-green-600 text-white rounded"
+        >
+          {processingSale ? "Processing..." : "Confirm & Print"}
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

@@ -2,12 +2,14 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 
 // Get token safely
-const authData = JSON.parse(localStorage.getItem("user"));
-const token = authData?.data?.token; // adjust if backend nests it differently
+const getAuthHeaders = () => {
+  const authData = JSON.parse(localStorage.getItem("user"));
+  const token = authData?.data?.token;
 
-const headers = {
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${token}`,
+  return {
+    'Content-Type': 'application/json',
+    Authorization: token ? `Bearer ${token}` : ''
+  };
 };
 
 /* ============================
@@ -17,7 +19,7 @@ export async function createProduct(product) {
   try {
     const response = await fetch(`${API_URL}/api/products/`, {
       method: "POST",
-      headers,
+      headers: getAuthHeaders(),
       body: JSON.stringify(product),
     });
 
@@ -39,15 +41,16 @@ export async function createProduct(product) {
    GET ALL PRODUCTS
 ============================ */
 export async function getAllProducts() {
+  
   try {
     const response = await fetch(`${API_URL}/api/products/`, {
       method: "GET",
-      headers,
+        headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
       throw new Error("Failed to fetch products");
-    }
+    } 
 
     return await response.json();
   } catch (err) {
@@ -63,7 +66,7 @@ export async function getProductById(id) {
   try {
     const response = await fetch(`${API_URL}/api/products/${id}`, {
       method: "GET",
-      headers,
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -86,7 +89,7 @@ export async function getProductByBarcode(barcode) {
       `${API_URL}/api/products/barcode/${barcode}`,
       {
         method: "GET",
-        headers,
+        headers: getAuthHeaders
       }
     );
 
@@ -108,7 +111,7 @@ export async function updateProduct(id, product) {
   try {
     const response = await fetch(`${API_URL}/api/products/${id}`, {
       method: "PUT",
-      headers,
+      headers:getAuthHeaders,
       body: JSON.stringify(product),
     });
 
@@ -132,7 +135,7 @@ export async function deleteProduct(id) {
   try {
     const response = await fetch(`${API_URL}/api/products/${id}`, {
       method: "DELETE",
-      headers,
+      headers:getAuthHeaders
     });
 
     if (!response.ok) {
@@ -142,6 +145,29 @@ export async function deleteProduct(id) {
     return await response.json();
   } catch (err) {
     console.error("Error deleting product:", err);
+    return null;
+  }
+}
+
+// STOCK UTILITIES
+
+export async function adjustStock(product) {
+  try {
+    
+  
+    const response = await fetch(`${API_URL}/api/stock/adjust`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(product)
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message);
+    }
+    console.log("Stock adjusted successfully:", response);
+    return await response;
+  } catch (err) {
+    console.error("Error adjusting stock:", err);
     return null;
   }
 }

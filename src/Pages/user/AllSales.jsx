@@ -1,154 +1,254 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getMySales } from '../../Utils/sales.util';
 
 const AllSales = () => {
+  
+
   const [sales, setSales] = useState([]);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    limit: 10,
+    pages: 1
+  });
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [date, setDate] = useState("");
+  const [page, setPage] = useState(1);
+
+  const [selectedSale, setSelectedSale] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+
+
+  const fetchSales = async () => {
+    setLoading(true);
+    try {
+      const filters = {
+        page,
+        limit: pagination.limit,
+        payment_method: paymentMethod
+        
+      };
+
+      if (paymentMethod) filters.payment_method = paymentMethod;
+      if (date) {
+        filters.start_date = `${date}T00:00:00`;
+        filters.end_date = `${date}T23:59:59`;
+      }
+
+      const response = await getMySales(filters);
+      console.log("Fetched sales data:", response);
+
+      if (response.success) {
+        setSales(response.data);
+        setPagination(response.pagination);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchSales = async () => {
-      try {
-        // TODO: Replace with your actual API endpoint
-        const response = await fetch('/api/sales');
-        if (response.ok) {
-          const data = await response.json();
-          setSales(data);
-        }
-      } catch (error) {
-        console.error('Error fetching sales:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchSales();
-  }, []);
+  }, [page, paymentMethod, date]);
+
+  const filteredSales = sales.filter(sale =>
+    sale.invoice_number?.toLowerCase().includes(search.toLowerCase())
+  );
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin h-10 w-10 border-b-2 border-green-600 rounded-full"></div>
       </div>
     );
   }
 
+//Open Sales details modal
+
+  const openSaleModal = (saleId) => {
+  const sale = sales.find(s => s.id === saleId); // find from already loaded data
+  if (sale) {
+    setSelectedSale(sale);
+    setIsModalOpen(true);
+  }
+};
+
   return (
     <div className="p-6 py-0">
-      <div className="mb-2 flex items-center justify-between">
-        <div>
-          <h3 className="text-xl font-bold text-gray-900">All Sales</h3>
-          <p className="text-gray-600 text-sm mt-1">Manage and track all sales transactions</p>
-        </div>
-        <button className="px-6 py-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-lg hover:from-primary-700 hover:to-secondary-700 transition shadow-md">
-          Export Sales{sales}
+      {/* HEADER */}
+      <div className="mb-3">
+        <h2 className="text-xl font-bold text-gray-900">My Sales</h2>
+        <p className="text-sm text-gray-600">
+          Sales you personally handled
+        </p>
+      </div>
+
+      {/* FILTERS */}
+      <div className="bg-white p-3 text-gray-600 rounded shadow mb-2 grid grid-cols-1 md:grid-cols-4 gap-2">
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search invoice..."
+          className="border px-2 h-8 text-xs rounded"
+        />
+
+        <select
+          value={paymentMethod}
+          onChange={e => { setPaymentMethod(e.target.value); setPage(1); }}
+          className="border h-8 text-xs rounded"
+        >
+          <option value="">All Payments</option>
+          <option value="cash">Cash</option>
+          <option value="momo">Mobile Money</option>
+          <option value="card">Card</option>
+        </select>
+
+        <input
+          type="date"
+          value={date}
+          onChange={e => { setDate(e.target.value); setPage(1); }}
+          className="border h-8 text-xs rounded"
+        />
+
+        <button
+          onClick={() => { setPage(1); setSearch(''); setPaymentMethod(''); setDate(''); fetchSales(); }}
+          className="bg-gray-100 text-xs rounded h-8"
+        >
+          Reset Filters
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md p-2 mb-1">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input
-            type="text"
-            placeholder="Search by order ID..."
-            className="px-4 py-2 border border-gray-300 text-xs text-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent h-7 w-auto outline-none"
-          />
-          <select className=" px-2 border border-gray-300 text-xs text-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent h-7 w-auto outline-none">
-            <option >All Status</option>
-            <option>Pending</option>
-            <option>Completed</option>
-            <option>Cancelled</option>
-          </select>
-          <input
-            type="date"
-            className="px-4 py-2 border border-gray-300 text-xs text-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent h-7 w-auto outline-none"
-          />
-          <button className=" h-7 w-auto text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
-            Apply Filters
-          </button>
-        </div>
-      </div>
+      {/* TABLE */}
+      <div className="bg-white rounded shadow overflow-hidden">
+        <table className="min-w-full border-collapse rounded-lg overflow-hidden shadow-md">
+          <thead className="bg-gray-400 text-white">
+            <tr className='px-6 py-3  text-sm font-semibold'>
+              <th className="p-2 text-text-center">Invoice</th>
+              <th className="p-2 text-text-center">Payment</th>
+              <th className="p-2 text-text-center">Date</th>
+              <th className="p-2 text-text-center">Total Items</th>
+              <th className="p-2 text-text-center">Amount</th>
+              <th className="p-2 text-text-center">Status</th>
+              <th className="p-2">Action</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200 bg-white">
+            <tr>
+              
+            </tr>
+            {filteredSales.map(sale => (
+              <tr key={sale.id} className="hover:bg-gray-50 transition-colors duration-150">
+                <td className="px-6 py-4 text-sm text-gray-700 text-center">{sale.invoice_number}</td>
+                <td className="px-6 py-4 text-xs text-gray-500 text-center">{sale.payment_method}</td>
+                <td className="px-6 py-4 text-xs text-gray-500 text-center">
+                  {new Date(sale.created_at).toLocaleString()}
+                </td>
+                <td className="px-6 py-4 text-xs text-gray-500 text-center">
+                  {sale.items.reduce((sum, item) => sum + item.quantity, 0)}
 
-      {/* Sales Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gradient-to-r text-sm text-center from-primary-600 to-secondary-600 text-gray-600">
-              <tr>
-                <th className="px-6 py-3 text-left font-semibold">Order ID</th>
-                <th className="px-6 py-3 text-left font-semibold">Customer</th>
-                <th className="px-6 py-3 text-left font-semibold">Cashier</th>
-                <th className="px-6 py-3 text-left font-semibold">Date</th>
-                <th className="px-6 py-3 text-left font-semibold">Amount</th>
-                <th className="px-6 py-3 text-left font-semibold">Status</th>
-                <th className="px-6 py-3 text-left font-semibold">Actions</th>
+                </td>
+                <td className="px-6 py-4 text-xs text-gray-500 text-center">
+                  {Number(sale.total_amount).toFixed(2)}
+                </td>
+                <td className="px-6 py-4 text-xs text-gray-500 text-center">{sale.status}</td>
+                <td className="px-6 py-4 text-xs text-gray-500 text-center text-center">
+                  <button
+                    onClick={() => openSaleModal(sale.id)}
+                    className="text-green-600"
+                  >
+                    View |
+                  </button>
+                  <Link
+                    to={`/user/sales/all/${sale.id}`}
+                    className="text-green-600 ml-2"
+                  >
+                    Return Claim
+                  </Link>
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-                <tr key={item} className="hover:bg-gray-50 text-gray-700 text-xs transition">
-                  <td className="px-2 py-2 font-medium text-gray-900">
-                    #ORD-{1000 + item}
-                  </td>
-                  <td className="px-2 py-2 text-gray-700">
-                    John Doe {item}
-                  </td>
-                  <td className='text-center px-2 py-2'>Cashier {item}</td>
-                  <td className="px-2 py-2 text-gray-700">
-                    2024-01-{String(item).padStart(2, '0')}
-                  </td>
-                  <td className="px-2 py-2 font-semibold text-gray-900">
-                    ${(Math.random() * 500 + 50).toFixed(2)}
-                  </td>
-                  <td className="px-2 py-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      item % 3 === 0
-                        ? 'bg-green-100 text-green-700'
-                        : item % 3 === 1
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {item % 3 === 0 ? 'Completed' : item % 3 === 1 ? 'Pending' : 'Processing'}
-                    </span>
-                  </td>
-                  <td className="px-2 py-2">
-                    <Link to={`/user/sales/all/${item}`} className="text-green-600 hover:text-primary-700 font-medium mr-3">
-                      view
-                    </Link>
-                    <Link className="text-blue-600 hover:text-secondary-700 font-medium">
-                      return
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
 
-        {/* Pagination */}
-        <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
-          <div className="text-sm text-gray-700">
-            Showing <span className="font-medium ">1</span> to <span className="font-medium">8</span> of{' '}
-            <span className="font-medium">97</span> results
-          </div>
-          <div className="flex space-x-2">
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
-              Previous
+            {filteredSales.length === 0 && (
+              <tr>
+                <td colSpan="6" className="text-center py-6 text-gray-500">
+                  No sales found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {/* PAGINATION */}
+        <div className="flex justify-between items-center p-2 bg-gray-200 text-xs">
+          <span className='text-gray-600'>
+            Page {pagination.page} of {pagination.pages} — Total {pagination.total}
+          </span>
+          <div className="flex text-sm text-blue-400 gap-2">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage(p => p - 1)}
+            >
+              Prev |
             </button>
-            <button className="px-4 py-2 bg-gray-300 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition">
-              1
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
-              2
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
-              3
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+            <button
+              disabled={page === pagination.pages}
+              onClick={() => setPage(p => p + 1)}
+            >
               Next
             </button>
           </div>
         </div>
       </div>
+      {/* SALE DETAILS MODAL */}
+      {isModalOpen && selectedSale && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 text-gray-500 flex justify-center items-center z-50">
+    <div className="bg-white rounded p-6 w-11/12 md:w-2/3 max-h-[90vh] overflow-auto relative">
+      <button
+        className="absolute top-2 right-2 text-gray-600 font-bold text-xl"
+        onClick={() => setIsModalOpen(false)}
+      >
+        &times;
+      </button>
+
+      <h2 className="text-lg font-bold mb-4">Invoice: {selectedSale.invoice_number}</h2>
+      <p className="mb-2">Cashier: {selectedSale.user?.full_name || 'N/A'}</p>
+      <p className="mb-2">Payment Method: {selectedSale.payment_method}</p>
+      <p className="mb-2">Date: {new Date(selectedSale.created_at).toLocaleString()}</p>
+      <p className="mb-2">Status: {selectedSale.status}</p>
+
+      <table className="w-full text-sm mt-4 border-collapse border border-gray-200">
+        <thead className="bg-gray-100">
+          <tr>
+            <th className="border px-2 py-1">Item</th>
+            <th className="border px-2 py-1">Unit Price</th>
+            <th className="border px-2 py-1">Quantity</th>
+            <th className="border px-2 py-1">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {selectedSale.items.map((item) => (
+            <tr key={item.id} className="text-center">
+              <td className="border px-2 py-1">{item.product_name || item.product?.name}</td>
+              <td className="border px-2 py-1">{Number(item.unit_price).toFixed(2)}</td>
+              <td className="border px-2 py-1">{item.quantity}</td>
+              <td className="border px-2 py-1">{Number(item.total_price).toFixed(2)}</td>
+            </tr>
+          ))}
+          <tr className="font-bold text-right">
+            <td colSpan="3" className="border text-left px-2 py-1">Total</td>
+            <td className="border px-2 py-1">{Number(selectedSale.total_amount).toFixed(2)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 };

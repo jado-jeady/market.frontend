@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { getAllCategories } from "../../Utils/CategoryUtils";
+import { getAllCategories } from "../../Utils/category.util";
 import { getAllProducts, deleteProduct } from "../../Utils/product.util";
+import StockAdjustmentModal from "../admin/Stock/StockAdjustmentModal";
+
 
 const ITEMS_PER_PAGE = 8;
 
@@ -10,6 +12,14 @@ const AdminiProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
+  const [isAdjustOpen, setIsAdjustOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState({});
+
+
+  const openAdjustModal = (product) => {
+  setSelectedProduct(product);
+  setIsAdjustOpen(true);
+};
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -203,14 +213,14 @@ const AdminiProductList = () => {
           <p className="text-gray-500">No products match your filters</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {paginatedProducts.map((p) => {
             const stockStatus =
               p.stock_quantity > 50
                 ? "In Stock"
                 : p.stock_quantity > 0
                 ? "Low Stock"
-                : "Out of Stock";
+                : "No Stock";
 
             const stockColor =
               p.stock_quantity > 50
@@ -221,15 +231,29 @@ const AdminiProductList = () => {
 
             return (
               <div key={p.id} className="bg-white rounded-lg shadow hover:shadow-lg">
-                <div className="h-24 bg-gray-100 flex items-center justify-center text-4xl">
-                  📦
+                <div className="h-15 bg-gray-100 flex items-center justify-center text-4xl">
+                   <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={30}
+    height={30}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="blue"
+    strokeWidth={0.5}
+  >
+    {/* Box outline */}
+    <path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5v-9z" />
+    {/* Inner lines for box detail */}
+    <path d="M12 3v18M3 7.5l9 4.5 9-4.5" />
+  </svg>
+
                 </div>
 
                 <div className="p-4 text-gray-500 text-xs">
                   <div className="flex justify-between mb-2">
                     <div>
                       <h4 className="font-semibold text-xs">{p.name}</h4>
-                      <p className="text-xs text-gray-500">{p.barcode}</p>
+                      <p className="text-[10px] text-wrap w-full  text-gray-500">{p.barcode}</p>
                     </div>
                     <span className={`text-xs font-medium ${stockColor}`}>
                       {stockStatus}
@@ -250,12 +274,22 @@ const AdminiProductList = () => {
                   </div>
 
                   <div className="flex gap-2">
-                    <button className="flex-1 bg-gray-100 py-2 rounded text-xs hover:bg-gray-200">
-                      Edit
+                    <button 
+                    onClick={() => openAdjustModal(p)}
+                    className="flex-1 bg-blue-100 text-blue-600 py-1 rounded text-xs hover:bg-blue-200">
+                      Adjust
                     </button>
+
                     <button
                       onClick={() => handleDelete(p.id)}
-                      className="flex-1 bg-red-100 text-red-600 py-2 rounded text-xs hover:bg-red-200"
+                      className="flex-1 bg-red-100 text-red-600 py-1 rounded text-xs hover:bg-red-200"
+                    >
+                      Delete
+                    </button>
+                    
+                    <button
+                      onClick={() => handleDelete(p.id)}
+                      className="flex-1 bg-red-100 text-red-600 py-1 rounded text-xs hover:bg-red-200"
                     >
                       Delete
                     </button>
@@ -301,6 +335,15 @@ const AdminiProductList = () => {
           </button>
         </div>
       )}
+      {/* OPEN ADJUSTMENT MODEL */}
+      {selectedProduct && (
+  <StockAdjustmentModal
+    isOpen={isAdjustOpen}
+    onClose={() => setIsAdjustOpen(false)}
+    product={selectedProduct}
+    refresh={fetchProducts}
+  />
+)}
     </div>
   );
 };

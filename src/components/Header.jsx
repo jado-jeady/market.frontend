@@ -64,8 +64,9 @@ const Header = () => {
                 {user?.data.name?.charAt(0).toUpperCase() || 'A'}
               </div>
               <div className="text-left hidden md:block">
-                <p className="text-sm font-medium text-gray-900">{localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).username : 'Admin'}</p>
-                <p className="text-xs text-gray-500">{localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).role : 'Administrator'}</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).data.user.role : 'Admin'}</p>
+                <p className="text-xs text-gray-500">{localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).data.user.full_name : 'Administrator'}</p>
               </div>
               <svg
                 className={`w-4 h-4 text-gray-600 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
