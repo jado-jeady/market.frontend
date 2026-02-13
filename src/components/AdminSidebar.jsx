@@ -112,8 +112,8 @@ const AdminSidebar = () => {
       </nav>
 
       {/* Bottom Section */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-primary-600">
-        <div className="text-xs text-primary-200 text-center">
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-600">
+        <div className="text-xs text-gray-500 text-center">
           <p>© 2024 Marketplace</p>
           <p className="mt-1">Version 1.0.0</p>
         </div>

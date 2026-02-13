@@ -61,12 +61,11 @@ const UserSidebar = () => {
       path: '/user/day-closing',
       icon: (
         <svg className='w-5 h-5' xmlns="http://www.w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-  <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-  <path d="M12 8v4l3 3"/>
-  <rect x="8" y="8" width="8" height="8" rx="1" fill="none"/>
-</svg>
-
-      ),
+        <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        <path d="M12 8v4l3 3"/>
+         <rect x="8" y="8" width="8" height="8" rx="1" fill="none"/>
+      </svg> 
+),
     },
     {
       name: 'Settings',
@@ -121,8 +120,8 @@ const UserSidebar = () => {
       </nav>
 
       {/* Bottom Section */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-secondary-600">
-        <div className="text-xs text-secondary-200 text-center">
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-600">
+        <div className="text-xs text-gray-500 text-center">
           <p>© 2024 POS System</p>
           <p className="mt-1">Version 1.0.0</p>
         </div>

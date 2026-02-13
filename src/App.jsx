@@ -13,9 +13,11 @@ import Dashboard from './Pages/admin/Dashboard';
 import AdminAllSales from './Pages/admin/AllSales';
 import Report from './Pages/admin/Report';
 import AllStock from './Pages/admin/AllStock';
-import Management from './Pages/admin/Management';
+import Management from './Pages/admin/Management/Management';
 import AdminSettings from './Pages/admin/Settings';
+import SettingsManagement from './Pages/admin/Management/SettingsManagement';
 import ProdcutTransfer from './Pages/admin/ProdcutTransfer'
+import AdminUserManagement from './Pages/admin/Management/UserManagement'
 import AdminDayClosingPage from './Pages/admin/AdminDayClosingPage';
 import Stock from './Pages/admin/Stock/Stock';
 import AdminProductList from './Pages/admin/AdminProductList';
@@ -51,6 +53,7 @@ import Expenses from './Pages/user/Expenses';
 import TransactionHistory from './Pages/user/TransactionHistory';
 import DayClosing from './Pages/user/DayClosing';
 import Settings from './Pages/user/Settings';
+import ManageRoles from './Pages/admin/Management/ManageRoles';
 
 
 
@@ -83,28 +86,38 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="sales" element={<AdminAllSales />} />
           <Route path="products" element={<Products />}>
-          <Route index element={<AdminProductList />} />
+            <Route index element={<AdminProductList />} />
             <Route path='add' element ={<AddProduct/>}/>
             <Route path='transfer' element={<ProductTransfer />} />
             <Route path='list' element={<AdminProductList />} />
             <Route path='category' element={<ProductCategories />}/>
 
           </Route>
-          <Route path="stock" element={<AllStock />}>
+          <Route path="stock" element={<Stock />}>
+            <Route index element={< AllStock/>}/>
             <Route path='in' element={<StockIn/>}/>
             <Route path='out' element={<StockOut/>} />
             <Route path='removed' element={<RemovedStock/>} />
           </Route>
-          <Route path='settings' element={<AdminSettings />} />
+
            {/* SETTINGS */}
-          <Route path="settings" element={<UserSettings />}>
-          <Route path="tax" element={<TaxSettings />} />
-          <Route path="currency" element={<CurrencySettings />} />
-          <Route path="receipt" element={<ReceiptFormatSettings />} />
-  </Route>
+          <Route path="settings" element={<AdminSettings />}>
+              <Route path="tax" element={<TaxSettings />} />
+              <Route path="currency" element={<CurrencySettings />} />
+              <Route path="receipt" element={<ReceiptFormatSettings />} />
+          </Route>
+          
+          <Route path="management" element={<Management />}>
+          
+          <Route  index element={<ManageRoles/>} />
+          <Route path='roles' element={<ManageRoles/>} />
+          <Route path='users' element={<AdminUserManagement/>} />
+          <Route path='settings' element={<SettingsManagement/>} />
+
+
+          </Route>
           
           <Route path="report" element={<Report />} />
-          <Route path="management" element={<Management />} />
           <Route path="day-closing" element={<AdminDayClosingPage />} />
         </Route>
 
