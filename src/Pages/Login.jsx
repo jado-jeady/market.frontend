@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import avatar from '../assets/user-female-icon.webp'
 
 const Login = () => {
@@ -169,14 +169,14 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full  bg-gray-300 bg-gray-600 md:bg-gray-700 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gray-300 md:bg-gray-300 bg-gray-600 md:bg-gray-700 text-white md:text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
-          <div className=" text-center text-sm text-gray-600">
-            <p>Demo credentials: admin / admin</p>
+          <div className=" text-center text-sm">
+            <Link to={"#"}>Forgot Password</Link>
           </div>
         </div>
       </div>
