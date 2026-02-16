@@ -26,7 +26,7 @@ const AllSales = () => {
 
   const fetchSales = async () => {
     setLoading(true);
-    const response = await getAllSales();
+    const response = await getAllSales({limit:1000000000000000,page:1});
     if (response?.success) {
       setSales(response.data);
     }
@@ -101,7 +101,7 @@ const AllSales = () => {
   }
 
   return (
-    <div className="p-6 py-0">
+    <div className="p-6 py-2">
       {/* Header */}
       <div className="mb-2 flex justify-between">
         <div>
@@ -110,7 +110,7 @@ const AllSales = () => {
             Manage and track all sales transactions
           </p>
         </div>
-        <button className="px-3 py-2 text-xs bg-green-600 text-white rounded-lg">
+        <button className="px-5 py-0 text-sm bg-green-600 text-white rounded-lg">
           Export Sales ({filteredSales.length})
         </button>
       </div>
@@ -203,7 +203,7 @@ const AllSales = () => {
                   {sale.created_at?.slice(0, 10)}
                 </td>
                 <td className="px-2 py-2 font-semibold">
-                  {Number(sale.total_amount).toFixed(2)}
+                  {Number(sale.subtotal).toFixed(2)}
                 </td>
                 <td className="px-2 py-2">{sale.status}</td>
                 <td className="px-2 py-2 space-x-2">
@@ -255,7 +255,7 @@ const AllSales = () => {
                   <th>Product</th>
                   <th>Qty</th>
                   <th>Unit Price</th>
-                  <th>Tax</th>
+                  
                   <th>Subtotal</th>
                 </tr>
               </thead>
@@ -265,7 +265,6 @@ const AllSales = () => {
                     <td>{item.product.name}</td>
                     <td>{item.quantity}</td>
                     <td>{item.unit_price}</td>
-                    <td>{(item.quantity * item.unit_price * 0.18).toFixed(2)}</td>
                     <td>{item.quantity * item.unit_price}</td>
                   </tr>
                 ))}
@@ -273,7 +272,7 @@ const AllSales = () => {
             </table>
 
             <div className="text-right mt-3 font-semibold">
-              Grand Total: {selectedSale.total_amount}
+              Grand Total: {selectedSale.subtotal}
             </div>
 
             <button

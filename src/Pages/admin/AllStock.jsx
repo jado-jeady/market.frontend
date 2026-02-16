@@ -39,8 +39,8 @@ const AllStock = () => {
           <h3 className="text-xl font-bold text-gray-900">Stock Inventory</h3>
           <p className="text-gray-600 text-xs mt-1">Manage and track all product inventory</p>
         </div>
-        <Link to="/admin/products/add" className="px-6 py-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-lg hover:from-primary-700 hover:to-secondary-700 transition shadow-md">
-          Add New Product
+        <Link to="/admin/stock/in" className="px-6 py-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-lg hover:from-primary-700 hover:to-secondary-700 transition shadow-md">
+          Add New Stock Item
         </Link>
       </div>
 

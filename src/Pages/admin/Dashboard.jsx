@@ -1,4 +1,8 @@
 import { useState, useEffect } from 'react';
+import { getAllSales } from '../../Utils/sales.util';
+import { getAllProducts } from '../../Utils/product.util';
+import { getUsers } from '../../Utils/user.util';
+
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -9,9 +13,13 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
+
+    
+    
     // Fetch dashboard statistics
     const fetchStats = async () => {
       try {
+        
         const response = await fetch('/api/dashboard/stats');
         if (response.ok) {
           const data = await response.json();
@@ -19,11 +27,33 @@ const Dashboard = () => {
         }
       } catch (error) {
         // Demo data
+        const allProducts = await getAllProducts({limit:100000000000});
+        const Lowstock_items= await getAllProducts({limit:100000,low_stock:true})
+        const users = await getUsers()
+
+        console.log(Lowstock_items.data.length)
+        console.log(allProducts.data.length)
+        const allsales= await getAllSales({limit:10000000000000})
+        const totalsales = allsales.data;
+        let salesCaounter=0;
+        //get all sales money
+        totalsales.map((sales)=>(
+          salesCaounter += Number(sales.subtotal)
+        ))
+        
+        // geting alll items in stock 
+        let productCounter =0;
+        allProducts.data.map((item)=>(
+          productCounter += Number(item.stock_quantity)
+        ))
+        
+
         setStats({
-          totalSales: 125430,
-          totalStock: 3456,
-          lowStock: 23,
-          totalUsers: 45
+          
+          totalSales: salesCaounter,
+          totalStock: productCounter,
+          lowStock: Lowstock_items?.data?.length,
+          totalUsers: users?.data.length,
         });
         console.error('Error fetching dashboard stats:', error);
       }
@@ -55,7 +85,7 @@ const Dashboard = () => {
       change: '-3.1%'
     },
     {
-      title: 'Total Customers',
+      title: 'Total User / Cashiers',
       value: stats.totalUsers,
       icon: '👥',
       color: 'from-purple-500 to-purple-600',

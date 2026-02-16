@@ -1,3 +1,4 @@
+//import * as XLSX from 'xlsx';
 const API_URL = import.meta.env.VITE_API_URL;
 
 
@@ -11,6 +12,15 @@ const getAuthHeaders = () => {
     Authorization: token ? `Bearer ${token}` : ''
   };
 };
+
+
+const buildQueryParams = (filters = {}) =>
+  new URLSearchParams(
+    Object.entries(filters).filter(
+      ([_, value]) => value !== undefined && value !== ''
+    )
+  ).toString();
+
 
 /* ============================
    CREATE PRODUCT
@@ -40,17 +50,41 @@ export async function createProduct(product) {
 /* ============================
    GET ALL PRODUCTS
 ============================ */
-export async function getAllProducts() {
-  
+
+/*
+export const getAllSales = async (filters = {}) => {
   try {
-    const response = await fetch(`${API_URL}/api/products/`, {
+    const params = buildQueryParams(filters);
+    const res = await fetch(`${SALES_BASE}?${params}`, {
+      headers: getAuthHeaders()
+    });
+
+    return await handleResponse(res);
+  } catch (error) {
+    console.error('Get all sales error:', error);
+    return { success: false, message: 'Failed to fetch sales' };
+  }
+}; 
+
+*/ 
+export async function getAllProducts(filters = {}) {
+  try {
+    const params = buildQueryParams(filters);
+    
+    // Add the "?" only if params isn't an empty string
+    const queryString = params ? `?${params}` : "";
+    
+    const response = await fetch(`${API_URL}/api/products${queryString}`, {
       method: "GET",
-        headers: getAuthHeaders(),
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch products");
-    } 
+      // Improved: Log the status code to help debugging
+      console.log(response)
+      throw new Error(`Failed to fetch products: ${response.status}`);
+      
+    }
 
     return await response.json();
   } catch (err) {
@@ -89,7 +123,7 @@ export async function getProductByBarcode(barcode) {
       `${API_URL}/api/products/barcode/${barcode}`,
       {
         method: "GET",
-        headers: getAuthHeaders
+        headers: getAuthHeaders()
       }
     );
 
@@ -109,14 +143,15 @@ export async function getProductByBarcode(barcode) {
 ============================ */
 export async function updateProduct(id, product) {
   try {
+    console.log(product)
     const response = await fetch(`${API_URL}/api/products/${id}`, {
       method: "PUT",
-      headers:getAuthHeaders,
+      headers:getAuthHeaders(),
       body: JSON.stringify(product),
     });
 
     const result = await response.json();
-
+  console.log(result)
     if (!response.ok) {
       throw new Error(result.message || "Failed to update product");
     }
@@ -171,3 +206,46 @@ export async function adjustStock(product) {
     return null;
   }
 }
+
+
+/**
+ * Fetches all stock adjustment history records
+ * @returns {Promise<Array>} List of adjustments or empty array on error
+ */
+export async function getStockAdjustments() {
+  try {
+    const response = await fetch(`${API_URL}/api/stock/adjustments`, {
+      method: "GET",
+      headers: getAuthHeaders(), // Assumes this helper exists in your file
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `Error: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    // Standardize return: ensure it returns an array even if backend wraps it in { data: [...] }
+    return Array.isArray(result) ? result : result?.data || [];
+    
+  } catch (err) {
+    console.error("Error fetching stock adjustments:", err);
+    return []; // Return empty array so the UI .filter() doesn't crash
+  }
+}
+
+
+// export to excel 
+
+// export const exportToExcel = (data, fileName = 'Sales_Report') => {
+//   // 1. Create a new workbook and worksheet
+//   const worksheet = XLSX.utils.json_to_sheet(data);
+//   const workbook = XLSX.utils.book_new();
+  
+//   // 2. Append the worksheet to the workbook
+//   XLSX.utils.book_append_sheet(workbook, worksheet, "Sales");
+
+//   // 3. Generate buffer and trigger download
+//   XLSX.writeFile(workbook, `${fileName}.xlsx`);
+// };

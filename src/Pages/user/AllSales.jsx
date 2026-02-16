@@ -203,6 +203,8 @@ const AllSales = () => {
           </div>
         </div>
       </div>
+
+
       {/* SALE DETAILS MODAL */}
       {isModalOpen && selectedSale && (
   <div className="fixed inset-0 bg-black bg-opacity-50 text-gray-500 flex justify-center items-center z-50">
@@ -240,7 +242,7 @@ const AllSales = () => {
           ))}
           <tr className="font-bold text-right">
             <td colSpan="3" className="border text-left px-2 py-1">Total</td>
-            <td className="border px-2 py-1">{Number(selectedSale.total_amount).toFixed(2)}</td>
+            <td className="border px-2 py-1">{Number(selectedSale.subtotal).toFixed(2)}</td>
           </tr>
         </tbody>
       </table>

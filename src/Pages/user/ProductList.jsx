@@ -36,7 +36,7 @@ const ProductList = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const res = await getAllProducts();
+      const res = await getAllProducts({limit:200000000000,page:1});
 
       if (res?.success) {
         setProducts(res.data);

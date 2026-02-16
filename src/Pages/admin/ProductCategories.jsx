@@ -74,7 +74,7 @@ const ProductCategories = () => {
   }};
 
   return (
-    <div className="p-6 w-190">
+    <div className="p-4 md:p-6 w-full">
       {/* HEADER */}
       <div className="flex items-center w-full justify-between mb-6">
         <div>
@@ -90,8 +90,8 @@ const ProductCategories = () => {
       </div>
 
       {/* CATEGORY LIST */}
-      <div className="bg-white rounded-lg shadow-md">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto bg-white">
+        <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50 text-gray-600">
             <tr>
               <th className="text-left px-6 py-3">ID</th>

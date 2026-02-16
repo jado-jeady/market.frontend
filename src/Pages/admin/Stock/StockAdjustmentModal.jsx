@@ -5,11 +5,31 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
   const [type, setType] = useState("IN");
   const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState("");
+  const [QuantityError, setQauntityError] = useState('');
 
   if (!isOpen) return null;
 
+const handleClose = () => {
+  // Reset all local states to default
+  setType("IN");
+  setQuantity("");
+  setReason("");
+  setQauntityError("");
+  // Finally, call the parent's onClose
+  onClose();
+};
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if(quantity<=0 ){
+      setQauntityError("Quantity Must Be greather than zero")
+      return;
+    }
+    if(type==="OUT" && quantity> product.stock_quantity){
+      setQauntityError("You can't remove stock you don't Have!");
+      return;
+    }
+    
 
     try {
       const response = await adjustStock({
@@ -63,10 +83,13 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
             type="number"
             placeholder="Quantity"
             value={quantity}
+            min={0}
             onChange={(e) => setQuantity(e.target.value)}
             className="w-full border p-2 rounded"
             required
           />
+          <p className="text-sm text-red-600 ">{QuantityError}</p>
+          
 
           <input
             type="text"
@@ -80,7 +103,8 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
           <div className="flex justify-end gap-2">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
+              
               className="px-4 py-2 bg-gray-300 rounded"
             >
               Cancel

@@ -6,7 +6,7 @@ const Stock = () => {
     {name : 'Stock', path:"/admin/stock"},
     { name: 'Stock In', path: '/admin/stock/in' },
     { name: 'Stock Out', path: '/admin/stock/out' },
-    { name: 'Stock Reports', path: '/admin/stock/removed'},
+    { name: 'Stock Adjustment', path: '/admin/stock/adjustment'},
   ];
 
   return (

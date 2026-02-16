@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAllCategories } from "../../Utils/category.util";
-import { getAllProducts, deleteProduct } from "../../Utils/product.util";
+import { getAllProducts } from "../../Utils/product.util";
 import StockAdjustmentModal from "../admin/Stock/StockAdjustmentModal";
+import EditProductModal from "./Products/EditProduct";
+
 
 
 const ITEMS_PER_PAGE = 8;
@@ -14,11 +16,19 @@ const AdminiProductList = () => {
   const [categories, setCategories] = useState([]);
   const [isAdjustOpen, setIsAdjustOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState({});
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+const [productToEdit, setProductToEdit] = useState(null);
+
 
 
   const openAdjustModal = (product) => {
   setSelectedProduct(product);
   setIsAdjustOpen(true);
+};
+
+const openEditModal = (product) => {
+  setProductToEdit(product);
+  setIsEditModalOpen(true);
 };
 
   useEffect(() => {
@@ -46,7 +56,7 @@ const AdminiProductList = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const res = await getAllProducts();
+      const res = await getAllProducts({limit:10000000000000});
 
       if (res?.success) {
         setProducts(res.data);
@@ -113,22 +123,7 @@ const AdminiProductList = () => {
     setCurrentPage(1);
   }, [search, category, stockLevel]);
 
-  /* ---------------- DELETE ---------------- */
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this product?")) return;
 
-    try {
-      const res = await deleteProduct(id);
-      if (res?.success) {
-        toast.success("Product deleted");
-        fetchProducts();
-      } else {
-        toast.error("Failed to delete");
-      }
-    } catch {
-      toast.error("Error deleting product");
-    }
-  };
 
   if (loading) {
     return (
@@ -281,18 +276,13 @@ const AdminiProductList = () => {
                     </button>
 
                     <button
-                      onClick={() => handleDelete(p.id)}
-                      className="flex-1 bg-red-100 text-red-600 py-1 rounded text-xs hover:bg-red-200"
+                      onClick={() => openEditModal(p)}
+                      className="flex-1 bg-blue-400 text-white py-1 rounded text-xs hover:bg-green-800"
                     >
-                      Delete
+                      Edit
                     </button>
                     
-                    <button
-                      onClick={() => handleDelete(p.id)}
-                      className="flex-1 bg-red-100 text-red-600 py-1 rounded text-xs hover:bg-red-200"
-                    >
-                      Delete
-                    </button>
+                    
                   </div>
                 </div>
               </div>
@@ -341,6 +331,21 @@ const AdminiProductList = () => {
     isOpen={isAdjustOpen}
     onClose={() => setIsAdjustOpen(false)}
     product={selectedProduct}
+    refresh={fetchProducts}
+  />
+)}
+
+{/* EDIT PRODUCT MODAL */}
+{productToEdit && (
+  <EditProductModal
+    key={productToEdit.id} // <--- THIS IS THE MAGIC LINE
+    
+    isOpen={isEditModalOpen}
+    onClose={() => {
+      setIsEditModalOpen(false);
+      setProductToEdit(null); // Clear the selection on close
+    }}
+    product={productToEdit}
     refresh={fetchProducts}
   />
 )}

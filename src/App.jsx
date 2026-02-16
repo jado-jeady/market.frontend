@@ -20,6 +20,9 @@ import ProdcutTransfer from './Pages/admin/ProdcutTransfer'
 import AdminUserManagement from './Pages/admin/Management/UserManagement'
 import AdminDayClosingPage from './Pages/admin/AdminDayClosingPage';
 import Stock from './Pages/admin/Stock/Stock';
+import StockIn from './Pages/admin/Stock/StockIn';
+import StockOut from './Pages/admin/Stock/StockOut';
+import StockAdjustment from './Pages/admin/Stock/Stock.Adjsutment';
 import AdminProductList from './Pages/admin/AdminProductList';
 
 
@@ -42,9 +45,6 @@ import LoyaltyPoints from './Pages/user/LoyaltyPoints';
 import SearchCustomer from './Pages/user/SearchCustomer';
 import AllSales from './Pages/user/AllSales';
 import Returns from './Pages/user/Returns';
-import StockIn from './Pages/admin/Stock/StockIn';
-import StockOut from './Pages/admin/Stock/StockOut';
-import RemovedStock from './Pages/admin/RemovedStock';
 import AddProduct from './Pages/admin/AddProduct';
 import Products from './Pages/admin/Products';
 import ProductCategories from './Pages/admin/ProductCategories';
@@ -97,7 +97,7 @@ function App() {
             <Route index element={< AllStock/>}/>
             <Route path='in' element={<StockIn/>}/>
             <Route path='out' element={<StockOut/>} />
-            <Route path='removed' element={<RemovedStock/>} />
+            <Route path='adjustment' element={<StockAdjustment/>} />
           </Route>
 
            {/* SETTINGS */}
