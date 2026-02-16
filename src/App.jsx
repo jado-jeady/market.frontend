@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import Login from './Pages/Login';
 import AdminLayout from './components/layouts/AdminLayout';
-import UserLayout from './components/layouts/userLayout';
+import UserLayout from './components/layouts/UserLayout';
 import ProtectedRoute from './components/ProtectedRoutes';
 
 // admin Imports
