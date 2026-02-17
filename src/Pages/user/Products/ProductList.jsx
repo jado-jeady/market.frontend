@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { getAllCategories } from "../../../Utils/category.util";
-import { getAllProducts } from "../../../Utils/product.util";
+import { getAllCategories } from "../../../utils/category.util";
+import { getAllProducts } from "../../../utils/product.util";
+import {TriangleAlert } from "lucide-react"
 
 const ITEMS_PER_PAGE = 8;
 
@@ -102,7 +103,6 @@ const ProductList = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [search, category, stockLevel]);
-
   
 
   if (loading) {
@@ -193,9 +193,9 @@ const ProductList = () => {
                 : "No Stock";
 
             const stockColor =
-              p.stock_quantity > 50
+              p.stock_quantity > p.min_stock
                 ? "text-green-600"
-                : p.stock_quantity > 0
+                : p.stock_quantity > p.min_stock
                 ? "text-yellow-600"
                 : "text-red-600";
 
@@ -241,6 +241,20 @@ const ProductList = () => {
                       <span>Stock</span>
                       <span>{p.stock_quantity}</span>
                     </div>
+                    {/* notification Icon for low stock  */}
+                    {p.stock_quantity < p.min_stock && (
+                    <div className="flex justify-center">
+                      <button
+                       className="inline-flex items-center px-2 py-1 bg-red-700 text-white text-xs font-bold rounded 
+                 animate-pulse shadow-sm
+                 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-700">
+                  <TriangleAlert  className="w-4 mx-2"/>
+                  Alert
+      
+    </button>
+  </div>
+)}
+                    
                   </div>
                   
                 </div>
