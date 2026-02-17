@@ -13,10 +13,10 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm max-h-16 fixed top-0 right-0 left-40 z-10">
+    <header className="bg-white left-0 border-b border-gray-200 shadow-sm max-h-16 fixed top-0 right-0 md:left-45 z-10">
       <div className="flex items-center justify-between px-6 py-1">
         {/* Search Bar */}
-        <div className="flex-1 max-w-xl">
+        <div className="flex-1 max-w-xl pl-8">
           <div className="relative">
             <input
               type="text"

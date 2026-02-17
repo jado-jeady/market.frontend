@@ -69,15 +69,8 @@ const Login = () => {
       }
     } catch (err) {
       // For demo purposes, allow login without API
-      console.log('API not available, using demo login'+err);
-      if (credentials.username === 'admin' && credentials.password === 'admin') {
-        localStorage.setItem('user', JSON.stringify({ username: 'admin', role: 'admin' }));
-        localStorage.setItem('isAuthenticated', 'true');
-        navigate('/dashboard');
-      } else {
-        setError('Invalid username or password. Try admin/admin for demo.');
-        console.error('Login error:', err);
-      }
+      console.log(err)
+      setError(`Internal Server Error \n call Admin : 0782228575`)
     } finally {
       setLoading(false);
     }
@@ -161,7 +154,7 @@ const Login = () => {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              <div className="bg-red-50 text-center border border-red-200 text-red-700 px-4 py-3 rounded-lg">
                 {error}
               </div>
             )}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import LowStockAlerts from './LowStockAlerts';
+import LowStockAlerts from './Stock/LowStockAlerts';
 
 // quickLinks.js or inside your component file
 const quickLinks = [

@@ -10,50 +10,50 @@ import ProtectedRoute from './components/ProtectedRoutes';
 
 // admin Imports
 import Dashboard from './Pages/admin/Dashboard';
-import AdminAllSales from './Pages/admin/AllSales';
+import AdminAllSales from './Pages/admin/Sales/AllSales';
 import Report from './Pages/admin/Report';
-import AllStock from './Pages/admin/AllStock';
+import AllStock from './Pages/admin/Stock/AllStock';
 import Management from './Pages/admin/Management/Management';
 import AdminSettings from './Pages/admin/Settings';
 import SettingsManagement from './Pages/admin/Management/SettingsManagement';
-import ProdcutTransfer from './Pages/admin/ProdcutTransfer'
+import ProdcutTransfer from './Pages/admin/Products/ProdcutTransfer'
 import AdminUserManagement from './Pages/admin/Management/UserManagement'
 import AdminDayClosingPage from './Pages/admin/AdminDayClosingPage';
 import Stock from './Pages/admin/Stock/Stock';
 import StockIn from './Pages/admin/Stock/StockIn';
 import StockOut from './Pages/admin/Stock/StockOut';
 import StockAdjustment from './Pages/admin/Stock/Stock.Adjsutment';
-import AdminProductList from './Pages/admin/AdminProductList';
-
+import AdminProductList from './Pages/admin/Products/AdminProductList';
+import AddProduct from './Pages/admin/Products/AddProduct';
+import Products from './Pages/admin/Products/Products';
+import ProductCategories from './Pages/admin/Products/ProductCategories';
+import ProductTransfer from './Pages/admin/Products/ProdcutTransfer';
+import ManageRoles from './Pages/admin/Management/ManageRoles';
+import Sales from './Pages/admin/Sales/Sales';
 
 // User Pages
-import NewSales from './Pages/user/NewSale';
+import NewSales from './Pages/user/Sales/NewSale';
 import UserDashboard from './Pages/user/UserDashboard';
-import UserSales from './Pages/user/UserSales';
-import UserReport from './Pages/user/UserReports';
-import UserManagement from './Pages/user/Management';
+import UserSales from './Pages/user/Sales/UserSales';
+import UserReport from './Pages/user/Reports/UserReports';
+import UserManagement from './Pages/user/Settings/Management';
 import UserCustomers from './Pages/user/UserCustomers';
-import UserSettings from './Pages/user/UserSettings';
-import TaxSettings from './Pages/user/TaxSettings';
-import CurrencySettings from './Pages/user/CurrencySettings';
-import ReceiptFormatSettings from './Pages/user/ReceiptFormat';
-import SalesStake from './Pages/user/SaleStake';
-import ProductList from './Pages/user/ProductList';
-import DailySales from './Pages/user/DailySales';
+import UserSettings from './Pages/user/Settings/UserSettings';
+import TaxSettings from './Pages/user/Settings/TaxSettings';
+import CurrencySettings from './Pages/user/Settings/CurrencySettings';
+import ReceiptFormatSettings from './Pages/user/Settings/ReceiptFormat';
+import SalesStake from './Pages/user/Sales/SaleStake';
+import ProductList from './Pages/user/Products/ProductList';
+import DailySales from './Pages/user/Sales/DailySales';
 import AddCustomer from './Pages/user/AddCustomer';
 import LoyaltyPoints from './Pages/user/LoyaltyPoints';
 import SearchCustomer from './Pages/user/SearchCustomer';
-import AllSales from './Pages/user/AllSales';
+import AllSales from './Pages/user/Sales/AllSales';
 import Returns from './Pages/user/Returns';
-import AddProduct from './Pages/admin/AddProduct';
-import Products from './Pages/admin/Products';
-import ProductCategories from './Pages/admin/ProductCategories';
-import ProductTransfer from './Pages/admin/ProdcutTransfer';
 import Expenses from './Pages/user/Expenses';
-import TransactionHistory from './Pages/user/TransactionHistory';
+import TransactionHistory from './Pages/user/Reports/TransactionHistory';
 import DayClosing from './Pages/user/DayClosing';
-import Settings from './Pages/user/Settings';
-import ManageRoles from './Pages/admin/Management/ManageRoles';
+import Settings from './Pages/user/Settings/Settings';
 
 
 
@@ -84,7 +84,13 @@ function App() {
           }
         >
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="sales" element={<AdminAllSales />} />
+          <Route path="sales" element={<Sales/>}> 
+              
+              <Route index element={<AdminAllSales />}/>
+              <Route path='daily' element={<DailySales />}/>
+              <Route path='all' element={<AdminAllSales />}/>
+          
+          </Route>
           <Route path="products" element={<Products />}>
             <Route index element={<AdminProductList />} />
             <Route path='add' element ={<AddProduct/>}/>

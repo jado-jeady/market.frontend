@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { getAllCategories } from "../../Utils/category.util";
-import { getAllProducts } from "../../Utils/product.util";
-import StockAdjustmentModal from "../admin/Stock/StockAdjustmentModal";
-import EditProductModal from "./Products/EditProduct";
+import { getAllCategories } from "../../../Utils/category.util";
+import { getAllProducts } from "../../../Utils/product.util";
+import StockAdjustmentModal from "../Stock/StockAdjustmentModal";
+import EditProductModal from "./EditProduct";
 
 
 

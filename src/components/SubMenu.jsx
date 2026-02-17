@@ -4,7 +4,7 @@ const SubMenu = ({ items }) => {
   if (!items || items.length === 0) return null;
 
   return (
-    <div className="bg-white border-b border-gray-200 shadow-sm">
+    <div className=" w-full bg-white border-b border-gray-200 shadow-sm">
       <div className="px-3 py-1">
         <nav className="flex space-x-1 overflow-x-auto">
           {items.map((item) => (

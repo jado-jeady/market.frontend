@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getMySales } from '../../Utils/sales.util';
+import { getMySales } from '../../../Utils/sales.util';
 
 const AllSales = () => {
   

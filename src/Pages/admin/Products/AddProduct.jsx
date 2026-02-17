@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getAllCategories } from '../../Utils/category.util';
-import { createProduct } from '../../Utils/product.util';
+import { getAllCategories } from '../../../Utils/category.util';
+import { createProduct } from '../../../Utils/product.util';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 

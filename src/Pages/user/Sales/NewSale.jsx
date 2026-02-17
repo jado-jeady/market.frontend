@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { getAllProducts } from '../../Utils/product.util';
-import { createSale } from '../../Utils/sales.util';
+import { getAllProducts } from '../../../Utils/product.util';
+import { createSale } from '../../../Utils/sales.util';
 
 
 const NewSale = () => {

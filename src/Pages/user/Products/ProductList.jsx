@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { getAllCategories } from "../../Utils/category.util";
-import { getAllProducts } from "../../Utils/product.util";
+import { getAllCategories } from "../../../Utils/category.util";
+import { getAllProducts } from "../../../Utils/product.util";
 
 const ITEMS_PER_PAGE = 8;
 
