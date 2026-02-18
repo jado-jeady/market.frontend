@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   getTodaySales,
   getMySales,
-} from "../../Utils/sales.util"
+} from "../../utils/sales.util"
 import { getAllProducts } from "../../utils/product.util";
 import LowStockAlerts from "./Stock/LowStockAlerts";
 
