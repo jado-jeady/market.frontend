@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getUsers,createUser } from '../../../Utils/user.util.js'; 
+import { getUsers,createUser } from '../../../utils/user.util.js'; 
 import { toast } from "react-toastify";
 
 // User Management Component

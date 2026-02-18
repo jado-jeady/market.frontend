@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllSales, getCashiers } from "../../../Utils/sales.util";
+import { getAllSales, getCashiers } from "../../../utils/sales.util";
 
 const DailySales = () => {
   /* ===================== STATE ===================== */

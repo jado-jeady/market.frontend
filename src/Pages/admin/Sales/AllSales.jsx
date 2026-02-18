@@ -4,7 +4,7 @@ import {
   getCashiers,
   getSaleById,
   confirmSaleReturn
-} from '../../../Utils/sales.util';
+} from '../../../utils/sales.util';
 
 const AllSales = () => {
   /* ===================== STATE ===================== */
