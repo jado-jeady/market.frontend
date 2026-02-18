@@ -14,7 +14,12 @@ const NewSale = () => {
   const [customerQuery, setCustomerQuery] = useState('');
   const [customerSuggestions, setCustomerSuggestions] = useState([]);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-const [processingSale, setProcessingSale] = useState(false);
+  const [processingSale, setProcessingSale] = useState('Process');
+  const [isProcessing, setIsProcessing] = useState(false);
+const [isConfirmed, setIsConfirmed] = useState(false);
+const [invoiceSnapshot, setInvoiceSnapshot] = useState(null);
+
+
 
 
   const MOCK_CUSTOMERS = [
@@ -138,66 +143,99 @@ const totalQuantity = cart.reduce(
   0
 );
 
+  const invoiceNumber =`TG-${Math.floor(Math.random() * 1000)}`
+
   /* ===================== CHECKOUT ===================== */
  const handleCheckout = () => {
   if (cart.length === 0) {
     toast.warning("Cart is empty");
     return;
   }
+  
 
+  // Take snapshot BEFORE confirmation
+  setInvoiceSnapshot({
+    items: [...cart],
+    totalItems,
+    totalQuantity,
+    totalAmount: calculateTotal(),
+    customer: customerQuery || "Walk-in",
+    paymentMethod,
+    date: new Date().toLocaleString(),
+    invoiceNumber: invoiceNumber
+  });
+
+  setIsConfirmed(false); // reset confirmation state
   setShowInvoiceModal(true);
 };
+// HANDLE PRINT
+// ====================
+const handlePrint = () => {
+  if (!isConfirmed) {
+    toast.warning("Please confirm payment first");
+    return;
+  }
+
+  window.print();
+
+  // Clear everything AFTER printing
+  setCart([]);
+  setInvoiceSnapshot(null);
+  setShowInvoiceModal(false);
+  setProcessingSale("Confirm Payment");
+};
+
 
 // confirm print sale 
 // ======================================================
-const confirmAndPrintSale = async () => {
+const confirmSale = async () => {
+  if (isProcessing || isConfirmed) return;
+
   try {
-    setProcessingSale(true);
+    setIsProcessing(true);
+    setProcessingSale("Confirming...");
 
     const payload = {
       customer_id: selectedCustomer?.id || null,
       customer_name: customerQuery || "Walk-in",
       payment_method: paymentMethod,
-      items: cart.map((item) => ({
+      invoiceNumber: invoiceNumber,
+      items: invoiceSnapshot.items.map((item) => ({
         product_id: item.id,
         quantity: item.quantity,
         unit_price: item.selling_price,
+        
+        
       })),
     };
+    console.log(payload)
 
     const response = await createSale(payload);
 
     if (!response.success) {
       throw new Error(response.message || "Sale failed");
     }
+    console.log('the data to bkc')
+    console.log(response);
 
-    toast.success("Sale completed successfully", { autoClose: 2000 });
+    setIsConfirmed(true);
+    setProcessingSale("Confirmed ✓");
+    setCart([]);
+    toast.success("Payment Confirmed Successfully!");
 
-    // ✅ IMPORTANT: refresh products
-
+    // Refresh products
     const res = await getAllProducts();
     if (res?.success) {
       setProducts(res.data);
-    } else {
-      toast.error('Failed to refresh products');
     }
-    
-  
 
-
-    window.print();
-
-
-    setCart([]);
-    setCustomerQuery("");
-    setSelectedCustomer(null);
-    setPaymentMethod("cash");
-    setShowInvoiceModal(false);
+    // 🚫 DO NOT CLEAR CART HERE
 
   } catch (error) {
     toast.error(error.message || "Error processing sale");
+    setProcessingSale("Confirm Payment");
   } finally {
-    setProcessingSale(false);
+    setIsProcessing(false);
   }
 };
 
@@ -438,9 +476,9 @@ const confirmAndPrintSale = async () => {
                   <button
                   onClick={handleCheckout}
                   
-                    className="w-full py-3 bg-gray-500 text-white rounded-lg font-semibold"
+                    className="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-semibold"
                   >
-                    Complete Sale
+                    Process A Sale 
                   </button>
                 </div>
               </>
@@ -451,91 +489,103 @@ const confirmAndPrintSale = async () => {
       </div>
       {showInvoiceModal && (
   <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg shadow-xl w-96 p-6 print-area">
+    <div className="bg-white rounded-lg shadow-xl w-[350px] p-6 print-area font-mono text-gray-800">
 
-      <h2 className="text-lg text-gray-600 font-semibold text-center mb-4">
-        Tyga Nation Supermarket !
-      </h2>
-
-      <div className="text-sm text-gray-600 space-y-2">
-
-  <div className="flex justify-between">
-    <span>Customer:</span>
-    <span>{customerQuery || "Walk-in"}</span>
-  </div>
-
-  <div className="flex justify-between">
-    <span>Payment:</span>
-    <span className="uppercase">{paymentMethod}</span>
-  </div>
-
-  <hr className="my-2" />
-
-  {/* ITEM LIST */}
-  <div className="max-h-40 overflow-y-auto border rounded p-2 space-y-2 bg-gray-50">
-
-    {cart.map((item) => (
-      <div key={item.id} className="text-xs border-b pb-1">
-
-        <div className="flex justify-between font-medium">
-          <span>{item.name}</span>
-          <span>
-            P/U: {item.selling_price} frw
-            
-          </span>
-        </div>
-
-        <div className="flex justify-between text-gray-600">
-          <span>
-            {item.quantity} × {item.selling_price} frw
-          </span>
-          <span>
-           total {(item.selling_price * item.quantity)} frw
-          </span>
-        </div>
-
+      {/* Store Header */}
+      <div className="text-center mb-4">
+        <h2 className="text-lg font-bold">Tyga Nation Supermarket</h2>
+        <p className="text-xs">KK 30 ave Kinamba</p>
+        <p className="text-xs">+250 783 559 238</p>
       </div>
-    ))}
 
-  </div>
+      {/* Date & Receipt Info */}
+      <div className="text-xs space-y-1 mb-2">
+        <div className="flex justify-between">
+          <span>Date:</span>
+          <span>{invoiceSnapshot?.date}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Invoice #:</span>
+          <span>{invoiceSnapshot?.invoiceNumber}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Customer:</span>
+          <span>{invoiceSnapshot?.customer || 'Walk-in'}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Payment:</span>
+          <span className="uppercase">{invoiceSnapshot?.paymentMethod}</span>
+        </div>
+      </div>
 
-  <hr className="my-2" />
+      <hr className="my-2 border-dashed" />
 
-  <div className="flex justify-between">
-    <span>Total Items:</span>
-    <span>{totalItems}</span>
-  </div>
+      {/* Item List */}
+      <div className="max-h-40 overflow-y-auto space-y-2">
+        {invoiceSnapshot?.items.map((item) => (
+          <div key={item.id} className="text-xs">
+            <div className="flex justify-between">
+              <span>{item.name}</span>
+              <span>{item.selling_price} frw</span>
+            </div>
+            <div className="flex justify-between text-gray-600">
+              <span>{item.quantity} × {item.selling_price} frw</span>
+              <span>{item.selling_price * item.quantity} frw</span>
+            </div>
+          </div>
+        ))}
+      </div>
 
-  <div className="flex justify-between">
-    <span>Total Quantity:</span>
-    <span>{totalQuantity}</span>
-  </div>
+      <hr className="my-2 border-dashed" />
 
-  <div className="flex justify-between font-bold pt-2 text-base">
-    <span>Grand Total:</span>
-    <span>{calculateTotal()} frw</span>
-  </div>
+      {/* Totals */}
+      <div className="text-xs space-y-1">
+        <div className="flex justify-between">
+          <span>Total Items:</span>
+          <span>{invoiceSnapshot?.totalItems}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Total Quantity:</span>
+          <span>{invoiceSnapshot?.totalQuantity}</span>
+        </div>
+        <div className="flex justify-between font-bold text-sm pt-2">
+          <span>Grand Total:</span>
+          <span>{invoiceSnapshot?.totalAmount} frw</span>
+        </div>
+      </div>
 
+      {/* Footer */}
+      <div className="text-center text-xs mt-4">
+        <p>Thank you for your business!</p>
+      </div>
+
+     {/* Action Buttons */}
+<div className="flex flex-col sm:flex-row gap-3 mt-6">
+  {/* Cancel */}
+  <button
+    onClick={() => {setShowInvoiceModal(false),setProcessingSale("Process")}}
+    className="flex-1 py-2 text-sm bg-red-400 text-white rounded hover:bg-red-500"
+  >
+    Cancel
+  </button>
+
+  {/* Confirm Payment */}
+  <button
+    onClick={confirmSale}   //
+    className="flex-1 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-90"
+  >
+    {processingSale ? processingSale : "Confirm Payment"}
+  </button>
+
+  {/* Print Invoice */}
+  <button
+  onClick={handlePrint}
+  disabled={!isConfirmed}
+  className="flex-1 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+>
+  Print Invoice
+</button>
 </div>
-
-
-      <div className="flex gap-3 mt-6">
-        <button
-          onClick={() => setShowInvoiceModal(false)}
-          className="flex-1 py-2 text-sm bg-red-400 rounded"
-        >
-          Cancel
-        </button>
-
-        <button
-          onClick={confirmAndPrintSale}
-          disabled={processingSale}
-          className="flex-1 py-1 text-sm bg-green-600 text-white rounded"
-        >
-          {processingSale ? "Processing..." : "Confirm & Print"}
-        </button>
-      </div>
-
     </div>
   </div>
 )}
