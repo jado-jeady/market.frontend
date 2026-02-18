@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { getAllProducts } from '../../../Utils/product.util';
-import { createSale } from '../../../Utils/sales.util';
+import { getAllProducts } from '../../../utils/product.util';
+import { createSale } from '../../../utils/sales.util';
 
 
 const NewSale = () => {
@@ -47,7 +47,7 @@ const [processingSale, setProcessingSale] = useState(false);
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await getAllProducts();
+        const res = await getAllProducts({limit:100000000});
         if (res?.success) {
           setProducts(res.data);
         } else {
@@ -222,7 +222,7 @@ const confirmAndPrintSale = async () => {
           </div>
 
           {/* SEARCH */}
-          <div className="mb-4">
+          <div className="mb-4 flex justify-around md:justify-between ">
             <input
               type="text"
               placeholder="Search products by name or barcode..."
@@ -231,14 +231,23 @@ const confirmAndPrintSale = async () => {
               className="w-2/3 h-7 px-4 py-3 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-2 focus:ring-gray-500 outline-none"
               autoFocus
             />
+            <div className='text-gray-700 text-xs md:text-sm mr-10'>
+            
+                <p className='text-green-500 text-[9px] pl-3 md:no-wrap  md:text-xs fw-bolder'> <span className='text-gray-800 md:text-xs fw-bolder'>Available Items: </span > {filteredProducts.length}</p>
           </div>
+             
+          </div>
+         
 
           {/* PRODUCTS GRID */}
           {loadingProducts ? (
             <div className="text-center text-gray-500">Loading products...</div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              
               {filteredProducts.map((product) => (
+            
                 <button
                   key={product.id}
                   onClick={() => addToCart(product)}
@@ -249,6 +258,7 @@ const confirmAndPrintSale = async () => {
                       : 'hover:shadow-lg hover:border-gray-500'
                     }`}
                 >
+
                   <div className="w-full h-15 bg-gradient-to-br from-gray-100 to-secondary-100 rounded-lg mb-0 flex items-center justify-center">
                     <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}

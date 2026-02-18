@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { adjustStock } from "../../../Utils/product.util";
+import { adjustStock } from "../../../utils/product.util";
 const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
   const [type, setType] = useState("IN");
   const [quantity, setQuantity] = useState("");
@@ -54,7 +54,7 @@ const handleClose = () => {
   };
 
   return (
-    <div className="fixed text-gray-600 inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+    <div className="fixed inset-0 z-50  text-gray-600 inset-0  bg-opacity-40 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
       <div className="bg-white w-[450px] rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">
           Adjust Stock - {product.name}

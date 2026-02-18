@@ -134,33 +134,34 @@ const UserDashboard = () => {
       </div>
 
       {/* ================= QUICK ACTIONS ================= */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
 
         <Link
           to="/user/sales/new"
-          className="bg-primary-600 text-white rounded-lg p-6 text-center hover:bg-primary-700 transition"
+          className="hover:bg-gray-200 border-1 text-white rounded-lg p-6 text-center hover:bg-primary-700 transition"
         >
           New Sale
         </Link>
 
         <Link
           to="/user/products"
-          className="bg-secondary-600 text-white rounded-lg p-6 text-center hover:bg-secondary-700 transition"
+          className=" hover:bg-gray-200 text-white rounded-lg border-1 p-6 text-center hover:bg-secondary-700 transition"
         >
           View Products
         </Link>
 
         <Link
           to="/user/reports"
-          className="bg-blue-600 text-white rounded-lg p-6 text-center hover:bg-blue-700 transition"
+          className="hover:bg-gray-200 border-1  text-white rounded-lg p-6 text-center hover:bg-blue-700 transition"
         >
           View Reports
         </Link>
+        
 
       </div>
 
       {/* ================= RECENT SALES ================= */}
-      <div className="bg-white shadow rounded-lg p-5 mb-6">
+      <div className="bg-white text-gray-700 shadow rounded-lg p-5 mb-6">
         <h3 className="text-lg font-semibold mb-4">
           Recent Transactions
         </h3>
@@ -170,7 +171,7 @@ const UserDashboard = () => {
             No recent sales found.
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 text-gray-700">
             {recentSales.map((sale) => (
               <div
                 key={sale.id}
@@ -180,12 +181,14 @@ const UserDashboard = () => {
                   <p className="font-medium text-sm">
                     Sale #{sale.id}
                   </p>
+                  
                   <p className="text-xs text-gray-500">
                     {new Date(
                       sale.created_at
                     ).toLocaleString()}
                   </p>
                 </div>
+                <p>{sale.toto}</p>
 
                 <p className="font-semibold text-green-600">
                   {Number(

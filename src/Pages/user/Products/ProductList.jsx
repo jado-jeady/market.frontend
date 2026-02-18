@@ -5,7 +5,7 @@ import { getAllCategories } from "../../../utils/category.util";
 import { getAllProducts } from "../../../utils/product.util";
 import {TriangleAlert } from "lucide-react"
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 18;
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -37,7 +37,7 @@ const ProductList = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const res = await getAllProducts({limit:200000000000,page:1});
+      const res = await getAllProducts({limit:200000000000});
 
       if (res?.success) {
         setProducts(res.data);
@@ -177,127 +177,137 @@ const ProductList = () => {
         </div>
       </div>
 
-      {/* PRODUCTS GRID */}
-      {paginatedProducts.length === 0 ? (
-        <div className="bg-white p-10 text-center rounded-lg shadow">
-          <p className="text-gray-500">No products match your filters</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-          {paginatedProducts.map((p) => {
-            const stockStatus =
-              p.stock_quantity > 50
-                ? "In Stock"
-                : p.stock_quantity > 0
-                ? "Low Stock"
-                : "No Stock";
+{/* PRODUCTS GRID */}
+{paginatedProducts.length === 0 ? (
+  <div className="bg-white p-10 text-center rounded-lg shadow">
+    <p className="text-gray-500">No products match your filters</p>
+  </div>
+) : (
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+    {paginatedProducts.map((p) => {
+      const stockStatus =
+        p.stock_quantity > 50
+          ? "In Stock"
+          : p.stock_quantity > 0
+          ? "Low Stock"
+          : "No Stock";
 
-            const stockColor =
-              p.stock_quantity > p.min_stock
-                ? "text-green-600"
-                : p.stock_quantity > p.min_stock
-                ? "text-yellow-600"
-                : "text-red-600";
+      const stockColor =
+        p.stock_quantity > p.min_stock
+          ? "text-green-600"
+          : p.stock_quantity > 0
+          ? "text-yellow-600"
+          : "text-red-600";
 
-            return (
-              <div key={p.id} className="bg-white rounded-lg shadow hover:shadow-lg">
-                <div className="h-15 bg-gray-100 flex items-center justify-center text-4xl">
-                   <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={30}
-    height={30}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="blue"
-    strokeWidth={0.5}
-  >
-    {/* Box outline */}
-    <path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5v-9z" />
-    {/* Inner lines for box detail */}
-    <path d="M12 3v18M3 7.5l9 4.5 9-4.5" />
-  </svg>
+      return (
+        <div key={p.id} className="bg-white rounded-lg shadow hover:shadow-lg">
+          <div className="h-15 bg-gray-100 flex items-center justify-center text-4xl">
+            {/* Icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={30}
+              height={30}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="blue"
+              strokeWidth={0.5}
+            >
+              <path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5v-9z" />
+              <path d="M12 3v18M3 7.5l9 4.5 9-4.5" />
+            </svg>
+          </div>
 
+          <div className="p-4 text-gray-500 text-xs md:text-sm">
+            <div className="flex justify-between mb-2">
+              <div>
+                <h4 className="font-semibold">{p.name}</h4>
+                <p className="text-gray-500">{p.barcode}</p>
+              </div>
+              <span className={`font-medium ${stockColor}`}>
+                {stockStatus}
+              </span>
+            </div>
+
+            <div className="space-y-1 mb-3">
+              <div className="flex justify-between">
+                <span>Price</span>
+                <span className="font-semibold">{p.selling_price} RWF</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Stock</span>
+                <span>{p.stock_quantity}</span>
+              </div>
+              {p.stock_quantity < p.min_stock && (
+                <div className="flex justify-center">
+                  <button
+                    className="inline-flex items-center px-2 py-1 bg-red-700 text-white text-xs font-bold rounded animate-pulse shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-700"
+                  >
+                    <TriangleAlert className="w-4 mx-2" />
+                    Alert
+                  </button>
                 </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+)}
 
-                <div className="p-4 text-gray-500 text-xs">
-                  <div className="flex justify-between mb-2">
-                    <div>
-                      <h4 className="font-semibold text-xs">{p.name}</h4>
-                      <p className="text-xs text-gray-500">{p.barcode}</p>
-                    </div>
-                    <span className={`text-xs font-medium ${stockColor}`}>
-                      {stockStatus}
-                    </span>
-                  </div>
 
-                  <div className="text-xs space-y-1 mb-3">
-                    <div className="flex justify-between">
-                      <span>Price</span>
-                      <span className="font-semibold">
-                        {p.selling_price} RWF
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Stock</span>
-                      <span>{p.stock_quantity}</span>
-                    </div>
-                    {/* notification Icon for low stock  */}
-                    {p.stock_quantity < p.min_stock && (
-                    <div className="flex justify-center">
-                      <button
-                       className="inline-flex items-center px-2 py-1 bg-red-700 text-white text-xs font-bold rounded 
-                 animate-pulse shadow-sm
-                 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-700">
-                  <TriangleAlert  className="w-4 mx-2"/>
-                  Alert
-      
+{/* PAGINATION */}
+{totalPages > 1 && (
+  <div className="mt-6 flex flex-wrap justify-center gap-2">
+    {/* Prev Button */}
+    <button
+      disabled={currentPage === 1}
+      onClick={() => setCurrentPage((p) => p - 1)}
+      className="px-3 py-2 text-xs border rounded bg-blue-500 hover:bg-blue-600 disabled:opacity-50"
+    >
+      Prev
+    </button>
+
+    {/* Page Numbers with Window */}
+    {(() => {
+      const maxButtons = 10; // how many buttons to show
+      let start = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+      let end = start + maxButtons - 1;
+
+      if (end > totalPages) {
+        end = totalPages;
+        start = Math.max(1, end - maxButtons + 1);
+      }
+
+      const pages = [];
+      for (let i = start; i <= end; i++) {
+        pages.push(
+          <button
+            key={i}
+            onClick={() => setCurrentPage(i)}
+            className={`min-w-[40px] px-3 py-2 text-xs border rounded transition-colors 
+              ${currentPage === i 
+                ? "bg-blue-600 text-white font-semibold" 
+                : "bg-gray-400 hover:bg-gray-200"}`}
+          >
+            {i}
+          </button>
+        );
+      }
+      return pages;
+    })()}
+
+    {/* Next Button */}
+    <button
+      disabled={currentPage === totalPages}
+      onClick={() => setCurrentPage((p) => p + 1)}
+      className="px-3 py-2 text-xs border rounded bg-blue-500 hover:bg-blue-600 disabled:opacity-50"
+    >
+      Next
     </button>
   </div>
 )}
-                    
-                  </div>
-                  
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* PAGINATION */}
-      {totalPages > 1 && (
-        <div className="mt-6 flex justify-center gap-2">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => p - 1)}
-            className="px-3 py-2 text-xs border bg-red-400 rounded disabled:opacity-50"
-          >
-            Prev
-          </button>
-
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-4 py-2 bg-gray-300 border rounded ${
-                currentPage === i + 1
-                  ? "bg-gray-600 text-gray-white"
-                  : ""
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-
-          <button
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => p + 1)}
-            className="px-4 py-2 bg-gray-300 border rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      {/* <pagination End */}
     </div>
   );
 };

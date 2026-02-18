@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getMySales } from '../../../Utils/sales.util';
+import { getMySales } from '../../../utils/sales.util';
 
 const AllSales = () => {
   
@@ -9,7 +9,7 @@ const AllSales = () => {
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
-    limit: 10,
+    limit: 100,
     pages: 1
   });
   const [loading, setLoading] = useState(true);

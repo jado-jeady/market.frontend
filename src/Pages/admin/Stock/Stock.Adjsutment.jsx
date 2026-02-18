@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getStockAdjustments } from '../../../Utils/product.util';
+import { getStockAdjustments } from '../../../utils/product.util';
 
 const StockAdjustment = () => {
   const [adjustments, setAdjustments] = useState([]);
@@ -159,3 +159,4 @@ const StockAdjustment = () => {
 };
 
 export default StockAdjustment;
+

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { updateProduct } from "../../../Utils/product.util"; // Ensure this utility exists
+import { updateProduct } from "../../../utils/product.util";
 
 const EditProductModal = ({ isOpen, onClose, product, refresh }) => {
   const [formData, setFormData] = useState({ ...product });

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAllCategories, createCategory, deleteCategory,updateCategory} from '../../../Utils/category.util';
+import { getAllCategories, createCategory, deleteCategory,updateCategory} from '../../../utils/category.util';
 
 
 
