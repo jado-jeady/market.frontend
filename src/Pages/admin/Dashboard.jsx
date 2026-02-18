@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { getAllSales } from '../../utils/sales.util';
-import { getAllProducts } from '../../utils/product.util';
-import { getUsers } from '../../utils/user.util';
+import { getAllSales } from '../../utils/sales.util.js';
+import { getAllProducts } from '../../utils/product.util.js';
+import { getUsers } from '../../utils/user.util.js';
 
 
 const Dashboard = () => {
