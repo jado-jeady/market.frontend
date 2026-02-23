@@ -245,13 +245,13 @@ if (p.stock_quantity === 0) {
                   <div className="flex gap-2">
                     <button
                       onClick={() => openAdjustModal(p)}
-                      className="flex-1 bg-blue-100 text-blue-600 py-1.5 rounded text-xs hover:bg-blue-200 transition-colors"
+                      className="flex-1 bg-gray-300 text-blue-600 lg:bg-gray-400 py-1.5 rounded text-xs hover:bg-blue-200 transition-colors"
                     >
                       Adjust
                     </button>
                     <button
                       onClick={() => openEditModal(p)}
-                      className="flex-1 bg-blue-400 text-white py-1.5 rounded text-xs hover:bg-blue-600 transition-colors"
+                      className="flex-1 bg-blue-400 text-white lg:bg-green-600 lg:text-white py-1.5 rounded text-xs hover:bg-blue-600 transition-colors"
                     >
                       Edit
                     </button>

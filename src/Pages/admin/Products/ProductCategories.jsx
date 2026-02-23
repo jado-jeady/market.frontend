@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAllCategories, createCategory, deleteCategory,updateCategory} from '../../../utils/category.util';
+import { toast } from 'react-toastify';
 
 
 
@@ -47,19 +48,19 @@ const ProductCategories = () => {
           setCategories((prev) =>
             prev.map((cat) => (cat.id === currentCategory.id ? updated : cat))
           );
-          
+          toast.success(`Category ${updated?.name}`)
         }
       } else {
         const created = await createCategory(currentCategory);
         if (created) {
           setCategories((prev) => [...prev, created]);
-          
+          toast.success(`Category ${created.name}Is Created!`)
         }
       }
 
       setShowModal(false);
     } catch (err) {
-      console.error("There was an error", err);
+      console.log("There was an error", err);
     }
   };
 
@@ -180,14 +181,13 @@ const ProductCategories = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-sm border rounded-lg text-gray-700 hover:bg-gray-100"
-                >
+                  className="px-4 py-2 text-sm border rounded-lg text-gray-700 hover:bg-gray-100 transition-colors lg:px-6 lg:py-3 lg:text-base xl:px-8 xl:py-4 xl:text-lg"
+>
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-                >
+                 className="px-4 py-2 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors lg:px-6 lg:py-3 lg:text-base xl:px-8 xl:py-4 xl:text-lg">
                   {isEditing ? 'Update' : 'Save'}
                 </button>
               </div>

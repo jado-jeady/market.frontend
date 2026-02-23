@@ -31,6 +31,7 @@ import ProductTransfer from './Pages/admin/Products/ProdcutTransfer';
 import ManageRoles from './Pages/admin/Management/ManageRoles';
 import Sales from './Pages/admin/Sales/Sales';
 import ShiftReport from './Pages/admin/ShiftReport';
+import MonthlySales from './Pages/admin/Sales/MonthlySales'
 
 // User Pages
 import NewSales from './Pages/user/Sales/NewSale';
@@ -92,6 +93,7 @@ function App() {
               <Route index element={<AdminAllSales />}/>
               <Route path='daily' element={<DailySales />}/>
               <Route path='all' element={<AdminAllSales />}/>
+              <Route path='monthly' element={<MonthlySales/>}/>
           
           </Route>
           <Route path="products" element={<Products />}>
@@ -115,21 +117,55 @@ function App() {
               <Route path="currency" element={<CurrencySettings />} />
               <Route path="receipt" element={<ReceiptFormatSettings />} />
           </Route>
-          
           <Route path="management" element={<Management />}>
           
           <Route  index element={<ManageRoles/>} />
           <Route path='roles' element={<ManageRoles/>} />
           <Route path='users' element={<AdminUserManagement/>} />
           <Route path='settings' element={<SettingsManagement/>} />
-
-
           </Route>
-          
           <Route path="report" element={<Report />} />
-          
           <Route path="day-closing" element={<ShiftReport />} />
         </Route>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         {/* User Routes */}
         <Route path="/user"
