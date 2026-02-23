@@ -11,29 +11,28 @@ const DailySales = () => {
 
   /* ===================== FETCH ===================== */
 
-  const fetchData = async () => {
-    setLoading(true);
-
-    const salesResponse = await getAllSales({
-      limit: 1000000,
-      page: 1,
-    });
-
-    const cashierResponse = await getCashiers();
-
-    if (salesResponse?.success) {
-      setSales(salesResponse.data);
-    }
-
-    if (cashierResponse?.success) {
-      setCashiers(cashierResponse.data);
-    }
-
-    setLoading(false);
-  };
 
   useEffect(() => {
-    fetchData();
+    (async () => {
+      setLoading(true);
+
+      const salesResponse = await getAllSales({
+        limit: 1000000,
+        page: 1,
+      });
+
+      const cashierResponse = await getCashiers();
+
+      if (salesResponse?.success) {
+        setSales(salesResponse.data);
+      }
+
+      if (cashierResponse?.success) {
+        setCashiers(cashierResponse.data);
+      }
+
+      setLoading(false);
+    })();
   }, []);
 
   /* ===================== FILTER TODAY ===================== */
