@@ -72,17 +72,24 @@ const AdminiProductList = () => {
           .includes(q)
       );
     }
+    // filter stock level
     if (category !== "all") {
       data = data.filter((p) => String(p.category?.id) === category);
     }
     if (stockLevel !== "all") {
-      data = data.filter((p) => {
-        if (stockLevel === "in") return p.stock_quantity > 50;
-        if (stockLevel === "low") return p.stock_quantity > 0 && p.stock_quantity <= 50;
-        if (stockLevel === "out") return p.stock_quantity === 0;
-        return true;
-      });
+  data = data.filter((p) => {
+    if (stockLevel === "in") {
+      return p.stock_quantity > p.min_stock; // above threshold
     }
+    if (stockLevel === "low") {
+      return p.stock_quantity > 0 && p.stock_quantity <= p.min_stock; // between 1 and min_stock
+    }
+    if (stockLevel === "out") {
+      return p.stock_quantity === 0; // no stock
+    }
+    return true;
+  });
+}
     return data;
   }, [products, search, category, stockLevel]);
 
@@ -115,7 +122,7 @@ const AdminiProductList = () => {
         </div>
         <Link
           to="/admin/products/add"
-          className="px-4 py-2 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600 whitespace-nowrap"
+          className="px-4 py-2 text-sm text-white bg-gray-200 rounded-lg hover:bg-gray-400 whitespace-nowrap"
         >
           + Add Product
         </Link>
@@ -178,20 +185,20 @@ const AdminiProductList = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {paginatedProducts.map((p) => {
-            const stockStatus =
-              p.stock_quantity > 50
-                ? "In Stock"
-                : p.stock_quantity > 0
-                ? "Low Stock"
-                : "No Stock";
+           {paginatedProducts.map((p) => {
+      let stockStatus, stockColor;
 
-            const stockColor =
-              p.stock_quantity > 50
-                ? "text-green-600"
-                : p.stock_quantity > 0
-                ? "text-yellow-600"
-                : "text-red-600";
+if (p.stock_quantity === 0) {
+  stockStatus = "No Stock";
+  stockColor = "text-red-600";
+} else if (p.stock_quantity <= p.min_stock) {
+  stockStatus = "Low Stock";
+  stockColor = "text-yellow-600";
+} else {
+  stockStatus = "In Stock";
+  stockColor = "text-green-600";
+}
+
 
             return (
               <div

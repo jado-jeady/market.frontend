@@ -4,11 +4,14 @@ import { getAllProducts } from '../../../utils/product.util';
 import { createSale } from '../../../utils/sales.util';
 
 
+
+
 const NewSale = () => {
+  
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedCustomer, setSelectedCustomer] = useState(undefined);
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [customerQuery, setCustomerQuery] = useState('');
@@ -20,7 +23,7 @@ const [isConfirmed, setIsConfirmed] = useState(false);
 const [invoiceSnapshot, setInvoiceSnapshot] = useState(null);
 
 
-
+ 
 
   const MOCK_CUSTOMERS = [
   { id: 1, name: 'John Doe', phone: '0788123456' },
@@ -144,7 +147,6 @@ const totalQuantity = cart.reduce(
 );
 
   const invoiceNumber =`TG-${Math.floor(Math.random() * 1000)}`
-
   /* ===================== CHECKOUT ===================== */
  const handleCheckout = () => {
   if (cart.length === 0) {
@@ -208,8 +210,13 @@ const confirmSale = async () => {
         
       })),
     };
-    console.log(payload)
+    
 
+if (!invoiceSnapshot || invoiceSnapshot.items.length === 0) {
+  toast.error("Invalid sale data");
+  return;
+}
+    // Create sale 
     const response = await createSale(payload);
 
     if (!response.success) {
@@ -247,7 +254,7 @@ const confirmSale = async () => {
   );
 
   return (
-    <div className="p-6 pt-1">
+    <div className="">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
 
         {/* ================= PRODUCTS SECTION ================= */}
@@ -417,15 +424,15 @@ const confirmSale = async () => {
                       onClick={() => setPaymentMethod('cash')}
                       className={`py-1 px-3 text-xs text-gray-700 rounded-lg border-2 transition ${
                         paymentMethod === 'cash'
-                          ? 'border-gray-500 bg-red-300 text-white'
-                          : 'border-gray-300 hover:border-gray-400'
+                          ? 'border-gray-500 lg:bg-red-400 hover:bg-red-500 bg-red-300 text-white'
+                          : 'border-gray-300 hover:border-gray-400 '
                       }`}
                     >
                       Cash
                     </button>
                     <button
                       onClick={() => setPaymentMethod('momo')}
-                      className={`py-2 px-3 text-xs text-gray-700 rounded-lg border-2 transition ${
+                      className={`py-2 px-3 text-xs lg:text-gray-700 text-gray-700 rounded-lg border-2 transition ${
                         paymentMethod === 'momo'
                           ? 'border-gray-500 bg-yellow-500 text-white'
                           : 'border-gray-300 hover:border-gray-400'
@@ -438,7 +445,7 @@ const confirmSale = async () => {
                       onClick={() => setPaymentMethod('card')}
                       className={`py-2 px-3 text-xs text-white-300 text-gray-700 rounded-lg border-2 transition ${
                         paymentMethod === 'card'
-                          ? 'border-gray-500 text-white bg-red-300 text-gray-700'
+                          ? 'border-gray-500 text-white lg:bg-red-600 bg-red-300 text-gray-700'
                           : 'border-gray-300 hover:border-gray-400'
                       }`}
                     >
@@ -476,7 +483,7 @@ const confirmSale = async () => {
                   <button
                   onClick={handleCheckout}
                   
-                    className="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-semibold"
+                    className="w-full py-3 lg:bg-gray-800 lg:hover:bg-green-500 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-semibold"
                   >
                     Process A Sale 
                   </button>
@@ -488,7 +495,16 @@ const confirmSale = async () => {
 
       </div>
       {showInvoiceModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+  <div className="
+  
+  /* Base (Mobile-first) */
+  fixed inset-0 z-50 flex justify-center items-center 
+  text-gray-600 bg-black/40 bg-opacity-40 backdrop-blur-sm
+
+
+
+  /* Large Screens (1024px and up) */
+  lg:bg-black/30 bg-opacity-50  lg:backdrop-blur-sm lg:text-gray-700">
     <div className="bg-white rounded-lg shadow-xl w-[350px] p-6 print-area font-mono text-gray-800">
 
       {/* Store Header */}
@@ -563,16 +579,18 @@ const confirmSale = async () => {
 <div className="flex flex-col sm:flex-row gap-3 mt-6">
   {/* Cancel */}
   <button
+    disabled={isProcessing}
     onClick={() => {setShowInvoiceModal(false),setProcessingSale("Process")}}
     className="flex-1 py-2 text-sm bg-red-400 text-white rounded hover:bg-red-500"
   >
-    Cancel
+    {isConfirmed ? "Go back":"Cancel"}
   </button>
 
   {/* Confirm Payment */}
   <button
     onClick={confirmSale}   //
-    className="flex-1 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-90"
+    disabled={isProcessing}
+    className="flex-1 py-2 text-sm md:bg-blue-600 md:hover:bg-blue-500 lg:bg-blue-600 lg:hover:bg-blue-500 bg-blue-600 lg:hover:bg-blue-500 text-white rounded hover:bg-blue-700 disabled:opacity-90"
   >
     {processingSale ? processingSale : "Confirm Payment"}
   </button>
@@ -581,7 +599,7 @@ const confirmSale = async () => {
   <button
   onClick={handlePrint}
   disabled={!isConfirmed}
-  className="flex-1 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+  className="flex-1 py-2 text-sm lg:hover:bg-green-700 lg:bg-green-500 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
 >
   Print Invoice
 </button>

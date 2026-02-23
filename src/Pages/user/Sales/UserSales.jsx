@@ -9,7 +9,7 @@ const UserSales = () => {
   ];
 
   return (
-    <div>
+    <div className=''>
       <SubMenu items={subMenuItems} />
       <Outlet />
     </div>

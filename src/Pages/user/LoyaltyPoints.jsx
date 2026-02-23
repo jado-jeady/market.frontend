@@ -4,8 +4,8 @@ const LoyaltyPoints = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Loyalty Points</h1>
-        <p className="text-blue-600 mt-1">Manage customer loyalty rewards</p>
+        <h2 className="text-xl font-bold text-gray-900">Loyalty Points</h2>
+        <p className="text-gray-700 text-sm mt-1">Manage customer loyalty rewards</p>
       </div>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">

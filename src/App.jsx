@@ -30,6 +30,7 @@ import ProductCategories from './Pages/admin/Products/ProductCategories';
 import ProductTransfer from './Pages/admin/Products/ProdcutTransfer';
 import ManageRoles from './Pages/admin/Management/ManageRoles';
 import Sales from './Pages/admin/Sales/Sales';
+import ShiftReport from './Pages/admin/ShiftReport';
 
 // User Pages
 import NewSales from './Pages/user/Sales/NewSale';
@@ -54,6 +55,8 @@ import Expenses from './Pages/user/Expenses';
 import TransactionHistory from './Pages/user/Reports/TransactionHistory';
 import DayClosing from './Pages/user/DayClosing';
 import Settings from './Pages/user/Settings/Settings';
+import CloseShift from './components/Shifts/CloseShift';
+import LowStockAlerts from './Pages/user/Stock/LowStockAlerts'; 
 
 
 
@@ -124,7 +127,8 @@ function App() {
           </Route>
           
           <Route path="report" element={<Report />} />
-          <Route path="day-closing" element={<AdminDayClosingPage />} />
+          
+          <Route path="day-closing" element={<ShiftReport />} />
         </Route>
 
         {/* User Routes */}
@@ -148,7 +152,7 @@ function App() {
   </Route>
 
   <Route path="products" element={<ProductList />} />
-  <Route path="stock" element={<AllStock />} />
+  <Route path="stock" element={<LowStockAlerts />} />
 
   {/* REPORTS */}
   <Route path="reports" element={<UserReport />}>
@@ -168,12 +172,16 @@ function App() {
 
   {/* CUSTOMERS */}
   <Route path="customers" element={<UserCustomers />}>
+    <Route index element={<LoyaltyPoints/>}/>
     <Route path="add" element={<AddCustomer />} />
     <Route path="search" element={<SearchCustomer />} />
     <Route path="loyalty" element={<LoyaltyPoints />} />
   </Route>
   <Route path="expenses" element={<Expenses />} />
 <Route path="day-closing" element={<DayClosing />} />
+<Route path='close-shift' element={<CloseShift/>}/>
+<Route path='open-shift' element={<CloseShift/>}/>
+
   <Route path="management" element={<UserManagement />} />
 </Route>
 

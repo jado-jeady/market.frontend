@@ -12,8 +12,6 @@ const DailySales = () => {
   /* ===================== FETCH ===================== */
 
   const fetchData = async () => {
-    setLoading(true);
-
     const salesResponse = await getAllSales({
       limit: 1000000,
       page: 1,
@@ -33,7 +31,9 @@ const DailySales = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    (async () => {
+      await fetchData();
+    })();
   }, []);
 
   /* ===================== FILTER TODAY ===================== */

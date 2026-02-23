@@ -78,15 +78,21 @@ const ProductList = () => {
     }
 
     // Stock filter
-    if (stockLevel !== "all") {
-      data = data.filter((p) => {
-        if (stockLevel === "in") return p.stock_quantity > 50;
-        if (stockLevel === "low")
-          return p.stock_quantity > 0 && p.stock_quantity <= 50;
-        if (stockLevel === "out") return p.stock_quantity === 0;
-        return true;
-      });
+if (stockLevel !== "all") {
+  data = data.filter((p) => {
+    if (stockLevel === "in") {
+      return p.stock_quantity > p.min_stock; // above threshold
     }
+    if (stockLevel === "low") {
+      return p.stock_quantity > 0 && p.stock_quantity <= p.min_stock; // between 1 and min_stock
+    }
+    if (stockLevel === "out") {
+      return p.stock_quantity === 0; // no stock
+    }
+    return true;
+  });
+}
+
 
     return data;
   }, [products, search, category, stockLevel]);
@@ -185,19 +191,18 @@ const ProductList = () => {
 ) : (
   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
     {paginatedProducts.map((p) => {
-      const stockStatus =
-        p.stock_quantity > 50
-          ? "In Stock"
-          : p.stock_quantity > 0
-          ? "Low Stock"
-          : "No Stock";
+      let stockStatus, stockColor;
 
-      const stockColor =
-        p.stock_quantity > p.min_stock
-          ? "text-green-600"
-          : p.stock_quantity > 0
-          ? "text-yellow-600"
-          : "text-red-600";
+if (p.stock_quantity === 0) {
+  stockStatus = "No Stock";
+  stockColor = "text-red-600";
+} else if (p.stock_quantity <= p.min_stock) {
+  stockStatus = "Low Stock";
+  stockColor = "text-yellow-600";
+} else {
+  stockStatus = "In Stock";
+  stockColor = "text-green-600";
+}
 
       return (
         <div key={p.id} className="bg-white rounded-lg shadow hover:shadow-lg">
@@ -234,13 +239,15 @@ const ProductList = () => {
                 <span className="font-semibold">{p.selling_price} RWF</span>
               </div>
               <div className="flex justify-between">
-                <span>Stock</span>
-                <span>{p.stock_quantity}</span>
+                <span className="bg-gray-300 rounded-sm p-1">Stock: <span className="pl-2">{p.stock_quantity}<br/></span></span>
+                
+                
+                <span  className="bg-blue-200 rounded-sm p-1 ">min: <span className="pl-2" >{p.min_stock}</span></span>
               </div>
               {p.stock_quantity < p.min_stock && (
-                <div className="flex justify-center">
+                <div className="flex pt-3 justify-center">
                   <button
-                    className="inline-flex items-center px-2 py-1 bg-red-700 text-white text-xs font-bold rounded animate-pulse shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-700"
+                    className="inline-flex items-center px-2  bg-red-700 text-white text-xs font-bold rounded animate-pulse shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-700"
                   >
                     <TriangleAlert className="w-4 mx-2" />
                     Alert

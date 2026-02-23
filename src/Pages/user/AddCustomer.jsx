@@ -13,8 +13,8 @@ const AddCustomer = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Add Customer</h1>
-        <p className="text-gray-600 mt-1">Register a new customer</p>
+        <h2 className="text-xl font-bold text-gray-900">Add Customer</h2>
+        <p className="text-gray-600 text-sm mt-1">Register a new customer</p>
       </div>
 
       <div className="max-w-2xl">

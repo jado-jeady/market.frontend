@@ -152,7 +152,7 @@ const AllSales = () => {
 
                 </td>
                 <td className="px-6 py-4 text-xs text-gray-500 text-center">
-                  {Number(sale.total_amount).toFixed(2)}
+                  {Number(sale.subtotal).toFixed(2)}
                 </td>
                 <td className="px-6 py-4 text-xs text-gray-500 text-center">{sale.status}</td>
                 <td className="px-6 py-4 text-xs text-gray-500 text-center text-center">
@@ -163,7 +163,7 @@ const AllSales = () => {
                     View |
                   </button>
                   <Link
-                    to={`/user/sales/all/${sale.id}`}
+                    to={`#`}
                     className="text-green-600 ml-2"
                   >
                     Return Claim
@@ -207,10 +207,20 @@ const AllSales = () => {
 
       {/* SALE DETAILS MODAL */}
       {isModalOpen && selectedSale && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 text-gray-500 flex justify-center items-center z-50">
+  <div className="
+  
+  /* Base (Mobile-first) */
+  fixed inset-0 z-50 flex justify-center items-center 
+  text-gray-600 bg-black/40 bg-opacity-40 backdrop-blur-sm
+
+
+
+  /* Large Screens (1024px and up) */
+  lg:bg-black/80 lg:backdrop-blur-lg lg:text-gray-700
+  ">
     <div className="bg-white rounded p-6 w-11/12 md:w-2/3 max-h-[90vh] overflow-auto relative">
       <button
-        className="absolute top-2 right-2 text-gray-600 font-bold text-xl"
+        className="absolute top-2 right-5 text-red-600 font-bold text-2xl"
         onClick={() => setIsModalOpen(false)}
       >
         &times;

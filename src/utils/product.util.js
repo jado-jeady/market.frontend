@@ -17,7 +17,7 @@ const getAuthHeaders = () => {
 const buildQueryParams = (filters = {}) =>
   new URLSearchParams(
     Object.entries(filters).filter(
-      ([_, value]) => value !== undefined && value !== ''
+      ([, value]) => value !== undefined && value !== ''
     )
   ).toString();
 

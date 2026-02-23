@@ -27,33 +27,35 @@ const AdminSidebar = () => {
 
   return (
     <>
-      {/* ================= TOGGLE BUTTON ================= */}
+      {/* ================= TOGGLE BUTTON (hamburger) ================= */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-3 left-2 z-50 bg-white text-gray-700 p-2 rounded-md shadow-md"
+        onClick={() => setIsOpen(true)}
+        className="lg:hidden fixed top-3 left-3 z-50 bg-white text-gray-700 p-2 rounded-md shadow-md"
       >
-        {isOpen ? <X size={20} /> : <Menu size={20} />}
+        <Menu size={20} />
       </button>
 
       {/* ================= OVERLAY ================= */}
       {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
-          className="fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 bg-opacity-40 z-40 lg:hidden"
         />
       )}
 
       {/* ================= SIDEBAR ================= */}
       <div
-        className={`
-          fixed top-0 left-0 h-full w-45
-          bg-white
-          text-white shadow-xl z-50
-          transform transition-transform duration-300 ease-in-out
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
-          lg:translate-x-0
-        `}
+        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out
+        ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:w-40`}
       >
+        {/* Close button (inside sidebar, mobile only) */}
+        <button
+          onClick={() => setIsOpen(false)}
+          className="absolute top-3 right-3 lg:hidden p-2 rounded bg-secondary-600 text-white"
+        >
+          <X size={20} />
+        </button>
+
         {/* Logo */}
         <div className="p-4 border-b border-red-300">
           <h3 className="text-lg text-gray-400 font-bold">POS Admin</h3>
