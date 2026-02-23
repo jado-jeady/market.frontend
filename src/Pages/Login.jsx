@@ -64,7 +64,6 @@ const Login = () => {
           navigate('/user/dashboard');
         }
         }else {
-          
         setError('Invalid username or password');
       }
     } catch (err) {

@@ -150,7 +150,7 @@ if (sortedCustomers.length > 0) {
         {/* Today Sales */}
         <div className="bg-white shadow rounded-lg p-5">
           <p className="text-sm text-gray-500">Today's Sales</p>
-          <h3 className="text-xl font-bold text-green-600 mt-2">
+          <h3 className="text-sm font-bold text-green-600 mt-2">
             {stats.todaySales.toLocaleString()} RWF
           </h3>
         </div>
@@ -160,7 +160,7 @@ if (sortedCustomers.length > 0) {
           <p className="text-sm text-gray-500">
             Today's Transactions
           </p>
-          <h3 className="text-xl font-bold text-blue-600 mt-2">
+          <h3 className="text-sm font-bold text-blue-600 mt-2">
             {stats.totalTransactions}
           </h3>
         </div>
@@ -169,18 +169,18 @@ if (sortedCustomers.length > 0) {
           <p className="text-sm text-gray-500">Best Selling Item</p>
           <h3 className="text-sm font-bold  mt-2">
             <span className="text-xs text-green-500">{stats.bestItemname }</span>
-            <span className="bg-gray-700 p-1 pl-1 pr-2 rounded-lg text-white text-sm ml-7 ">{stats.bestItemquantity} pcs<span></span> </span>
+            <span className="bg-gray-700 p-1 pl-1 pr-2 rounded-lg text-white text-[9px] ml-7 ">{stats.bestItemquantity} pcs<span></span> </span>
             </h3>
         </div>
 
         {/* Top Customer */}
-        <div className="bg-white shadow rounded-lg p-5">
+        <div className="bg-white shadow rounded-lg pt-5 p-3">
           <p className="text-sm text-gray-500">
            Top Customer
           </p>
           <h3 className="text-sm font-bold  mt-2">
             <span className="text-xs text-green-500">{stats.topCustomername }</span>
-            <span className="bg-gray-700 p-1 pl-2 pr-2 rounded-lg text-white text-sm ml-7 ">{stats.topCustomerpurchase} Frw</span>
+            <span className="bg-gray-700 p-1 rounded-lg text-white text-[10px] ml-7 ">{stats.topCustomerpurchase} Frw</span>
             </h3>
         </div>
 
@@ -189,7 +189,7 @@ if (sortedCustomers.length > 0) {
           <p className="text-sm text-gray-500">
             Low Stock Products
           </p>
-          <h3 className="text-xl font-bold text-yellow-600 mt-2">
+          <h3 className="text-sm font-bold text-yellow-600 mt-2">
             {stats.lowStockItems}
           </h3>
         </div>

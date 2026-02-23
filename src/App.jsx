@@ -58,6 +58,8 @@ import DayClosing from './Pages/user/DayClosing';
 import Settings from './Pages/user/Settings/Settings';
 import CloseShift from './components/Shifts/CloseShift';
 import LowStockAlerts from './Pages/user/Stock/LowStockAlerts'; 
+import SalesClaim from './Pages/admin/Sales/SalesClaim';
+import ItemSales from './Pages/admin/Sales/ItemSales';
 
 
 
@@ -94,6 +96,8 @@ function App() {
               <Route path='daily' element={<DailySales />}/>
               <Route path='all' element={<AdminAllSales />}/>
               <Route path='weekly' element={<WeeklySales/>}/>
+              <Route path='claim' element={<SalesClaim/>}/>
+              <Route path='items' element={<ItemSales/>}/>
           
           </Route>
           <Route path="products" element={<Products />}>

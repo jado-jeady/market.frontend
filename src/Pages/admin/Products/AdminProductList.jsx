@@ -111,8 +111,8 @@ const AdminiProductList = () => {
       {/* HEADER SECTION */}
       <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
         <div>
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight">Products</h2>
-          <p className="text-xs sm:text-sm lg:text-base text-gray-600">Search, filter & manage inventory</p>
+          <h2 className="text-xl sm:text-xl lg:text-xl font-bold text-gray-900 tracking-tight">Products</h2>
+          <p className="text-xs sm:text-xs lg:text-base text-gray-600">Search, filter & manage inventory</p>
         </div>
         <Link
           to="/admin/products/add"
@@ -123,20 +123,20 @@ const AdminiProductList = () => {
       </div>
 
       {/* FILTER BAR */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 lg:p-5 mb-8">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 lg:p-1 mb-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
           <input
             type="text"
             placeholder="Search name, barcode, SKU..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-3 py-2 h-10 lg:h-12 w-full text-gray-700 text-sm lg:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="px-2 py-2 h-10 lg:h-10 w-full text-gray-700 text-xs lg:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
 
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="px-3 h-10 lg:h-12 w-full text-gray-700 text-sm lg:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="px-2 py-2 h-10 lg:h-10 w-full text-gray-700 text-xs lg:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
             <option value="all">All Categories</option>
             {[...new Map(categories.map((p) => [p.id, p])).values()]
@@ -149,7 +149,7 @@ const AdminiProductList = () => {
           <select
             value={stockLevel}
             onChange={(e) => setStockLevel(e.target.value)}
-            className="px-3 h-10 lg:h-12 w-full text-gray-700 text-sm lg:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="px-2 py-2 h-10 lg:h-10 w-full text-gray-700 text-xs lg:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
             <option value="all">All Stock Levels</option>
             <option value="in">In Stock</option>
@@ -159,7 +159,7 @@ const AdminiProductList = () => {
 
           <button
             onClick={() => { setSearch(""); setCategory("all"); setStockLevel("all"); }}
-            className="px-4 h-10 lg:h-12 bg-gray-50 border border-gray-300 text-gray-700 text-sm lg:text-base rounded-lg hover:bg-gray-100 transition-colors"
+            className="px-2 py-2 h-10 lg:h-10 w-full text-gray-700 text-xs lg:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
             Clear Filters
           </button>
@@ -172,7 +172,7 @@ const AdminiProductList = () => {
           <p className="text-gray-500 text-lg">No products match your current filters</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4 lg:gap-6 xl:gap-8">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4 lg:gap-6 xl:gap-8">
           {paginatedProducts.map((p) => {
             let stockStatus, stockColor;
             if (p.stock_quantity === 0) {

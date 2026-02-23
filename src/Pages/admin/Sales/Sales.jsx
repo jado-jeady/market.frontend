@@ -7,6 +7,7 @@ const Sales = () => {
     { name: 'Daily Sales', path: '/admin/sales/daily' },
     { name: 'Weekly Sales', path: '/admin/sales/weekly' },
     { name: 'Sales Claim', path: '/admin/sales/claim'},
+    { name: 'Item Sales', path: '/admin/sales/items'},
   ];
 
   return (
