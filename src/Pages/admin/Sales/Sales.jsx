@@ -5,7 +5,7 @@ const Sales = () => {
   const subMenuItems = [
     {name : 'All Sales', path:"/admin/sales/all"},
     { name: 'Daily Sales', path: '/admin/sales/daily' },
-    { name: 'Monthly Sales', path: '/admin/sales/monthly' },
+    { name: 'Weekly Sales', path: '/admin/sales/weekly' },
     { name: 'Sales Claim', path: '/admin/sales/claim'},
   ];
 

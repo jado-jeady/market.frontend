@@ -162,7 +162,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full lg:bg-gray-700 lg:text-white bg-gray-600 md:bg-gray-600 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:bg-gray-700 sm:text-white lg:bg-gray-700 lg:text-white bg-gray-600 md:bg-gray-600 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
