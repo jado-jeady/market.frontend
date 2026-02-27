@@ -31,9 +31,11 @@ export const createUser = async (payload) => {
 
 /* DISABLE USER */
 export const disableUser = async (id) => {
-  const res = await fetch(`${USERS_BASE}/${id}`, {
-    method: 'DELETE',
-    headers: getHeaders()
+  const payload = { is_active: false };
+  const res = await fetch(`${USERS_BASE}users/delete/${id}`, {
+    method: 'PATCH',
+    headers: getHeaders(),
+    body: JSON.stringify(payload)
   });
   return await res.json();
 };
