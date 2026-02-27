@@ -1,16 +1,16 @@
-import { Outlet } from "react-router-dom";
-import StorekeeperSidebar from "../StorekeeperSidebar.jsx";
-import Header from "../Header";
+import { Outlet } from 'react-router-dom';
+import StorekeeperSidebar from '../StorekeeperSidebar';
+import Header from '../Header';
 
 const StorekeeperLayout = () => {
   return (
-    <div className="flex h-screen ">
+    <div className="min-h-screen bg-white">
       <StorekeeperSidebar />
-      <div className="">
+      <div className="ml-40">
         <Header />
-      </div>
-      <div className="top-20 pt-20 pl-40">
-         <Outlet />
+        <main className="pt-16">
+          <Outlet />
+        </main>
       </div>
     </div>
   );

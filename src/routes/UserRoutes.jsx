@@ -10,7 +10,7 @@ import AllSales from "../pages/user/Sales/AllSales";
 import Returns from "../pages/user/Returns";
 import SalesStake from "../pages/user/Sales/SaleStake";
 import ProductList from "../pages/user/Products/ProductList";
-import LowStockAlerts from "../pages/user/Stock/LowStockAlerts";
+import LowStockAlerts from "../Pages/user/Stock/LowStockAlerts";
 import UserReport from "../pages/user/Reports/UserReports";
 import DailySales from "../pages/user/Sales/DailySales";
 import TransactionHistory from "../pages/user/Reports/TransactionHistory";

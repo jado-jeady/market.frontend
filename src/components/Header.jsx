@@ -8,14 +8,15 @@ const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const storedUser = localStorage.getItem('user');
-  const user = storedUser ? JSON.parse(storedUser).data.user : null;
+  const user = storedUser ? JSON.parse(storedUser)?.data?.user : null;
   const role = user?.role;
+  console.log(role);
 
-  const profilePath = role === 'admin'
+  const profilePath = role === 'Admin'
     ? '/admin/profile'
     : '/user/profile';
 
-  const settingsPath = role === 'admin'
+  const settingsPath = role === 'Admin'
     ? '/admin/settings'
     : '/user/settings';
 

@@ -3,32 +3,32 @@ import ProtectedRoute from "../components/ProtectedRoutes";
 import AdminLayout from "../components/layouts/AdminLayout";
 
 // Admin Pages
-import Dashboard from "../Pages/admin/Dashboard";
-import Sales from "../Pages/admin/Sales/Sales";
-import AdminAllSales from "../Pages/admin/Sales/AllSales";
-import WeeklySales from "../Pages/admin/Sales/WeeklySales";
-import ItemSales from "../Pages/admin/Sales/ItemSales";
-import SalesClaim from "../Pages/admin/Sales/SalesClaim";
-import Products from "../Pages/admin/Products/Products";
-import AdminProductList from "../Pages/admin/Products/AdminProductList";
-import AddProduct from "../Pages/admin/Products/AddProduct";
-import ProductCategories from "../Pages/admin/Products/ProductCategories";
-import ProductTransfer from "../Pages/admin/Products/ProdcutTransfer";
-import Stock from "../Pages/admin/Stock/Stock";
-import AllStock from "../Pages/admin/Stock/AllStock";
-import StockIn from "../Pages/admin/Stock/StockIn";
-import StockOut from "../Pages/admin/Stock/StockOut";
-import StockAdjustment from "../Pages/admin/Stock/Stock.Adjsutment";
-import Management from "../Pages/admin/Management/Management";
-import ManageRoles from "../Pages/admin/Management/ManageRoles";
-import AdminUserManagement from "../Pages/admin/Management/UserManagement";
-import SettingsManagement from "../Pages/admin/Management/SettingsManagement";
-import AdminSettings from "../Pages/admin/Settings";
-import TaxSettings from "../Pages/user/Settings/TaxSettings";
-import CurrencySettings from "../Pages/user/Settings/CurrencySettings";
-import ReceiptFormatSettings from "../Pages/user/Settings/ReceiptFormat";
-import Report from "../Pages/admin/Report";
-import ShiftReport from "../Pages/admin/ShiftReport";
+import Dashboard from "../pages/admin/Dashboard";
+import Sales from "../pages/admin/Sales/Sales";
+import AdminAllSales from "../pages/admin/Sales/AllSales";
+import WeeklySales from "../pages/admin/Sales/WeeklySales";
+import ItemSales from "../pages/admin/Sales/ItemSales";
+import SalesClaim from "../pages/admin/Sales/SalesClaim";
+import Products from "../pages/admin/Products/Products";
+import AdminProductList from "../pages/admin/Products/AdminProductList";
+import AddProduct from "../pages/admin/Products/AddProduct";
+import ProductCategories from "../pages/admin/Products/ProductCategories";
+import ProductTransfer from "../pages/admin/Products/ProdcutTransfer";
+import Stock from "../pages/admin/Stock/Stock";
+import AllStock from "../pages/admin/Stock/AllStock";
+import StockIn from "../pages/admin/Stock/StockIn";
+import StockOut from "../pages/admin/Stock/StockOut";
+import StockAdjustment from "../pages/admin/Stock/Stock.Adjsutment";
+import Management from "../pages/admin/Management/Management";
+import ManageRoles from "../pages/admin/Management/ManageRoles";
+import AdminUserManagement from "../pages/admin/Management/UserManagement";
+import SettingsManagement from "../pages/admin/Management/SettingsManagement";
+import AdminSettings from "../pages/admin/Settings";
+import TaxSettings from "../pages/user/Settings/TaxSettings";
+import CurrencySettings from "../pages/user/Settings/CurrencySettings";
+import ReceiptFormatSettings from "../pages/user/Settings/ReceiptFormat";
+import Report from "../pages/admin/Report";
+import ShiftReport from "../pages/admin/ShiftReport";
 
 export const AdminRoutes = (
   <Route
