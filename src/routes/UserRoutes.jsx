@@ -10,7 +10,6 @@ import AllSales from "../pages/user/Sales/AllSales";
 import Returns from "../pages/user/Returns";
 import SalesStake from "../pages/user/Sales/SaleStake";
 import ProductList from "../pages/user/Products/ProductList";
-import LowStockAlerts from "../Pages/user/Stock/LowStockAlerts";
 import UserReport from "../pages/user/Reports/UserReports";
 import DailySales from "../pages/user/Sales/DailySales";
 import TransactionHistory from "../pages/user/Reports/TransactionHistory";
@@ -26,6 +25,9 @@ import AddCustomer from "../pages/user/AddCustomer";
 import SearchCustomer from "../pages/user/SearchCustomer";
 import LoyaltyPoints from "../pages/user/LoyaltyPoints";
 import UserManagement from "../pages/user/Settings/Management";
+import Stock from "../pages/admin/Stock/Stock";
+import CashierApproval from "../pages/user/Consumables/CashierApproval";
+import Consumables from "../pages/user/Consumables/Consumables";
 
 export const UserRoutes = (
   <Route
@@ -46,7 +48,7 @@ export const UserRoutes = (
       <Route path="stake" element={<SalesStake />} />
     </Route>
     <Route path="products" element={<ProductList />} />
-    <Route path="stock" element={<LowStockAlerts />} />
+    <Route path="consumables" element={<Consumables />} />
     <Route path="reports" element={<UserReport />}>
       <Route index element={<DailySales />} />
       <Route path="daily-sales" element={<DailySales />} />

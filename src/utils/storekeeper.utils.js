@@ -3,51 +3,56 @@ const getAuthHeaders = () => {
   const token = authData?.data?.token;
 
   return {
-    'Content-Type': 'application/json',
-    Authorization: token ? `Bearer ${token}` : ''
+    "Content-Type": "application/json",
+    Authorization: token ? `Bearer ${token}` : "",
   };
 };
-const BASE_URL = import.meta.env.VITE_API_URL
 
+const BASE_URL = import.meta.env.VITE_API_URL;
 
-export const getProductionLogs = async () => {
+/* ===================== GET PRODUCTION LOGS ===================== */
+export const getAllProductions= async () => {
   try {
-    const response = await fetch(`${BASE_URL}/api/storekeeper/production`);
+    const response = await fetch(`${BASE_URL}/api/storekeeper/productions`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    console.log(response)
+
     if (response.ok) {
-      const data = await response.json();
-      return data;
+      return await response.json();
     }
   } catch (error) {
-    console.log('API call failed:', error);
+    console.log("API call failed:", error);
     return [];
   }
 };
 
+/* ===================== GET PRODUCTION LOG BY ID ===================== */
 export const getProductionLogById = async (id) => {
   try {
-    const response = await fetch(`${BASE_URL}/api/production-logs/${id}`);
+    const response = await fetch(`${BASE_URL}/api/production-logs/${id}`, {
+      headers: getAuthHeaders(),
+    });
     if (response.ok) {
-      const data = await response.json();
-      return data;
+      return await response.json();
     }
   } catch (error) {
-    console.log('API call failed:', error);
+    console.log("API call failed:", error);
     return null;
   }
 };
 
+/* ===================== CREATE PRODUCTION ===================== */
 export const createProduction = async (productionData) => {
   try {
     console.log("Payload being sent:", productionData);
-    console.log("Headers:", getAuthHeaders());
 
     const response = await fetch(`${BASE_URL}/api/storekeeper/production`, {
       method: "POST",
       headers: getAuthHeaders(),
-      body: JSON.stringify(productionData), // FIXED
+      body: JSON.stringify(productionData), // must be { items: [...] }
     });
-
-    console.log("Response object:", response);
 
     const data = await response.json();
 
@@ -62,35 +67,34 @@ export const createProduction = async (productionData) => {
   }
 };
 
+/* ===================== UPDATE PRODUCTION LOG ===================== */
 export const updateProductionLog = async (id, productionLogData) => {
   try {
     const response = await fetch(`${BASE_URL}/api/production-logs/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productionLogData })
+      method: "PATCH",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(productionLogData), // FIXED
     });
-    console.log("this is the response")
-    console.log(response)
+
     if (response.ok) {
-      const data = await response.json();
-      return data;
+      return await response.json();
     }
   } catch (error) {
-    console.log('API call failed:', error);
+    console.log("API call failed:", error);
     return null;
   }
 };
 
+/* ===================== DELETE PRODUCTION LOG ===================== */
 export const deleteProductionLog = async (id) => {
   try {
     const response = await fetch(`${BASE_URL}/api/production-logs/${id}`, {
-      method: 'DELETE'
+      method: "DELETE",
+      headers: getAuthHeaders(),
     });
-    if (response.ok) {
-      return true;
-    }
+    return response.ok;
   } catch (error) {
-    console.log('API call failed:', error);
+    console.log("API call failed:", error);
     return false;
   }
 };

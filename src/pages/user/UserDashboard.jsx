@@ -5,7 +5,7 @@ import {
   getMySales,
 } from "../../utils/sales.util"
 import { getAllProducts } from "../../utils/product.util";
-import LowStockAlerts from "./Stock/LowStockAlerts";
+import LowStockAlerts from "./Consumables/LowStockAlerts";
 
 const UserDashboard = () => {
   const [loading, setLoading] = useState(true);

@@ -17,7 +17,7 @@ const UserSidebar = ({ sidebarOpen, setSidebarOpen }) => {
     { name: "Dashboard", path: "/user/dashboard", icon: <LayoutDashboard size={18} /> },
     { name: "Sales", path: "/user/sales", icon: <ShoppingCart size={18} /> },
     { name: "Products", path: "/user/products", icon: <Package size={18} /> },
-    { name: "Stock", path: "/user/stock", icon: <Boxes size={18} /> },
+    { name: "Consumables", path: "/user/consumables", icon: <Boxes size={18} /> },
     { name: "Reports", path: "/user/reports", icon: <BarChart3 size={18} /> },
     { name: "Customers", path: "/user/customers", icon: <Users size={18} /> },
     { name: "Day Closing", path: "/user/day-closing", icon: <CalendarCheck size={18} /> },
