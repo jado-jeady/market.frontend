@@ -50,7 +50,7 @@ const StorekeeperSidebar = () => {
   ];
 
   return (
-    <div className="w-40 bg-white text-white min-h-screen fixed left-0 top-0 shadow-xl">
+    <div className="w-40 pt-9 bg-white text-white min-h-screen fixed left-0 top-0 shadow-xl">
       {/* Logo */}
       <div className="p-2 border-b border-gray-200">
         <div className="flex items-center space-x-3">
@@ -59,7 +59,7 @@ const StorekeeperSidebar = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
             </svg>
           </div>
-          <div>
+          <div className="flex flex-col ">
             <h2 className="text-lg text-red-700 font-bold">Marketplace</h2>
             <p className="text-xs text-orange-800">Storekeeper</p>
           </div>

@@ -1,7 +1,4 @@
-//import * as XLSX from 'xlsx';
 const API_URL = import.meta.env.VITE_API_URL;
-
-
 // Get token safely
 const getAuthHeaders = () => {
   const authData = JSON.parse(localStorage.getItem("user"));
@@ -51,22 +48,7 @@ export async function createProduct(product) {
    GET ALL PRODUCTS
 ============================ */
 
-/*
-export const getAllSales = async (filters = {}) => {
-  try {
-    const params = buildQueryParams(filters);
-    const res = await fetch(`${SALES_BASE}?${params}`, {
-      headers: getAuthHeaders()
-    });
 
-    return await handleResponse(res);
-  } catch (error) {
-    console.error('Get all sales error:', error);
-    return { success: false, message: 'Failed to fetch sales' };
-  }
-}; 
-
-*/ 
 export async function getAllProducts(filters = {}) {
   try {
     const params = buildQueryParams(filters);
@@ -236,16 +218,3 @@ export async function getStockAdjustments() {
 }
 
 
-// export to excel 
-
-// export const exportToExcel = (data, fileName = 'Sales_Report') => {
-//   // 1. Create a new workbook and worksheet
-//   const worksheet = XLSX.utils.json_to_sheet(data);
-//   const workbook = XLSX.utils.book_new();
-  
-//   // 2. Append the worksheet to the workbook
-//   XLSX.utils.book_append_sheet(workbook, worksheet, "Sales");
-
-//   // 3. Generate buffer and trigger download
-//   XLSX.writeFile(workbook, `${fileName}.xlsx`);
-// };
