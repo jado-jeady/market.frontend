@@ -49,7 +49,7 @@ useEffect(() => {
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">All Productions</h1>
+          <h3 className="text-xl font-bold text-gray-900">All Productions</h3>
           <p className="text-gray-600 mt-1">View all production records</p>
         </div>
         <select
@@ -110,14 +110,37 @@ useEffect(() => {
           {new Date(prod.createdAt).toLocaleString()}
         </td>
         <td className="px-6 py-4">
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-              prod.status
-            )}`}
-          >
-            {prod.status}
-          </span>
-        </td>
+  <span
+    className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+      prod.status
+    )}`}
+  >
+    {prod.status}
+  </span>
+
+  {prod.status === "APPROVED" && (
+    <div className="mt-1">
+      <button
+        onClick={() => setSelectedProduction(prod)}
+        className="text-green-600 hover:text-green-700 text-xs font-medium"
+      >
+        View Approval Info
+      </button>
+    </div>
+  )}
+
+  {prod.status === "REJECTED" && (
+    <div className="mt-1">
+      <button
+        onClick={() => setSelectedProduction(prod)}
+        className="text-red-600 hover:text-red-700 text-xs font-medium"
+      >
+        View Rejection Info
+      </button>
+    </div>
+  )}
+</td>
+
         <td className="px-6 py-4">
           <button
             onClick={() => setSelectedProduction(prod)}
@@ -132,58 +155,63 @@ useEffect(() => {
 </tbody>
         </table>
       </div>
-
-      {/* Modal */}
+      {/* Approval / Rejection Modal */}
       {selectedProduction && (
-        <div className="fixed inset-0 bg-black/50 bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">
-              Production Details (Batch-{selectedProduction.id})
-            </h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Status:{" "}
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                  selectedProduction.status
-                )}`}
-              >
-                {selectedProduction.status}
-              </span>
-            </p>
+  <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+      <h2 className="text-xl font-bold mb-4 text-gray-900">
+        {selectedProduction.status === "APPROVED"
+          ? `Approval Details (Batch-${selectedProduction.id})`
+          : `Rejection Details (Batch-${selectedProduction.id})`}
+      </h2>
 
-            <table className="w-full text-gray-700 text-sm mb-4">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-4 py-2 text-left">Item</th>
-                  <th className="px-4 py-2 text-center">Quantity</th>
-                  <th className="px-4 py-2 text-center">Production Time</th>
-                  <th className="px-4 py-2 text-left">Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-  {selectedProduction.items?.map((item, idx) => (
-    <tr key={idx} className="border-t ">
-      <td className="px-4 py-2">{item.product?.name}</td>
-      <td className="px-4 py-2 text-center">{item.quantity}</td>
-      <td className="px-4 py-2 text-center">
-        {item.production_time || "—"}
-      </td>
-      <td className="px-4 py-2">{item.notes || "—"}</td>
-    </tr>
-  ))}
-</tbody>
-
-            </table>
-
-            <button
-              onClick={() => setSelectedProduction(null)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
+      {selectedProduction.status === "APPROVED" ? (
+        <>
+          <p className="text-sm text-gray-600 mb-4">
+            Note:{" "}
+            <span className="text-green-600 font-medium">
+              {selectedProduction.approval_note || "No note provided"}
+            </span>
+          </p>
+          <p className="text-sm text-gray-600 mb-4">
+            Approved By: {selectedProduction.approvedBy?.full_name || "—"}
+          </p>
+          <p className="text-sm text-gray-600 mb-4">
+            Date:{" "}
+            {selectedProduction.approved_at
+              ? new Date(selectedProduction.approved_at).toLocaleString()
+              : "—"}
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="text-sm text-gray-600 mb-4">
+            Reason:{" "}
+            <span className="text-red-600 font-medium">
+              {selectedProduction.rejection_reason || "No reason provided"}
+            </span>
+          </p>
+          <p className="text-sm text-gray-600 mb-4">
+            Rejected By: {selectedProduction.rejectedBy?.full_name || "—"}
+          </p>
+          <p className="text-sm text-gray-600 mb-4">
+            Date:{" "}
+            {selectedProduction.rejected_at
+              ? new Date(selectedProduction.rejected_at).toLocaleString()
+              : "—"}
+          </p>
+        </>
       )}
+
+      <button
+        onClick={() => setSelectedProduction(null)}
+        className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 };

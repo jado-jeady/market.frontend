@@ -38,7 +38,7 @@ const UserDashboard = () => {
         /* ================= MY SALES (RECENT) ================= */
         const recentSalesRes = await getMySales({
           page: 1,
-          limit: 100000000,
+          limit: 5,
         });
 
         const mySalesList = recentSalesRes?.data || [];

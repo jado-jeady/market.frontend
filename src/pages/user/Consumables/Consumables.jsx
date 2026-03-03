@@ -5,8 +5,8 @@ const Consumables = () => {
   const subMenuItems = [
     
     { name: 'View All', path: '/user/consumables/all'},
-    { name: 'Approved', path: '/user/consumables/edit' },
-    { name: 'Pending Approval', path: '/user/consumables/add'}
+    { name: 'Approved', path: '/user/consumables/approved' },
+    { name: 'Pending Approval', path: '/user/consumables/pending'}
   ];
 
   return (

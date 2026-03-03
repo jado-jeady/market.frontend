@@ -11,20 +11,22 @@ const getAuthHeaders = () => {
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 /* ===================== GET PRODUCTION LOGS ===================== */
-export const getAllProductions= async () => {
+export const getAllProductions = async (page = 1, limit = 20) => {
   try {
-    const response = await fetch(`${BASE_URL}/api/storekeeper/productions`, {
-      method: "GET",
-      headers: getAuthHeaders(),
-    });
-    console.log(response)
+    const response = await fetch(
+      `${BASE_URL}/api/storekeeper/productions?page=${page}&limit=${limit}`,
+      {
+        method: "GET",
+        headers: getAuthHeaders(),
+      }
+    );
 
     if (response.ok) {
-      return await response.json();
+      return await response.json(); // { success, total, page, limit, data }
     }
   } catch (error) {
     console.log("API call failed:", error);
-    return [];
+    return { success: false, data: [] };
   }
 };
 
@@ -96,5 +98,48 @@ export const deleteProductionLog = async (id) => {
   } catch (error) {
     console.log("API call failed:", error);
     return false;
+  }
+};
+
+export const approveProduction = async (id, approvalNote) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/storekeeper/production/${id}/approve`, {
+      method: "PATCH",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ approval_note: approvalNote }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to approve production");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("API call failed:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+// rejectProduction
+export const rejectProduction = async (id, rejectionReason) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/storekeeper/production/${id}/reject`, {
+      method: "PATCH",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ rejection_reason: rejectionReason }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to reject production");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("API call failed:", error);
+    return { success: false, message: error.message };
   }
 };

@@ -26,8 +26,10 @@ import SearchCustomer from "../pages/user/SearchCustomer";
 import LoyaltyPoints from "../pages/user/LoyaltyPoints";
 import UserManagement from "../pages/user/Settings/Management";
 import Stock from "../pages/admin/Stock/Stock";
-import CashierApproval from "../pages/user/Consumables/CashierApproval";
+import CashierApproval from "../pages/user/Consumables/PendingApproval";
 import Consumables from "../pages/user/Consumables/Consumables";
+import AllApprovals from "../pages/user/Consumables/AllApprovals";
+import Approved from "../pages/user/Consumables/Aproved";
 
 export const UserRoutes = (
   <Route
@@ -48,7 +50,15 @@ export const UserRoutes = (
       <Route path="stake" element={<SalesStake />} />
     </Route>
     <Route path="products" element={<ProductList />} />
-    <Route path="consumables" element={<Consumables />} />
+
+    <Route path="consumables" element={<Consumables />}>
+      <Route index element={<AllApprovals />} />
+      <Route path="all" element={<AllApprovals />} />
+      <Route path="pending" element={<CashierApproval />} />
+      <Route path="approved" element={<Approved />} />
+
+    
+    </Route>
     <Route path="reports" element={<UserReport />}>
       <Route index element={<DailySales />} />
       <Route path="daily-sales" element={<DailySales />} />
