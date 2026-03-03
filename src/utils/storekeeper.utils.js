@@ -143,3 +143,18 @@ export const rejectProduction = async (id, rejectionReason) => {
     return { success: false, message: error.message };
   }
 };
+
+export const abortProduction = async (id) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/storekeeper/production/${id}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to abort production");
+    return data;
+  } catch (error) {
+    console.error("Abort API failed:", error);
+    return { success: false, message: error.message };
+  }
+};

@@ -1,47 +1,103 @@
+import { useState, useEffect } from "react";
+import { getAllProductions } from "../../../utils/storekeeper.utils";
+
 const Approved = () => {
+  const [approvals, setApprovals] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchApprovals = async () => {
+      try {
+        const data = await getAllProductions();
+        // Only approved productions
+        setApprovals((data.data || []).filter((prod) => prod.status === "APPROVED"));
+      } catch (error) {
+        console.error("Error fetching approvals:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApprovals();
+  }, []);
+
+  const getStatusColor = (status) => {
+    switch (status?.toUpperCase()) {
+      case "APPROVED":
+        return "bg-green-100 text-green-700";
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-700";
+      case "REJECTED":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Approved Productions</h1>
-        <p className="text-gray-600 mt-1">Productions approved and available for sale</p>
-      </div>
+      <h3 className="text-xl font-bold text-gray-900 mb-6">All Approved Productions</h3>
 
-      <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
-        <div className="flex">
-          <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p className="text-sm text-green-700">
-            These productions have been approved by the cashier and are now available in the system.
-          </p>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <table className="w-full text-gray-600">
+      <div className="bg-white rounded-lg shadow-md text-gray-700 overflow-x-auto">
+        <table className="w-full text-sm">
           <thead className="bg-gradient-to-r from-green-500 to-green-600 text-white">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Batch ID</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Items</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Quantity</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Approved By</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Approved At</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Remaining</th>
+              <th className="px-6 py-3 text-left font-semibold">Batch ID</th>
+              <th className="px-6 py-3 text-left font-semibold">Items</th>
+              <th className="px-6 py-3 text-left font-semibold">Total Quantity</th>
+              <th className="px-6 py-3 text-left font-semibold">Date Approved</th>
+              <th className="px-6 py-3 text-left font-semibold">Approved By</th>
+              <th className="px-6 py-3 text-left font-semibold">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {[...Array(8)].map((_, i) => (
-              <tr key={i} className="hover:bg-gray-50">
-                <td className="px-6 py-4 text-sm font-medium">BATCH-{1000 + i}</td>
-                <td className="px-6 py-4 text-sm">Sambusa, Mandazi</td>
-                <td className="px-6 py-4 text-sm font-semibold">{Math.floor(Math.random() * 100 + 50)}</td>
-                <td className="px-6 py-4 text-sm">Cashier {i + 1}</td>
-                <td className="px-6 py-4 text-sm">Today 09:{String(i * 5).padStart(2, '0')}</td>
-                <td className="px-6 py-4 text-sm">
-                  <span className="font-semibold text-green-600">{Math.floor(Math.random() * 50)}%</span>
+            {loading ? (
+              <tr>
+                <td colSpan="6" className="text-center py-6 text-gray-500">
+                  Loading approved productions...
                 </td>
               </tr>
-            ))}
+            ) : approvals.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="text-center py-6 text-gray-500">
+                  No approved productions found
+                </td>
+              </tr>
+            ) : (
+              approvals.map((prod) => (
+                <tr key={prod.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 font-medium">BATCH-{prod.id}</td>
+                  <td className="px-6 py-4">
+                    {prod.items
+                      ?.map((item) => `${item.product?.name} (${item.quantity})`)
+                      .join(", ") || "—"}
+                  </td>
+                  <td className="px-6 py-4 font-semibold">
+                    {prod.items?.reduce(
+                      (sum, item) => sum + Number(item.quantity || 0),
+                      0
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    {prod.approved_at
+                      ? new Date(prod.approved_at).toLocaleString()
+                      : "—"}
+                  </td>
+                  <td className="px-6 py-4">
+                    {prod.approvedBy?.full_name || "—"}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                        prod.status
+                      )}`}
+                    >
+                      {prod.status}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
