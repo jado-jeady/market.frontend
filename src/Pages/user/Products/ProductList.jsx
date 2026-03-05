@@ -189,7 +189,7 @@ if (stockLevel !== "all") {
     <p className="text-gray-500">No products match your filters</p>
   </div>
 ) : (
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
     {paginatedProducts.map((p) => {
       let stockStatus, stockColor;
 
@@ -238,7 +238,7 @@ if (p.stock_quantity === 0) {
                 <span>Price</span>
                 <span className="font-semibold">{p.selling_price} RWF</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex text-xs justify-between">
                 <span className="bg-gray-300 rounded-sm p-1">Stock: <span className="pl-2">{p.stock_quantity}<br/></span></span>
                 
                 
