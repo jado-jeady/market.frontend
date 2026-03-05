@@ -22,7 +22,7 @@ const NewSale = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 const [isConfirmed, setIsConfirmed] = useState(false);
 const [invoiceSnapshot, setInvoiceSnapshot] = useState(null);
-const [isShiftopen, setIsShiftopen] = useState(false);
+const [isShiftOpen, setisShiftOpen] = useState(false);
 
 
  
@@ -53,15 +53,26 @@ const [isShiftopen, setIsShiftopen] = useState(false);
 
 
 
+
+ 
+
   /* ===================== FETCH PRODUCTS ===================== */
   useEffect(() => {
+
     const fetchProducts = async () => {
       try {
+        const shift = await getCurrentShift();
+        if (shift?.isShiftOpen) {setisShiftOpen(shift?.isShiftOpen);
+
         const res = await getAllProducts({limit:100000000});
         if (res?.success) {
           setProducts(res.data);
+          
         } else {
+          console.log("Failed to load products");
           toast.error('Failed to load products');
+        }
+          
         }
       } catch (err) {
         toast.error('Error loading products');
@@ -72,7 +83,8 @@ const [isShiftopen, setIsShiftopen] = useState(false);
     };
 
     fetchProducts();
-  }, []);
+  }, [isShiftOpen]);
+
 
   useEffect(() => {
   if (!customerQuery.trim()) {
@@ -243,7 +255,6 @@ if (!invoiceSnapshot || invoiceSnapshot.items.length === 0) {
     }
 
     // 🚫 DO NOT CLEAR CART HERE
-
   } catch (error) {
     toast.error(error.message || "Error processing sale");
     setProcessingSale("Confirm Payment");
@@ -290,46 +301,49 @@ if (!invoiceSnapshot || invoiceSnapshot.items.length === 0) {
 
           {/* PRODUCTS GRID */}
 
-          
           {loadingProducts ? (
-            <div className="text-center text-gray-500">Loading products...</div>
-          ) : (
-            
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              
-              {filteredProducts.map((product) => (
-            
-                <button
-                  key={product.id}
-                  onClick={() => addToCart(product)}
-                  disabled={product.stock_quantity === 0}
-                  className={`bg-white rounded-lg shadow-md transition p-4 text-left border-2
-                    ${product.stock_quantity === 0
-                      ? 'opacity-40 cursor-not-allowed'
-                      : 'hover:shadow-lg hover:border-gray-500'
-                    }`}
-                >
-
-                  <div className="w-full h-15 bg-gradient-to-br from-gray-100 to-secondary-100 rounded-lg mb-0 flex items-center justify-center">
-                    <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                  </div>
-
-                  <h3 className="font-semibold text-xs text-gray-900 mb-1">
-                    {product.name}
-                  </h3>
-                  <p className="text-xs font-bold text-gray-600">
-                    {product.selling_price} frw
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Stock: {product.stock_quantity}
-                  </p>
-                </button>
-              ))}
+  <div className="text-center text-gray-500">Loading products...</div>
+) : (
+  <>
+    {isShiftOpen ? (
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {filteredProducts.map((product) => (
+          <button
+            key={product.id}
+            onClick={() => addToCart(product)}
+            disabled={product.stock_quantity === 0}
+            className={`bg-white rounded-lg shadow-md transition p-4 text-left border-2
+              ${product.stock_quantity === 0
+                ? 'opacity-40 cursor-not-allowed'
+                : 'hover:shadow-lg hover:border-gray-500'
+              }`}
+          >
+            <div className="w-full h-15 bg-gradient-to-br from-gray-100 to-secondary-100 rounded-lg mb-0 flex items-center justify-center">
+              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
             </div>
-          )}
+
+            <h3 className="font-semibold text-xs text-gray-900 mb-1">
+              {product.name}
+            </h3>
+            <p className="text-xs font-bold text-gray-600">
+              {product.selling_price} frw
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Stock: {product.stock_quantity}
+            </p>
+          </button>
+        ))}
+      </div>
+    ) : (
+      <div className="text-center text-red-500 font-semibold mt-6">
+        Please open a shift to start selling products.
+      </div>
+    )}
+  </>
+)}
         </div>
 
         {/* ================= CART SECTION ================= */}
