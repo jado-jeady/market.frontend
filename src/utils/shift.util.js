@@ -1,5 +1,4 @@
 const BASE_URL = import.meta.env.VITE_API_URL;
-const SHIFT_BASE = `${BASE_URL}/api/shift`;
 
 const getAuthHeaders = () => {
   const authData = JSON.parse(localStorage.getItem("user"));
@@ -17,59 +16,68 @@ const handleResponse = async (res) => {
   return data;
 };
 
-/* GET ACTIVE SHIFT */
-export const getActiveShift = async () => {
+/* ================= GET CURRENT SHIFT ================= */
+export const getCurrentShift = async () => {
   try {
-    const res = await fetch(`${SHIFT_BASE}/current`, {
+    const res = await fetch(`${BASE_URL}/api/shift/current`, {
       headers: getAuthHeaders(),
     });
-
     return await handleResponse(res);
-  } catch {
-    return { success: false };
+  } catch (error) {
+    return { success: false, message: error?.message || "Failed to fetch current shift" };
   }
 };
 
-/* OPEN SHIFT */
+/* ================= OPEN SHIFT ================= */
 export const openShift = async (payload) => {
   try {
-    const res = await fetch(`${SHIFT_BASE}/open`, {
+    const res = await fetch(`${BASE_URL}/api/shift/open`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify(payload),
     });
-
     return await handleResponse(res);
   } catch (error) {
-    return { success: false, message: error?.message };
+    return { success: false, message: error?.message || "Failed to open shift" };
   }
 };
 
-/* CLOSE SHIFT */
+/* ================= CLOSE SHIFT ================= */
 export const closeShift = async (payload) => {
   try {
-    const res = await fetch(`${SHIFT_BASE}/close`, {
+    const res = await fetch(`${BASE_URL}/api/shift/close`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify(payload),
     });
-
     return await handleResponse(res);
   } catch (error) {
-    return { success: false, message: error?.message };
+    return { success: false, message: error?.message || "Failed to close shift" };
   }
 };
 
-export const getAllShifts = async () => {
+/* ================= ABORT SHIFT ================= */
+export const abortShift = async (payload) => {
   try {
-    console.log(getAuthHeaders())
-    const res = await fetch(`${BASE_URL}/api/shift`, {
+    const res = await fetch(`${BASE_URL}/api/shift/abort`, {
+      method: "DELETE",
       headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
     });
-
-
     return await handleResponse(res);
   } catch (error) {
-    return { success: false,message:error};
+    return { success: false, message: error?.message || "Failed to abort shift" };
+  }
+};
+
+/* ================= GET ALL SHIFTS (ADMIN) ================= */
+export const getAllShifts = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/shifts`, {
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    return { success: false, message: error?.message || "Failed to fetch shifts" };
   }
 };

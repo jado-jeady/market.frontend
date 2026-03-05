@@ -3,7 +3,7 @@ import ProtectedRoute from "../components/ProtectedRoutes";
 import UserLayout from "../components/layouts/UserLayout";
 
 // User Pages
-import UserDashboard from "../Pages/user/UserDashboard";
+import UserDashboard from "../pages/user/UserDashboard";
 import UserSales from "../pages/user/Sales/UserSales";
 import NewSales from "../pages/user/Sales/NewSale";
 import AllSales from "../pages/user/Sales/AllSales";
