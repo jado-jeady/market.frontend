@@ -22,6 +22,7 @@ export const getCurrentShift = async () => {
     const res = await fetch(`${BASE_URL}/api/shift/current`, {
       headers: getAuthHeaders(),
     });
+    console.log(res);
     return await handleResponse(res);
   } catch (error) {
     return { success: false, message: error?.message || "Failed to fetch current shift" };
@@ -79,5 +80,31 @@ export const getAllShifts = async () => {
     return await handleResponse(res);
   } catch (error) {
     return { success: false, message: error?.message || "Failed to fetch shifts" };
+  }
+};
+
+/* ================= GET SHIFT BY ID (ADMIN) ================= */
+export const getShiftById = async (id) => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/shifts/${id}`, {
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    return { success: false, message: error?.message || "Failed to fetch shift" };
+  }
+};
+
+/* ================= CREATE SHIFT (ADMIN) ================= */
+export const createShift = async (payload) => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/shift`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    return { success: false, message: error?.message || "Failed to create shift" };
   }
 };

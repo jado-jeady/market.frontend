@@ -1,34 +1,75 @@
-import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, use } from "react";
+import { useAuth } from "../context/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
+import { getCurrentShift, closeShift, openShift } from "../utils/shift.util";
 
 const Header = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [shift, setShift] = useState(null);
 
-  const storedUser = localStorage.getItem('user');
+  const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser)?.data?.user : null;
   const role = user?.role;
-  console.log(role);
+  // Profile & Settings paths by role
+  const profilePath =
+    role === "Admin"
+      ? "/admin/profile"
+      : role === "Storekeeper"
+      ? "/storekeeper/profile"
+      : "/cashier/profile";
 
-  const profilePath = role === 'Admin'
-    ? '/admin/profile'
-    : '/user/profile';
+  const settingsPath =
+    role === "Admin"
+      ? "/admin/settings"
+      : role === "Storekeeper"
+      ? "/storekeeper/settings"
+      : "/cashier/settings";
 
-  const settingsPath = role === 'Admin'
-    ? '/admin/settings'
-    : '/user/settings';
+  // Fetch current shift for cashier
+  useEffect(() => {
+    console.log(role);
+    if (role === "Cashier") {
+      (async () => {
+        const response = await getCurrentShift();
+        if (response.success) setShift(response.data);
+        console.log('response.data');
+        console.log(response);
+      })();
+    }
+  }, [role]);
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
+  };
+
+  const handleOpenShift = async () => {
+    const start_time = new Date().toISOString();
+    const opening_balance = prompt("Enter opening balance:");
+    const response = await openShift({ opening_balance, start_time,shop_name:"Tyag_market",user });
+    if (response.success) {
+      setShift(response.data);
+    } else {
+      alert(response.message);
+    }
+  };
+
+  const handleCloseShift = async () => {
+    const closingBalance = prompt("Enter closing balance:");
+    const response = await closeShift({ shiftId: shift.id, closingBalance });
+    if (response.success) {
+      alert("Shift closed successfully!");
+      setShift(null);
+    } else {
+      alert(response.message);
+    }
   };
 
   return (
-    <header className="bg-white left-0 border-b border-gray-200 shadow-sm max-h-16 fixed top-0 right-0 lg:left-40 z-10">
+    <header className="bg-white border-b border-gray-200 shadow-sm max-h-16 fixed top-0 right-0 left-40 z-10">
       <div className="flex items-center justify-between px-6 py-1">
-
         {/* Search Bar */}
         <div className="flex-1 max-w-xl pl-8">
           <div className="relative">
@@ -42,21 +83,39 @@ const Header = () => {
 
         {/* Right Section */}
         <div className="flex items-center space-x-4 ml-6">
-
-          {/* Open Shift (Only for Users) */}
-          {role !== 'admin' && (
-            <Link
-              to="/user/open-shift"
-              className="relative px-3 py-2 text-sm text-gray-600 bg-gray-100 hover:bg-gray-300 rounded-lg transition"
-            >
-              Open Shift
-            </Link>
+          {/* Shift Button (Cashier only) */}
+          {role === "Cashier" && (
+            <>
+              {!shift ? (
+                <button
+                  onClick={handleOpenShift}
+                  className="px-3 py-2 text-sm text-gray-600 bg-gray-100 hover:bg-gray-300 rounded-lg transition"
+                >
+                  Open Shift
+                </button>
+              ) : (
+                <button
+                  onClick={handleCloseShift}
+                  className="px-3 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg transition"
+                >
+                  Close Shift
+                </button>
+              )}
+            </>
           )}
 
           {/* Notifications */}
           <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
               />
             </svg>
@@ -70,20 +129,25 @@ const Header = () => {
             >
               <div className="text-left hidden md:block">
                 <p className="text-sm font-medium text-gray-900">
-                  {role || 'Admin'}
+                  {role || "User"}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {user?.full_name || 'Administrator'}
+                  {user?.full_name || "User"}
                 </p>
               </div>
 
               <svg
-                className={`w-4 h-4 text-gray-600 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+                className={`w-4 h-4 text-gray-600 transition-transform ${
+                  dropdownOpen ? "rotate-180" : ""
+                }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
                   d="M19 9l-7 7-7-7"
                 />
               </svg>
@@ -91,7 +155,6 @@ const Header = () => {
 
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
-
                 <Link
                   to={profilePath}
                   className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 transition"
@@ -114,7 +177,6 @@ const Header = () => {
                 >
                   Logout
                 </button>
-
               </div>
             )}
           </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { getAllProducts } from '../../../utils/product.util';
 import { createSale } from '../../../utils/sales.util';
+import { getCurrentShift } from '../../../utils/shift.util';
 
 
 
@@ -21,6 +22,7 @@ const NewSale = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 const [isConfirmed, setIsConfirmed] = useState(false);
 const [invoiceSnapshot, setInvoiceSnapshot] = useState(null);
+const [isShiftopen, setIsShiftopen] = useState(false);
 
 
  
@@ -194,6 +196,9 @@ const confirmSale = async () => {
   if (isProcessing || isConfirmed) return;
 
   try {
+    const shift = await getCurrentShift();
+    console.log('that is a shift id')
+    console.log(shift?.data?.id);
     setIsProcessing(true);
     setProcessingSale("Confirming...");
 
@@ -201,6 +206,7 @@ const confirmSale = async () => {
       customer_id: selectedCustomer?.id || null,
       customer_name: customerQuery || "Walk-in",
       payment_method: paymentMethod,
+      shift_id: shift?.data?.id,
       invoiceNumber: invoiceNumber,
       items: invoiceSnapshot.items.map((item) => ({
         product_id: item.id,
@@ -248,15 +254,13 @@ if (!invoiceSnapshot || invoiceSnapshot.items.length === 0) {
 
   /* ===================== FILTERED PRODUCTS ===================== */
   const filteredProducts = products.filter(product =>
-    `${product.name} ${product.barcode}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+    `${product.name} ${product.barcode}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-
+        
         {/* ================= PRODUCTS SECTION ================= */}
         <div className="mt-2 col-span-2 p-2">
           <div className="mb-3">
@@ -285,6 +289,8 @@ if (!invoiceSnapshot || invoiceSnapshot.items.length === 0) {
          
 
           {/* PRODUCTS GRID */}
+
+          
           {loadingProducts ? (
             <div className="text-center text-gray-500">Loading products...</div>
           ) : (
