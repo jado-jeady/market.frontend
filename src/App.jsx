@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import Login from "./Pages/Login";
+import Login from "./pages/Login";
 import { AdminRoutes } from "./routes/AdminRoutes";
 import { UserRoutes } from "./routes/UserRoutes";
 import { StorekeeperRoutes } from "./routes/StoreKeeperRoutes";
