@@ -8,6 +8,10 @@ const Header = () => {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [shift, setShift] = useState(null);
+  const [isOpenShiftModal, setIsOpenShiftModal] = useState(false);
+  const [openingBalance, setOpeningBalance] = useState("");
+  const [shiftNote, setShiftNote] = useState("");
+
 
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser)?.data?.user : null;
@@ -88,11 +92,12 @@ const Header = () => {
             <>
               {!shift ? (
                 <button
-                  onClick={handleOpenShift}
-                  className="px-3 py-2 text-sm text-gray-600 bg-gray-100 hover:bg-gray-300 rounded-lg transition"
+                onClick={() => setIsOpenShiftModal(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
-                  Open Shift
-                </button>
+                  Open Shif
+                  </button>
+
               ) : (
                 <button
                   onClick={handleCloseShift}
@@ -182,6 +187,67 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {isOpenShiftModal && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-50">
+    <div className="bg-white rounded-lg text-gray-700 shadow-lg p-6 w-96">
+      <h2 className="text-lg font-bold mb-4">Open A Shift</h2>
+
+      <label className="block mb-2 text-xs font-medium text-gray-700">
+        Opening Balance
+      </label>
+      <input
+        type="number"
+        value={openingBalance}
+        onChange={(e) => setOpeningBalance(e.target.value)}
+        className="w-full text-xs border text-gray-600 rounded px-3 py-2 mb-4"
+        placeholder="Enter starting amount"
+      />
+
+      <label className="block mb-2 text-xs font-medium text-gray-700">
+        Shift Note
+      </label>
+      <textarea
+        value={shiftNote}
+        onChange={(e) => setShiftNote(e.target.value)}
+        className="w-full border text-xs text-gray-600 rounded px-1 py-2 mb-4"
+        placeholder="Enter shift note"
+      />
+
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setIsOpenShiftModal(false)}
+          className="px-2 py-1 bg-gray-300 text-xs rounded hover:bg-gray-400"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={async () => {
+            const start_time = new Date().toISOString();
+            const response = await openShift({
+              opening_balance: openingBalance,
+              start_time,
+              shop_name: "Tyag_market",
+              user,
+              note: shiftNote, // include note if backend supports it
+            });
+            if (response.success) {
+              setShift(response.data);
+              setIsOpenShiftModal(false);
+              setOpeningBalance("");
+              setShiftNote("");
+            } else {
+              alert(response.message);
+            }
+          }}
+          className="px-2 py-2 text-xs font-medium bg-green-600 text-white rounded hover:bg-green-700"
+        >
+          Open Shift
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </header>
   );
 };

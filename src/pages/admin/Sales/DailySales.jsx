@@ -10,17 +10,12 @@ const DailySales = () => {
   const today = new Date().toISOString().slice(0, 10);
 
   /* ===================== FETCH ===================== */
-
-
   useEffect(() => {
     (async () => {
       setLoading(true);
 
-      const salesResponse = await getAllSales({
-        limit: 1000000,
-        page: 1,
-      });
-
+      // Fetch all sales for today (backend filters by date)
+      const salesResponse = await getAllSales({});
       const cashierResponse = await getCashiers();
 
       if (salesResponse?.success) {
@@ -35,20 +30,9 @@ const DailySales = () => {
     })();
   }, []);
 
-  /* ===================== FILTER TODAY ===================== */
-
-  const todaySales = sales.filter(
-    (sale) =>
-      sale.created_at?.slice(0, 10) === today &&
-      sale.status === "COMPLETED"
-  );
-
   /* ===================== GROUP BY CASHIER ===================== */
-
   const cashierSummary = cashiers.map((cashier) => {
-    const cashierSales = todaySales.filter(
-      (sale) => sale.user_id === cashier.id
-    );
+    const cashierSales = sales.filter((sale) => sale.user_id === cashier.id);
 
     const totalAmount = cashierSales.reduce(
       (sum, sale) => sum + Number(sale.subtotal || 0),
@@ -69,7 +53,6 @@ const DailySales = () => {
   );
 
   /* ===================== UI ===================== */
-
   if (loading) {
     return (
       <div className="p-6 flex justify-center">
@@ -96,26 +79,16 @@ const DailySales = () => {
           <thead className="bg-gray-100 text-gray-700">
             <tr>
               <th className="px-4 py-3 text-left">Cashier</th>
-              <th className="px-4 py-3 text-center">
-                Transactions
-              </th>
-              <th className="px-4 py-3 text-right">
-                Total Amount
-              </th>
+              <th className="px-4 py-3 text-center">Transactions</th>
+              <th className="px-4 py-3 text-right">Total Amount</th>
             </tr>
           </thead>
 
           <tbody className="divide-y text-gray-700">
             {cashierSummary.map((cashier) => (
               <tr key={cashier.cashierId} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-medium">
-                  {cashier.name}
-                </td>
-
-                <td className="px-4 py-3 text-center">
-                  {cashier.totalSales}
-                </td>
-
+                <td className="px-4 py-3 font-medium">{cashier.name}</td>
+                <td className="px-4 py-3 text-center">{cashier.totalSales}</td>
                 <td className="px-4 py-3 text-right font-semibold">
                   {cashier.totalAmount.toFixed(2)}
                 </td>
@@ -135,9 +108,7 @@ const DailySales = () => {
           <tfoot>
             <tr className="bg-gray-100 font-bold">
               <td className="px-4 py-3">Grand Total</td>
-              <td className="px-4 py-3 text-center">
-                {todaySales.length}
-              </td>
+              <td className="px-4 py-3 text-center">{sales.length}</td>
               <td className="px-4 py-3 text-right text-green-600">
                 {grandTotal.toFixed(2)}
               </td>

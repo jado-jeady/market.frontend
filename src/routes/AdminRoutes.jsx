@@ -30,6 +30,7 @@ import ReceiptFormatSettings from "../pages/user/Settings/ReceiptFormat";
 import Report from "../pages/admin/Report";
 import ShiftReport from "../pages/admin/ShiftReport";
 import DailySales from "../pages/admin/Sales/DailySales";
+import GetShifts from "../pages/user/Shifts/GetShifts";
 
 export const AdminRoutes = (
   <Route
@@ -72,6 +73,6 @@ export const AdminRoutes = (
       <Route path="receipt" element={<ReceiptFormatSettings />} />
     </Route>
     <Route path="report" element={<Report />} />
-    <Route path="day-closing" element={<ShiftReport />} />
+    <Route path="shifts" element={<GetShifts />} />
   </Route>
 );

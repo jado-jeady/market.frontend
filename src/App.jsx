@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Login from "./Pages/Login";
 import { AdminRoutes } from "./routes/AdminRoutes";
 import { UserRoutes } from "./routes/UserRoutes";
-import { StorekeeperRoutes } from "./routes/StorekeeperRoutes";
+import { StorekeeperRoutes } from "./routes/StoreKeeperRoutes";
 
 function App() {
   return (

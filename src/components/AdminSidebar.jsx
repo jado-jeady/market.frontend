@@ -21,7 +21,7 @@ const AdminSidebar = () => {
     { name: "Products", path: "/admin/products", icon: Package },
     { name: "Stock", path: "/admin/stock", icon: Boxes },
     { name: "Report", path: "/admin/report", icon: BarChart3 },
-    { name: "Day Close", path: "/admin/day-closing", icon: CalendarCheck },
+    { name: "Shifts", path: "/admin/shifts", icon: CalendarCheck },
     { name: "Management", path: "/admin/management", icon: Settings },
   ];
 

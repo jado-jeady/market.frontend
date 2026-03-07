@@ -19,7 +19,7 @@ const getAuthHeaders = () => {
 };
 
 const handleResponse = async (res) => {
-  const data = await res.json();
+  const data = await res.json(); // consume once
   if (!res.ok) throw data;
   return data;
 };
@@ -30,8 +30,6 @@ const buildQueryParams = (filters = {}) =>
       ([_, value]) => value !== undefined && value !== ''
     )
   ).toString();
-
-
 
 /* ===================== GET MY SALES (CASHIER) ===================== */
 export const getMySales = async (filters = {}) => {
@@ -105,20 +103,22 @@ export const createSale = async (payload) => {
  * page, limit, start_date, end_date,
  * payment_method, cashier_id, status
  */
+
 export const getAllSales = async (filters = {}) => {
   try {
     const params = buildQueryParams(filters);
     const res = await fetch(`${SALES_BASE}?${params}`, {
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
     });
 
-    return await handleResponse(res);
+    const data = await handleResponse(res); // ✅ only once
+    console.log("Sales response:", data);   // log the parsed data, not res.json()
+    return data;
   } catch (error) {
-    console.error('Get all sales error:', error);
-    return { success: false, message: 'Failed to fetch sales' };
+    console.error("Get all sales error:", error);
+    return { success: false, message: "Failed to fetch sales" };
   }
 };
-
 /* ===================== GET SALE BY ID ===================== */
 
 export const getSaleById = async (saleId) => {

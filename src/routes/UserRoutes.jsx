@@ -14,8 +14,6 @@ import UserReport from "../pages/user/Reports/UserReports";
 import DailySales from "../pages/user/Sales/DailySales";
 import TransactionHistory from "../pages/user/Reports/TransactionHistory";
 import Expenses from "../pages/user/Expenses";
-import DayClosing from "../pages/user/DayClosing";
-import CloseShift from "../components/Shifts/CloseShift";
 import UserSettings from "../pages/user/Settings/UserSettings";
 import TaxSettings from "../pages/user/Settings/TaxSettings";
 import CurrencySettings from "../pages/user/Settings/CurrencySettings";
@@ -77,9 +75,6 @@ export const UserRoutes = (
       <Route path="loyalty" element={<LoyaltyPoints />} />
     </Route>
     <Route path="expenses" element={<Expenses />} />
-    <Route path="day-closing" element={<DayClosing />} />
-    <Route path="close-shift" element={<CloseShift />} />
-    <Route path="open-shift" element={<CloseShift />} />
     <Route path="management" element={<UserManagement />} />
   </Route>
 );
