@@ -9,7 +9,7 @@ import StoreReports from "../pages/storekeeper/Reports/StoreReports.jsx";
 import Consumables from "../pages/storekeeper/Cosumables/Consumables.jsx";
 import AddConsumables from "../pages/storekeeper/Cosumables/AddConsumables.jsx";
 import ViewAll from "../pages/storekeeper/Cosumables/ViewAll.jsx";
-import PendingApprovals from "../pages/storekeeper/Cosumables/Pendingapprovals.jsx";
+import PendingApprovals from "../pages/storekeeper/Cosumables/PendingApprovals.jsx";
 import Approved from "../pages/storekeeper/Cosumables/Approved.jsx";
 import ProductionLog from "../pages/storekeeper/ProductionLogs.jsx";
 import Inventory from "../pages/storekeeper/Inventory.jsx";
