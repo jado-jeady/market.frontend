@@ -6,7 +6,7 @@ const ShiftReport = () => {
 
   useEffect(() => {
     const loadShifts = async () => {
-      const res = await getAllShifts();
+      const res = await getAllShifts({limit: 1000000});
       console.log(res)
       if (res.success) {
         setShifts(res.data);

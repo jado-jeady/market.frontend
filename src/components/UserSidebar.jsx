@@ -14,21 +14,21 @@ import {
 
 const UserSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const menuItems = [
-    { name: "Dashboard", path: "/user/dashboard", icon: <LayoutDashboard size={18} /> },
-    { name: "Sales", path: "/user/sales", icon: <ShoppingCart size={18} /> },
-    { name: "Products", path: "/user/products", icon: <Package size={18} /> },
-    { name: "Consumables", path: "/user/consumables", icon: <Boxes size={18} /> },
-    { name: "Reports", path: "/user/reports", icon: <BarChart3 size={18} /> },
-    { name: "Customers", path: "/user/customers", icon: <Users size={18} /> },
-    { name: "Day Closing", path: "/user/day-closing", icon: <CalendarCheck size={18} /> },
-    { name: "Settings", path: "/user/settings", icon: <Settings size={18} /> },
+    { name: "Dashboard", path: "/user/dashboard", icon: <LayoutDashboard size={14} /> },
+    { name: "Sales", path: "/user/sales", icon: <ShoppingCart size={14} /> },
+    { name: "Products", path: "/user/products", icon: <Package size={14} /> },
+    { name: "Consumables", path: "/user/consumables", icon: <Boxes size={14} /> },
+    { name: "Reports", path: "/user/reports", icon: <BarChart3 size={14} /> },
+    { name: "Customers", path: "/user/customers", icon: <Users size={14} /> },
+    { name: "Day Closing", path: "/user/day-closing", icon: <CalendarCheck size={14} /> },
+    { name: "Settings", path: "/user/settings", icon: <Settings size={14} /> },
   ];
 
   return (
     <>
       {/* Mobile hamburger toggle (top-left, outside sidebar) */}
       <button
-        className="fixed top-3 left-3 z-50 md:hidden p-2 rounded bg-gray-600 text-white"
+        className="fixed top-2 left-3 z-50 md:hidden p-2 rounded bg-gray-600 text-white"
         onClick={() => setSidebarOpen(true)}
       >
         <Menu size={20} />
@@ -76,7 +76,7 @@ const UserSidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 <NavLink
                   to={item.path}
                   className={({ isActive }) =>
-                    `flex items-center space-x-2 px-4 py-3 text-sm rounded-lg transition-all duration-200 ${
+                    `flex items-center space-x-2 px-2 py-3 text-xs rounded-lg transition-all duration-200 ${
                       isActive
                         ? "bg-gray-100 text-white transform scale-105"
                         : "text-secondary-100 hover:bg-secondary-600 hover:text-white"

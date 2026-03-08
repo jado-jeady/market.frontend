@@ -5,6 +5,7 @@ import {
   getSaleById,
   confirmSaleReturn
 } from '../../../utils/sales.util';
+import { Download, Share2 } from 'lucide-react';
 
 const AllSales = () => {
   /* ===================== STATE ===================== */
@@ -16,7 +17,9 @@ const AllSales = () => {
     orderId: '',
     status: '',
     date: '',
-    cashierId: ''
+    cashierId: '',
+    shiftDate: "",   // new filter
+
   });
 
   const [selectedSale, setSelectedSale] = useState(null);
@@ -26,7 +29,7 @@ const AllSales = () => {
 
   const fetchSales = async () => {
     setLoading(true);
-    const response = await getAllSales({limit:1000000000000000,page:1});
+    const response = await getAllSales({limit:10000000,page:1});
     if (response?.success) {
       setSales(response.data);
     }
@@ -49,19 +52,31 @@ const AllSales = () => {
 
   /* ===================== FILTERING ===================== */
 
-  const filteredSales = sales.filter((sale) => {
-    return (
-      (!filters.orderId ||
-        sale.invoice_number
-          ?.toLowerCase()
-          .includes(filters.orderId.toLowerCase())) &&
-      (!filters.status || sale.status === filters.status) &&
-      (!filters.cashierId ||
-        sale.user_id === Number(filters.cashierId)) &&
-      (!filters.date ||
-        sale.created_at?.slice(0, 10) === filters.date)
-    );
-  });
+ const filteredSales = sales.filter((sale) => {
+  const matchesOrderId =
+    !filters.orderId || sale.invoice_number?.includes(filters.orderId);
+  const matchesStatus =
+    !filters.status || sale.status === filters.status;
+  const matchesCashier =
+    !filters.cashierId || sale.user?.id === Number(filters.cashierId);
+  const matchesDate =
+    !filters.date || sale.created_at?.slice(0, 10) === filters.date;
+  const matchesShiftDate =
+    !filters.shiftDate || sale.shift?.business_date === filters.shiftDate;
+
+  return (
+    matchesOrderId &&
+    matchesStatus &&
+    matchesCashier &&
+    matchesDate &&
+    matchesShiftDate
+  );
+});
+
+const totalCash = filteredSales.reduce(
+  (sum, sale) => sum + Number(sale.subtotal || 0),
+  0
+);
 
   /* ===================== ACTIONS ===================== */
 
@@ -86,7 +101,9 @@ const AllSales = () => {
       orderId: '',
       status: '',
       date: '',
-      cashierId: ''
+      cashierId: '',
+      shiftDate: ""
+
     });
   };
 
@@ -94,9 +111,9 @@ const AllSales = () => {
 
   if (loading) {
     return (
-      <div className="p-6 flex justify-center">
-        <div className="animate-spin h-10 w-10 border-b-2 border-primary-600 rounded-full" />
-      </div>
+      <div className="p-6 flex mt-20 justify-center">
+        <div className="inline-block animate-spin h-6 w-6 border-2 border-blue-600 border-t-transparent rounded-full" />
+                    </div>
     );
   }
 
@@ -110,14 +127,17 @@ const AllSales = () => {
             Manage and track all sales transactions
           </p>
         </div>
-        <button className="px-5 py-0 text-sm bg-green-600 text-white rounded-lg">
-          Export Sales ({filteredSales.length})
+        <button className="px-4 py-2 text-xs bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition-colors">
+            <span>Export All {sales.length > 0 && <span>{sales.length}</span>} Sales</span>
+            <Download name="download" size={16} />
+            
         </button>
+
       </div>
 
       {/* Filters */}
       <div className="bg-white text-gray-500 rounded-lg shadow-md p-2 mb-1">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
           <input
             value={filters.orderId}
             onChange={(e) =>
@@ -139,6 +159,20 @@ const AllSales = () => {
             <option value="RETURNED">Returned</option>
             <option value="CANCELLED">Cancelled</option>
           </select>
+          
+          {/* Shift Filter */}
+          <select
+            value={filters.shiftDate}
+              onChange={(e) => setFilters({ ...filters, shiftDate: e.target.value })}
+              className="h-7 px-2 text-xs border rounded"
+            >
+             <option value="">All Shifts</option>
+             {[...new Set(sales.map((s) => s.shift?.business_date))].map((date) => (
+               <option key={date} value={date}>
+                 {date}
+               </option>
+             ))}
+            </select>
 
           <select
             value={filters.cashierId}
@@ -171,6 +205,17 @@ const AllSales = () => {
             Reset Filters
           </button>
         </div>
+        {/* displaying the result info */}
+       <div className="flex right-0 items-baseline gap-2">
+  <span className="text-sm font-bold text-gray-900">
+    ({filteredSales.length})
+  </span>
+  <p className="text-sm  text-gray-600">
+    {filters.shiftDate
+      ? `Total cash for shift ${filters.shiftDate} Is : ${totalCash.toFixed(2)} frw`
+      : `Total Amount Is : ${totalCash.toFixed(2)}`}
+  </p>
+</div>
       </div>
 
       {/* Table */}

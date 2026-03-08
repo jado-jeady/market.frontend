@@ -8,14 +8,13 @@ const GetShifts = () => {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const response = await getAllShifts({limit:2,page:1});
+      const response = await getAllShifts({limit:1000000,page:1});
       if (response.success) setShifts(response.data);
       setLoading(false);
     })();
   }, []);
 
   const handleCloseShift = async (shiftId) => {
-    const closingBalance = prompt("Enter closing balance:");
     const response = await closeShift({ shiftId, closingBalance });
     if (response.success) {
       alert("Shift closed successfully!");

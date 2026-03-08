@@ -134,6 +134,23 @@ export const getSaleById = async (saleId) => {
   }
 };
 
+/* ===================== Get Sale by shift cashier ===================== */
+export const getSalesByShift = async ({ cashierId, businessDate }) => {
+  try {
+    const params = new URLSearchParams();
+    if (cashierId) params.append("cashierId", cashierId);
+    if (businessDate) params.append("businessDate", businessDate);
+
+    const res = await fetch(`${SALES_BASE}/today-sales?${params}`, {
+      headers: getAuthHeaders(),
+    });
+    
+    return await handleResponse(res);
+  } catch (error) {
+    return { success: false, message: error?.message || "Failed to fetch sales" };
+  }
+};
+
 /* ===================== CONFIRM SALE RETURN (ADMIN) ===================== */
 
 export const confirmSaleReturn = async (saleId) => {

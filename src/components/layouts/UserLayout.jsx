@@ -13,9 +13,9 @@ const UserLayout = () => {
       <UserSidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       {/* Content */}
-      <div className="flex-1 flex flex-col mt-15 bg-white md:ml-30">
+      <div className="flex-1 flex flex-col  mt-13 bg-white md:ml-30">
         <Header />
-        <main className="pt-0 ml-10">
+        <main className="pt-0 ml-0 md:ml-10">
           <Outlet />
         </main>
       </div>

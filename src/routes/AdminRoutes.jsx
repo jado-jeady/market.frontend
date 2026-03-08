@@ -30,7 +30,7 @@ import ReceiptFormatSettings from "../pages/user/Settings/ReceiptFormat";
 import Report from "../pages/admin/Report";
 import ShiftReport from "../pages/admin/ShiftReport";
 import DailySales from "../pages/admin/Sales/DailySales";
-import GetShifts from "../pages/user/Shifts/GetShifts";
+import GetShifts from "../pages/admin/Shifts/GetShifts";
 
 export const AdminRoutes = (
   <Route
@@ -48,6 +48,7 @@ export const AdminRoutes = (
       <Route path="items" element={<ItemSales />} />
       <Route path="claim" element={<SalesClaim />} />
       <Route path="daily" element={<DailySales />} />
+      <Route path="all" element={<AdminAllSales />} />
     </Route>
     <Route path="products" element={<Products />}>
       <Route index element={<AdminProductList />} />

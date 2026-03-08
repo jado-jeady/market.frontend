@@ -3,6 +3,8 @@ import { toast } from 'react-toastify';
 import { getAllProducts } from '../../../utils/product.util';
 import { createSale } from '../../../utils/sales.util';
 import { getCurrentShift } from '../../../utils/shift.util';
+import { useShift } from "../../../context/ShiftContext";
+
 
 
 
@@ -10,6 +12,8 @@ import { getCurrentShift } from '../../../utils/shift.util';
 const NewSale = () => {
   
   const [products, setProducts] = useState([]);
+    const { isShiftOpen, shift } = useShift();
+
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(undefined);
@@ -22,7 +26,6 @@ const NewSale = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 const [isConfirmed, setIsConfirmed] = useState(false);
 const [invoiceSnapshot, setInvoiceSnapshot] = useState(null);
-const [isShiftOpen, setisShiftOpen] = useState(false);
 
 
  
@@ -57,33 +60,31 @@ const [isShiftOpen, setisShiftOpen] = useState(false);
  
 
   /* ===================== FETCH PRODUCTS ===================== */
-  useEffect(() => {
-
-    const fetchProducts = async () => {
-      try {
-        const shift = await getCurrentShift();
-        if (shift?.isShiftOpen) {setisShiftOpen(shift?.isShiftOpen);
-
-        const res = await getAllProducts({limit:100000000});
+ useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      if (isShiftOpen) {
+        const res = await getAllProducts({ limit: 100000000 });
         if (res?.success) {
           setProducts(res.data);
-          
         } else {
-          console.log("Failed to load products");
-          toast.error('Failed to load products');
+          toast.error("Failed to load products");
         }
-          
-        }
-      } catch (err) {
-        toast.error('Error loading products');
-        console.error('Fetch products error:', err);
-      } finally {
-        setLoadingProducts(false);
+      } else {
+        setProducts([]); // clear products if no shift
       }
-    };
+    } catch (err) {
+      toast.error("Error loading products");
+      console.error("Fetch products error:", err);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
 
-    fetchProducts();
-  }, [isShiftOpen]);
+  fetchProducts();
+}, [isShiftOpen]);
+
+
 
 
   useEffect(() => {
@@ -610,8 +611,8 @@ if (!invoiceSnapshot || invoiceSnapshot.items.length === 0) {
   <button
     onClick={confirmSale}   //
     disabled={isProcessing}
-    className="flex-1 py-2 text-sm md:bg-blue-600 md:hover:bg-blue-500 lg:bg-blue-600 lg:hover:bg-blue-500 bg-blue-600 lg:hover:bg-blue-500 text-white rounded hover:bg-blue-700 disabled:opacity-90"
-  >
+     className="flex-1 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded disabled:opacity-50 transition-colors"
+ >
     {processingSale ? processingSale : "Confirm Payment"}
   </button>
 

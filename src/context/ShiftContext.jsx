@@ -1,54 +1,23 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { useAuth } from "./AuthContext";
-
-const ShiftContext = createContext(null);
+// ShiftContext.js
+import { createContext, useContext, useState, useEffect } from "react";
+import { getCurrentShift } from "../utils/shift.util";
+const ShiftContext = createContext();
 
 export const ShiftProvider = ({ children }) => {
-  const { user } = useAuth();
-  // Start with undefined to mean "not yet loaded"
-  const [activeShift, setActiveShift] = useState(undefined);
-  const [loading, setLoading] = useState(true);
+  const [shift, setShift] = useState(null);
+  const isShiftOpen = !!shift;
 
-  const loadShift = async () => {
-    if (!user) {
-      setActiveShift(null);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        import.meta.env.VITE_API_URL + "/api/shift/current",
-        {
-          headers: {
-            Authorization: `Bearer ${user?.data?.token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        setActiveShift(null); // explicitly no shift
-        return;
-      }
-
-      const shift = await response.json();
-      setActiveShift(shift.data || null); // valid object or null
-    } catch (err) {
-      console.error(err);
-      setActiveShift(null);
-    } finally {
-      setLoading(false);
-    }
+  const refreshShift = async () => {
+    const response = await getCurrentShift();
+    setShift(response.success ? response.data : null);
   };
 
   useEffect(() => {
-    loadShift();
-  }, [user]);
+    refreshShift();
+  }, []);
 
   return (
-    <ShiftContext.Provider
-      value={{ activeShift, loading, reloadShift: loadShift }}
-    >
+    <ShiftContext.Provider value={{ shift, isShiftOpen, refreshShift }}>
       {children}
     </ShiftContext.Provider>
   );

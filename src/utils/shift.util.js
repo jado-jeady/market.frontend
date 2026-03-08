@@ -33,7 +33,6 @@ export const getCurrentShift = async () => {
     const res = await fetch(`${BASE_URL}/api/shift/current`, {
       headers: getAuthHeaders(),
     });
-    console.log(res);
     return await handleResponse(res);
   } catch (error) {
     return { success: false, message: error?.message || "Failed to fetch current shift" };
@@ -43,6 +42,9 @@ export const getCurrentShift = async () => {
 /* ================= OPEN SHIFT ================= */
 export const openShift = async (payload) => {
   try {
+    console.log("payload");
+    console.log(payload); 
+
     const res = await fetch(`${BASE_URL}/api/shift/open`, {
       method: "POST",
       headers: getAuthHeaders(),
