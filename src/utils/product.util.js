@@ -1,3 +1,7 @@
+
+
+import * as XLSX from "xlsx";
+
 const API_URL = import.meta.env.VITE_API_URL;
 // Get token safely
 const getAuthHeaders = () => {
@@ -218,3 +222,41 @@ export async function getStockAdjustments() {
 }
 
 
+
+export const exportProductsToExcel = async () => {
+  try {
+    const res = await getAllProducts({ limit: 1000000 });
+
+    if (!res?.success) {
+      throw new Error("Failed to fetch products");
+    }
+
+    const products = res.data || [];
+
+    const data = products.map((p) => ({
+      Name: p.name,
+      Barcode: p.barcode || "N/A",
+      SKU: p.sku || "N/A",
+      Category: p.category?.name || "N/A",
+      Price: Number(p.selling_price || 0),
+      Stock: p.stock_quantity,
+      MinStock: p.min_stock,
+      Status:
+        p.stock_quantity === 0
+          ? "Out of Stock"
+          : p.stock_quantity <= p.min_stock
+          ? "Low Stock"
+          : "In Stock",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
+
+    XLSX.writeFile(workbook, "products.xlsx");
+  } catch (error) {
+    console.error(error);
+  }
+};

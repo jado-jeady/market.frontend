@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAllCategories } from "../../../utils/category.util";
-import { getAllProducts } from "../../../utils/product.util";
+import { exportProductsToExcel, getAllProducts } from "../../../utils/product.util";
 import StockAdjustmentModal from "../Stock/StockAdjustmentModal";
 import EditProductModal from "./EditProduct";
+import { Download } from "lucide-react";
 
 const ITEMS_PER_PAGE = 12; // Increased slightly for larger screens
 
@@ -114,12 +115,22 @@ const AdminiProductList = () => {
           <h2 className="text-xl sm:text-xl lg:text-xl font-bold text-gray-900 tracking-tight">Products</h2>
           <p className="text-xs sm:text-xs lg:text-base text-gray-600">Search, filter & manage inventory</p>
         </div>
+        <div className="space-2 flex">
+          
         <Link
           to="/admin/products/add"
-          className="px-4 py-2 lg:px-6 lg:text-white md:text-white lg:py-3 text-xs lg:text-base text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm transition-all whitespace-nowrap"
+          className="px-2 py-2 lg:px-2 text-white lg:text-white lg:py-2 text-xs lg:text-base text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm transition-all whitespace-nowrap"
         >
           + Add Product
         </Link>
+       <button 
+  onClick={exportProductsToExcel} 
+  className="inline-flex items-center px-4 py-2 ml-5 lg:px-2 lg:py-1 text-xs lg:text-base text-white bg-green-600 rounded-lg hover:bg-green-700 shadow-sm transition-all"
+>
+  Export Excel
+  <Download className="ml-2 w-4 h-4" />
+</button>
+        </div>
       </div>
 
       {/* FILTER BAR */}
@@ -172,7 +183,7 @@ const AdminiProductList = () => {
           <p className="text-gray-500 text-lg">No products match your current filters</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4 lg:gap-6 xl:gap-8">
+        <div className="grid grid-cols-2 xs:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4 lg:gap-6 xl:gap-8">
           {paginatedProducts.map((p) => {
             let stockStatus, stockColor;
             if (p.stock_quantity === 0) {

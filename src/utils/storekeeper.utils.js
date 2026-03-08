@@ -158,3 +158,18 @@ export const abortProduction = async (id) => {
     return { success: false, message: error.message };
   }
 };
+// getRecentApprovedProductions
+export const getRecentApprovedProductions = async () => {
+  try {
+    const res = await fetch(
+      import.meta.env.VITE_API_URL + "/api/storekeeper/production/weekly-approved",
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching production logs:", error);
+    return { success: false, message: "Error fetching production logs" };
+  }
+};

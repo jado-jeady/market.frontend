@@ -5,8 +5,8 @@ const SubMenu = ({ items }) => {
 
   return (
     <div className="w-full sticky top-0  bg-white border-b border-gray-200 shadow-sm">
-      <div className="px-3 py-1">
-        <nav className="flex space-x-2 overflow-x-auto mt-2">
+      <div className="px-0 py-1">
+        <nav className="flex space-x-0 overflow-x-auto mt-2">
           {items.map((item) => (
             <NavLink
               key={item.path}
