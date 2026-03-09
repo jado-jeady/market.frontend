@@ -165,12 +165,17 @@ const Login = () => {
             )}
 
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full sm:bg-gray-700 sm:text-white lg:bg-gray-700 lg:text-white bg-gray-600 md:bg-gray-600 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
+  type="submit"
+  disabled={loading}
+  className="w-full py-3 rounded-lg font-semibold transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+             bg-blue-600 text-white 
+             md:bg-blue-800 
+             lg:bg-gray-700 
+             xl:bg-gray-900 xl:text-xl xl:py-4
+             hover:bg-gray-800"
+>
+  {loading ? 'Signing in...' : 'Sign In'}
+</button>
           </form>
 
           <div className=" text-center text-sm">
