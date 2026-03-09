@@ -174,12 +174,12 @@ const Login = () => {
              xl:bg-gray-900 xl:text-xl xl:py-4
              hover:bg-gray-800"
 >
-  {loading ? 'Signing in...' : 'Sign In'}
+  {loading ? 'Signingin...' : 'SignIn'}
 </button>
           </form>
 
           <div className=" text-center text-sm">
-            <Link to={"#"}>Forgot Password</Link>
+            <Link to={"#"}>ForgotPassword</Link>
           </div>
         </div>
       </div>
