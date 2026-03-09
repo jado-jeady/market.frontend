@@ -163,18 +163,16 @@ const Login = () => {
                 {error}
               </div>
             )}
-
-            <button
+<button
   type="submit"
   disabled={loading}
   className="w-full py-3 rounded-lg font-semibold transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed
-             bg-blue-600 text-white 
-             md:bg-blue-800 
-             lg:bg-gray-700 
-             xl:bg-gray-900 xl:text-xl xl:py-4
-             hover:bg-gray-800"
+             text-white
+             bg-gray-600 
+             lg:bg-gray-700
+             xl:bg-gray-900"
 >
-  {loading ? 'Signingin...' : 'SignIn'}
+  {loading ? 'Signing in...' : 'Sign In'}
 </button>
           </form>
 
