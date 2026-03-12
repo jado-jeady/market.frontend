@@ -110,7 +110,7 @@ export const getAllSales = async (filters = {}) => {
     const res = await fetch(`${SALES_BASE}?${params}`, {
       headers: getAuthHeaders(),
     });
-
+    
     const data = await handleResponse(res); // ✅ only once
     console.log("Sales response:", data);   // log the parsed data, not res.json()
     return data;
@@ -199,17 +199,17 @@ export const getSalesSummary = async () => {
 
 /* ===================== TODAY SALES ===================== */
 
-export const getTodaySales = async () => {
+export const getTodaySales = async ( currentBussines_date) => {
   try {
-    const today = new Date().toISOString().split('T')[0];
-    const res = await fetch(`${MY_SALES_BASE}?start_date=${today}`, {
+
+    const res = await fetch(`${SALES_BASE}/sales-by-shift/${currentBussines_date}`, {
       headers: getAuthHeaders()
     });
 
     return await handleResponse(res);
   } catch (error) {
     console.error('Today sales error:', error);
-    return { success: false, message: 'Failed to fetch today sales' };
+    return { success: false, message: 'Failed to load today sales' };
   }
 };
 

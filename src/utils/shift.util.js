@@ -92,8 +92,6 @@ export const getAllShifts = async (filters = {}) => {
     const res = await fetch(`${BASE_URL}/api/shift?${params}`, {
       headers: getAuthHeaders(),
     });
-    console.log("this are the params ",params);
-
     const data = await handleResponse(res);
     return data;
   } catch (error) {
@@ -124,5 +122,17 @@ export const createShift = async (payload) => {
     return await handleResponse(res);
   } catch (error) {
     return { success: false, message: error?.message || "Failed to create shift" };
+  }
+};
+
+// get shifts business dates
+export const getShiftBusinessDates = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/shift/business-date`, {
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    return { success: false, message: error?.message || "Failed to fetch shift" };
   }
 };

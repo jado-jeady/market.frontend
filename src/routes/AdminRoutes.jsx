@@ -55,6 +55,7 @@ export const AdminRoutes = (
       <Route path="add" element={<AddProduct />} />
       <Route path="category" element={<ProductCategories />} />
       <Route path="transfer" element={<ProductTransfer />} />
+      <Route path="list" element={<AdminProductList />} />
     </Route>
     <Route path="stock" element={<Stock />}>
       <Route index element={<AllStock />} />
