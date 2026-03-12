@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { getCurrentShift, closeShift, openShift } from "../utils/shift.util";
 import { BellDot, ChevronDown, ChevronUp } from "lucide-react";
+import { toast } from "react-toastify";
 
 const Header = () => {
   const { logout } = useAuth();
@@ -157,7 +158,7 @@ const Header = () => {
               onSubmit={async (e) => {
                 e.preventDefault();
                 if (!openingBalance || Number(openingBalance) <= 0) {
-                  alert("Opening balance must be greater than 0");
+                  toast.error("Opening balance must be greater than 0");
                   return;
                 }
                 setLoadingShift(true);
@@ -176,7 +177,7 @@ const Header = () => {
                     setOpeningBalance("");
                     setShiftNote("");
                   } else {
-                    alert(response.message);
+                    toast.error(response.message);
                   }
                 } finally {
                   setLoadingShift(false);
@@ -235,7 +236,7 @@ const Header = () => {
               onSubmit={async (e) => {
                 e.preventDefault();
                 if (!closingBalance || Number(closingBalance) <= 0) {
-                  alert("Closing balance must be greater than 0");
+                  toast.error("Closing balance must be greater than 0");
                   return;
                 }
                 setLoadingShift(true);
@@ -246,13 +247,13 @@ const Header = () => {
                     closing_note: closingNote,
                   });
                   if (response.success) {
-                    alert("Shift closed successfully!");
+                    toast.success("Shift closed successfully!");
                     setShift(null);
                     setIsCloseShiftModal(false);
                     setClosingBalance("");
                     setClosingNote("");
                   } else {
-                    alert(response.message);
+                    toast.error(response.message);
                   }
                 } finally {
                   setLoadingShift(false);

@@ -316,16 +316,16 @@ const Dashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-600">
-            Welcome back! Here's what's happening with your store today.
+          <h3 className="text-xl font-bold text-gray-900">Dashboard</h3>
+          <p className="text-xs text-gray-600">
+            Welcome back! Here's what's happening with your Shop today.
           </p>
         </div>
         <div className="flex gap-2">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-1 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
           >
             <option value="day">Today</option>
             <option value="week">This Week</option>
@@ -335,12 +335,12 @@ const Dashboard = () => {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2"
+            className="px-2 py-1 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50 flex items-center text-gray-700 gap-2"
           >
             <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
             Refresh
           </button>
-          <button className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 flex items-center gap-2">
+          <button className="px-2 py-1 text-gray-800 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 flex items-center gap-2">
             <Download size={16} />
             Export
           </button>
@@ -348,7 +348,7 @@ const Dashboard = () => {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
         {statCards.map((card, index) => {
           const Icon = card.icon;
           const isPositive = card.change.startsWith('+');
