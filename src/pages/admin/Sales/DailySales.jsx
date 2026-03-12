@@ -1,139 +1,103 @@
 import { useEffect, useState } from "react";
-import { getAllSales, getCashiers } from "../../../utils/sales.util";
+import { getTodaySales as getSalesByDate } from "../../../utils/sales.util"; 
+import { getShiftBusinessDates as getShiftByBusinessDate } from "../../../utils/shift.util";
 
 const DailySales = () => {
-  const [sales, setSales] = useState([]);
-  const [cashiers, setCashiers] = useState([]);
+  const [availableDates, setAvailableDates] = useState([]);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [salesSummary, setSalesSummary] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const today = new Date().toISOString().slice(0, 10);
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
-
-      const salesResponse = await getAllSales({
-        start_date: today,
-        end_date: today,
-        status: "COMPLETED",
-      });
-      const cashierResponse = await getCashiers();
-
-      if (salesResponse?.success) setSales(salesResponse.data);
-      if (cashierResponse?.success) setCashiers(cashierResponse.data);
-
-      setLoading(false);
+      const response = await getShiftByBusinessDate();
+      if (response?.success && response.data.length > 0) {
+        const uniqueDates = [...new Set(response.data.map(d => d.business_date))];
+        const sortedDates = uniqueDates.sort((a, b) => new Date(b) - new Date(a));
+        
+        setAvailableDates(sortedDates);
+        setSelectedDate(sortedDates[0]);
+      } else {
+        setLoading(false);
+      }
     })();
   }, []);
 
-  /* ===================== GROUP BY CASHIER + SHIFT ===================== */
-  const cashierShiftSummary = [];
-
-  cashiers.forEach((cashier) => {
-    // group sales by shift for this cashier
-    const cashierSales = sales.filter((sale) => sale.user_id === cashier.id);
-
-    const shiftsMap = {};
-    cashierSales.forEach((sale) => {
-      const shiftId = sale.shift_id;
-      if (!shiftsMap[shiftId]) {
-        shiftsMap[shiftId] = {
-          shiftId,
-          businessDate: sale.shift?.business_date,
-          openedAt: sale.shift?.opened_at,
-          closedAt: sale.shift?.closed_at,
-          totalSales: 0,
-          totalAmount: 0,
-        };
-      }
-      shiftsMap[shiftId].totalSales += 1;
-      shiftsMap[shiftId].totalAmount += Number(sale.subtotal || 0);
-    });
-
-    Object.values(shiftsMap).forEach((shiftSummary) => {
-      cashierShiftSummary.push({
-        cashierId: cashier.id,
-        cashierName: cashier.full_name,
-        ...shiftSummary,
-      });
-    });
-  });
-
-  const grandTotal = cashierShiftSummary.reduce(
-    (sum, s) => sum + s.totalAmount,
-    0
-  );
-
-  /* ===================== UI ===================== */
-  if (loading) {
-    return (
-      <div className="p-6 flex justify-center">
-        <div className="inline-block animate-spin h-6 w-6 border-2 border-blue-600 border-t-transparent rounded-full" />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!selectedDate) return;
+    (async () => {
+      setLoading(true);
+      const response = await getSalesByDate(selectedDate);
+      if (response?.success) setSalesSummary(response.data);
+      else setSalesSummary([]);
+      setLoading(false);
+    })();
+  }, [selectedDate]);
 
   return (
-    <div className="p-6 py-2">
-      {/* Header */}
-      <div className="mb-4">
-        <h3 className="text-xl font-bold text-gray-900">Daily Sales Summary</h3>
-        <p className="text-sm text-gray-600">Sales report for {today}</p>
-      </div>
+    <div className="p-4 md:p-6 text-gray-800">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+        <div>
+          <h3 className="text-xl text-gray-900">Performance Summary</h3>
+          <p className="text-xs text-gray-500">Showing data for : <span className="text-blue-600">{selectedDate}</span></p>
+        </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-100 text-gray-700">
-            <tr>
-              <th className="px-4 py-3 text-left">Cashier</th>
-              <th className="px-4 py-3 text-left">Shift Date</th>
-              <th className="px-4 py-3 text-left">Opened At</th>
-              <th className="px-4 py-3 text-left">Closed At</th>
-              <th className="px-4 py-3 text-center">Transactions</th>
-              <th className="px-4 py-3 text-right">Total Amount</th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y text-gray-700">
-            {cashierShiftSummary.map((row) => (
-              <tr key={`${row.cashierId}-${row.shiftId}`} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-medium">{row.cashierName}</td>
-                <td className="px-4 py-3">{row.businessDate}</td>
-                <td className="px-4 py-3">
-                  {row.openedAt ? new Date(row.openedAt).toLocaleString() : "-"}
-                </td>
-                <td className="px-4 py-3">
-                  {row.closedAt ? new Date(row.closedAt).toLocaleString() : "-"}
-                </td>
-                <td className="px-4 py-3 text-center">{row.totalSales}</td>
-                <td className="px-4 py-3 text-right font-semibold">
-                  {row.totalAmount.toFixed(2)}
-                </td>
-              </tr>
+        <div className="w-full/2 md:w-64">
+          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 block">Select Date</label>
+          <select 
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="w-full border-2 border-gray-100 rounded-xl px-4 py-2 bg-white shadow-sm focus:border-blue-500 outline-none cursor-pointer font-medium"
+          >
+            {availableDates.map(date => (
+              <option key={date} value={date}>{date}</option>
             ))}
-
-            {cashierShiftSummary.length === 0 && (
-              <tr>
-                <td colSpan="6" className="text-center py-6 text-gray-500">
-                  No sales for today
-                </td>
-              </tr>
-            )}
-          </tbody>
-
-          {/* Footer Grand Total */}
-          <tfoot>
-            <tr className="bg-gray-100 font-bold">
-              <td colSpan="4" className="px-4 py-3">Grand Total</td>
-              <td className="px-4 py-3 text-center">{sales.length}</td>
-              <td className="px-4 py-3 text-right text-green-600">
-                {grandTotal.toFixed(2)}
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+          </select>
+        </div>
       </div>
+
+      {loading ? (
+        <div className="flex justify-center py-20"><div className="animate-spin h-10 w-10 border-4 border-blue-600 border-t-transparent rounded-full" /></div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {salesSummary.map((item, index) => (
+            <div key={index} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:border-blue-200 transition-colors">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="font-bold text-gray-800">{item.user?.full_name}</h4>
+                <div className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-[10px] font-black uppercase">
+                  {item.transaction_count} Trans
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <p className="text-[10px] text-gray-400 uppercase font-black tracking-tighter">Total Revenue</p>
+                  <p className="text-sm font-black text-gray-700">
+                    {Number(item.total_sales).toLocaleString()} <span className="text-xs text-gray-400">RWF</span>
+                  </p>
+                </div>
+                
+                <div className="flex justify-between items-center pt-3 border-t border-gray-50">
+                  <div className="text-[10px] font-bold text-gray-400 uppercase">
+                    <p>Opened</p>
+                    <p className="text-gray-600 font-black">{item.shift?.opened_at ? new Date(item.shift.opened_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--'}</p>
+                  </div>
+                  <div className="text-[10px] font-bold text-gray-400 uppercase text-right">
+                    <p>Closed</p>
+                    <p className="text-gray-600 font-black">{item.shift?.closed_at ? new Date(item.shift.closed_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'ACTIVE'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {!loading && salesSummary.length === 0 && (
+            <div className="col-span-full py-20 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+              <p className="font-bold text-gray-400">No transactions recorded for this date.</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

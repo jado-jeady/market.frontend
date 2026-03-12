@@ -27,6 +27,7 @@ import CashierApproval from "../pages/user/Consumables/PendingApproval";
 import Consumables from "../pages/user/Consumables/Consumables";
 import AllApprovals from "../pages/user/Consumables/AllApprovals";
 import Approved from "../pages/user/Consumables/Aproved";
+import DayClosing from "../pages/user/DayClosing";
 
 export const UserRoutes = (
   <Route
@@ -75,5 +76,6 @@ export const UserRoutes = (
     </Route>
     <Route path="expenses" element={<Expenses />} />
     <Route path="management" element={<UserManagement />} />
+    <Route path="day-closing" element={<DayClosing />} />
   </Route>
 );

@@ -49,3 +49,11 @@ export const updateUser = async (id, payload) => {
   });
   return await res.json();
 };
+// GET USERname BY ID
+export const getUserNameById = async (id) => {
+  const res = await fetch(`${USERS_BASE}users/username/${id}`, {
+    headers: getHeaders()
+    
+  });
+  return await res.json();
+}

@@ -29,7 +29,9 @@ const AllSales = () => {
       const filters = {
         page,
         limit: pagination.limit,
-        payment_method: paymentMethod
+        payment_method: paymentMethod,
+        start_date: date ? new Date(`${date}T00:00:00Z`).toISOString() : null,
+        end_date: date ? new Date(`${date}T23:59:59Z`).toISOString() : null
         
       };
 
