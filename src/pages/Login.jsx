@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import avatar from '../assets/user-female-icon.webp'
+import { EyeOff, Eye } from 'lucide-react';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -11,6 +12,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const infoMessage = location.state?.message;
 
   const handleChange = (e) => {
     setCredentials({
@@ -58,6 +60,7 @@ const Login = () => {
 
 
         if (data.data?.user?.role === "Admin"){
+          console.log(infoMessage); 
         navigate('/admin/dashboard');
         }
         else if(data?.data?.user?.role==="Cashier"){
@@ -65,9 +68,8 @@ const Login = () => {
         }
         else if(data?.data?.user?.role==="Storekeeper"){
           navigate('/storekeeper/dashboard');
+
         }
-        
-        
       }
         else {
         setError('Invalid username or password');
@@ -142,17 +144,10 @@ const Login = () => {
                 >
                   {showPassword ? (
                     // eye-off icon
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-5 0-9.27-3-11-7 1.12-2.62 3.01-4.73 5.22-6.02" />
-                      <path d="M1 1l22 22" />
-                      <path d="M9.88 9.88A3 3 0 0 0 14.12 14.12" />
-                    </svg>
+                    <EyeOff size={16} className='text-red-500'/>
                   ) : (
                     // eye icon
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
+                    <Eye size={18}  />
                   )}
                 </button>
               </div>

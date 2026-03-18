@@ -4,6 +4,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { getCurrentShift, closeShift, openShift } from "../utils/shift.util";
 import { BellDot, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "react-toastify";
+import NotificationBell from "./NotificationBell";
+
+
+
+
 
 const Header = () => {
   const { logout } = useAuth();
@@ -94,9 +99,9 @@ const Header = () => {
           )}
 
           {/* Notifications */}
-          <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">
-            <BellDot size={16} className="w-6 h-6" />
-          </button>
+          
+           <NotificationBell />
+
 
           {/* User Dropdown */}
           <div className="relative">
