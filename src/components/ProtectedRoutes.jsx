@@ -1,12 +1,12 @@
 import { Navigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const user = JSON.parse(localStorage.getItem('user'));
 
-  if (!user.data.user) {
+  if (!user?.data.user.role) {
     alert('You must be logged in to access this page.');
-    return <Navigate to="/" replace />;
-
+    return <Navigate to="/" replace/>;
   }
 
   // if role is not allowed, block access
