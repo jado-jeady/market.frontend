@@ -609,40 +609,12 @@ if (!invoiceSnapshot || invoiceSnapshot.items.length === 0) {
 
   {/* Confirm Payment */}
   <button
-  onClick={confirmSale}
-  disabled={isProcessing}
-  className="flex-1 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded disabled:opacity-50 transition-colors flex items-center justify-center space-x-2"
->
-  {isProcessing ? (
-    <>
-      {/* Spinner */}
-      <svg
-        className="animate-spin h-4 w-4 text-white"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"
-        ></path>
-      </svg>
-      <span>Processing...</span>
-    </>
-  ) : (
-    <span>Confirm Payment</span>
-  )}
-</button>
-
+    onClick={confirmSale}   //
+    disabled={isProcessing}
+     className="flex-1 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded disabled:opacity-50 transition-colors"
+ >
+    {processingSale ? processingSale : "Confirm Payment"}
+  </button>
 
   {/* Print Invoice */}
   <button

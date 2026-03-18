@@ -1,22 +1,22 @@
-  import { Navigate } from 'react-router-dom';
-  import { useAuth } from '../context/AuthContext';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-  const ProtectedRoute = ({ children }) => {
-    const { isAuthenticated, loading } = useAuth();
-    if (loading) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-        </div>
-      );
-    }
-    if (!isAuthenticated) {
-  // Pass the message and the location they were trying to visit
-  return <Navigate to="/login" state={{ message: "Please log in to access this page." }} replace />;
-}
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
-    return children;
-  };
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-  export default ProtectedRoute;
+  return children;
+};
+
+export default ProtectedRoute;

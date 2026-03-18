@@ -260,23 +260,3 @@ export const exportProductsToExcel = async () => {
     console.error(error);
   }
 };
-
-export const getAllConsumables= async ()=>{
-  try {
-    const response = await fetch('localhot:300',{
-      method: 'GET',
-      Authorization : getAuthHeaders()
-    })
-
-    if(!response.ok){
-      const errorData= await response.json();
-      throw new Error(errorData.message || `Error: ${response.status}`);
-    }
-    const consumables = await response.json();
-    return Array.isArray(consumables) ? consumables : consumables?.data || [];
-
-  } catch (error) {
-    console.log(error);
-    
-  }
-} 
