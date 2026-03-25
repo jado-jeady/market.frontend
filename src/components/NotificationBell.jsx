@@ -58,7 +58,9 @@ const NotificationBell = () => {
           </div>
           <ul className="max-h-64 text-gray-600 text-sm text-center overflow-y-auto">
             {notifications.length === 0 ? (
-              <li className="p-2 text-white bg-red-500 text-sm">No new notifications</li>
+              <li className="p-2 text-white bg-red-500 text-sm">
+                No new notifications
+              </li>
             ) : (
               notifications.map((n) => (
                 <li
@@ -67,7 +69,9 @@ const NotificationBell = () => {
                 >
                   <span>{n.message}</span>
                   {!n.read && (
-                    <span className="text-xs text-blue-600 font-medium">New</span>
+                    <span className="text-xs text-blue-600 font-medium">
+                      New
+                    </span>
                   )}
                 </li>
               ))

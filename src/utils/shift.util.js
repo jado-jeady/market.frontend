@@ -20,7 +20,6 @@ export const buildQueryParams = (filters) => {
   return query.toString();
 };
 
-
 const handleResponse = async (res) => {
   const data = await res.json();
   if (!res.ok) throw data;
@@ -35,7 +34,10 @@ export const getCurrentShift = async () => {
     });
     return await handleResponse(res);
   } catch (error) {
-    return { success: false, message: error?.message || "Failed to fetch current shift" };
+    return {
+      success: false,
+      message: error?.message || "Failed to fetch current shift",
+    };
   }
 };
 
@@ -43,7 +45,7 @@ export const getCurrentShift = async () => {
 export const openShift = async (payload) => {
   try {
     console.log("payload");
-    console.log(payload); 
+    console.log(payload);
 
     const res = await fetch(`${BASE_URL}/api/shift/open`, {
       method: "POST",
@@ -52,13 +54,18 @@ export const openShift = async (payload) => {
     });
     return await handleResponse(res);
   } catch (error) {
-    return { success: false, message: error?.message || "Failed to open shift" };
+    return {
+      success: false,
+      message: error?.message || "Failed to open shift",
+    };
   }
 };
 
 /* ================= CLOSE SHIFT ================= */
 export const closeShift = async (payload) => {
   try {
+    console.log("payload");
+    console.log(payload);
     const res = await fetch(`${BASE_URL}/api/shift/close`, {
       method: "POST",
       headers: getAuthHeaders(),
@@ -66,7 +73,10 @@ export const closeShift = async (payload) => {
     });
     return await handleResponse(res);
   } catch (error) {
-    return { success: false, message: error?.message || "Failed to close shift" };
+    return {
+      success: false,
+      message: error?.message || "Failed to close shift",
+    };
   }
 };
 
@@ -80,7 +90,10 @@ export const abortShift = async (payload) => {
     });
     return await handleResponse(res);
   } catch (error) {
-    return { success: false, message: error?.message || "Failed to abort shift" };
+    return {
+      success: false,
+      message: error?.message || "Failed to abort shift",
+    };
   }
 };
 
@@ -88,7 +101,7 @@ export const abortShift = async (payload) => {
 export const getAllShifts = async (filters = {}) => {
   try {
     // Build query string from filters
-    const params = buildQueryParams(filters); 
+    const params = buildQueryParams(filters);
     const res = await fetch(`${BASE_URL}/api/shift?${params}`, {
       headers: getAuthHeaders(),
     });
@@ -96,7 +109,10 @@ export const getAllShifts = async (filters = {}) => {
     return data;
   } catch (error) {
     console.error("Get all shifts error:", error);
-    return { success: false, message: error?.message || "Failed to fetch shifts" };
+    return {
+      success: false,
+      message: error?.message || "Failed to fetch shifts",
+    };
   }
 };
 /* ================= GET SHIFT BY ID (ADMIN) ================= */
@@ -107,7 +123,10 @@ export const getShiftById = async (id) => {
     });
     return await handleResponse(res);
   } catch (error) {
-    return { success: false, message: error?.message || "Failed to fetch shift" };
+    return {
+      success: false,
+      message: error?.message || "Failed to fetch shift",
+    };
   }
 };
 
@@ -121,7 +140,10 @@ export const createShift = async (payload) => {
     });
     return await handleResponse(res);
   } catch (error) {
-    return { success: false, message: error?.message || "Failed to create shift" };
+    return {
+      success: false,
+      message: error?.message || "Failed to create shift",
+    };
   }
 };
 
@@ -133,6 +155,9 @@ export const getShiftBusinessDates = async () => {
     });
     return await handleResponse(res);
   } catch (error) {
-    return { success: false, message: error?.message || "Failed to fetch shift" };
+    return {
+      success: false,
+      message: error?.message || "Failed to fetch shift",
+    };
   }
 };

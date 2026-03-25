@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 const AllStock = () => {
   const [products, setProducts] = useState([]);
@@ -8,13 +8,13 @@ const AllStock = () => {
     const fetchProducts = async () => {
       try {
         // TODO: Replace with your actual API endpoint
-        const response = await fetch('/api/stock/products');
+        const response = await fetch("/api/stock/products");
         if (response.ok) {
           const data = await response.json();
           setProducts(data);
         }
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error("Error fetching products:", error);
       } finally {
         setLoading(false);
       }
@@ -36,7 +36,9 @@ const AllStock = () => {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Stock Inventory</h2>
-          <p className="text-gray-600 text-sm mt-1">Manage and track all product inventory</p>
+          <p className="text-gray-600 text-sm mt-1">
+            Manage and track all product inventory
+          </p>
         </div>
         <button className="px-6 py-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-gray-600 rounded-lg hover:from-primary-700 hover:to-secondary-700 transition shadow-md">
           Add New Product
@@ -95,23 +97,50 @@ const AllStock = () => {
           <table className="w-full">
             <thead className="bg-gradient-to-r from-primary-600 to-secondary-600 text-gray-600">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Product ID</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Name</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Category</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Price</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Quantity</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Status</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Product ID
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Category
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Quantity
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => {
                 const quantity = Math.floor(Math.random() * 150);
-                const status = quantity > 50 ? 'In Stock' : quantity > 10 ? 'Low Stock' : 'Out of Stock';
-                const statusColor = quantity > 50 ? 'bg-green-100 text-green-700' : quantity > 10 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700';
+                const status =
+                  quantity > 50
+                    ? "In Stock"
+                    : quantity > 10
+                      ? "Low Stock"
+                      : "Out of Stock";
+                const statusColor =
+                  quantity > 50
+                    ? "bg-green-100 text-green-700"
+                    : quantity > 10
+                      ? "bg-yellow-100 text-yellow-700"
+                      : "bg-red-100 text-red-700";
 
                 return (
-                  <tr key={item|| products } className="hover:bg-gray-50 transition">
+                  <tr
+                    key={item || products}
+                    className="hover:bg-gray-50 transition"
+                  >
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                       PRD-{2000 + item}
                     </td>
@@ -119,7 +148,11 @@ const AllStock = () => {
                       Product Name {item}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700">
-                      {item % 3 === 0 ? 'Electronics' : item % 3 === 1 ? 'Clothing' : 'Food'}
+                      {item % 3 === 0
+                        ? "Electronics"
+                        : item % 3 === 1
+                          ? "Clothing"
+                          : "Food"}
                     </td>
                     <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                       ${(Math.random() * 100 + 10).toFixed(2)}
@@ -128,7 +161,9 @@ const AllStock = () => {
                       {quantity}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}
+                      >
                         {status}
                       </span>
                     </td>
@@ -150,7 +185,8 @@ const AllStock = () => {
         {/* Pagination */}
         <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
           <div className="text-sm text-gray-700">
-            Showing <span className="font-medium">1</span> to <span className="font-medium">8</span> of{' '}
+            Showing <span className="font-medium">1</span> to{" "}
+            <span className="font-medium">8</span> of{" "}
             <span className="font-medium">1,234</span> results
           </div>
           <div className="flex space-x-2">

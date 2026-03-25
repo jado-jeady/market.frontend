@@ -1,13 +1,42 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Boxes, Package, ClipboardList, BarChart3, Menu, X, Warehouse } from "lucide-react";
+import {
+  LayoutDashboard,
+  Boxes,
+  Package,
+  ClipboardList,
+  BarChart3,
+  Menu,
+  X,
+  Warehouse,
+} from "lucide-react";
 
 const StorekeeperSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const menuItems = [
-    { name: "Dashboard", path: "/storekeeper/dashboard", icon: <LayoutDashboard size={14} /> },
-    { name: "Consumables", path: "/storekeeper/consumables", icon: <Boxes size={14} /> },
-    { name: "Production Log", path: "/storekeeper/production", icon: <ClipboardList size={14} /> },
-    { name: "Inventory", path: "/storekeeper/inventory", icon: <Package size={14} /> },
-    { name: "Reports", path: "/storekeeper/reports", icon: <BarChart3 size={14} /> },
+    {
+      name: "Dashboard",
+      path: "/storekeeper/dashboard",
+      icon: <LayoutDashboard size={14} />,
+    },
+    {
+      name: "Consumables",
+      path: "/storekeeper/consumables",
+      icon: <Boxes size={14} />,
+    },
+    {
+      name: "Production Log",
+      path: "/storekeeper/production",
+      icon: <ClipboardList size={14} />,
+    },
+    {
+      name: "Inventory",
+      path: "/storekeeper/inventory",
+      icon: <Package size={14} />,
+    },
+    {
+      name: "Reports",
+      path: "/storekeeper/reports",
+      icon: <BarChart3 size={14} />,
+    },
   ];
 
   return (
@@ -45,7 +74,7 @@ const StorekeeperSidebar = ({ sidebarOpen, setSidebarOpen }) => {
         <div className="p-0 border-b shadow-sm border-gray-200">
           <div className="flex px-0 py-2 items-center space-x-1">
             <div className="w-12 h-12 p-0 bg-gray-200 rounded-lg flex items-center justify-center">
-              <Warehouse  className=" w-full text-orange-600" />
+              <Warehouse className=" w-full text-orange-600" />
             </div>
             <div>
               <h3 className="text-lg text-gray-700 font-bold">Tyga Shop</h3>

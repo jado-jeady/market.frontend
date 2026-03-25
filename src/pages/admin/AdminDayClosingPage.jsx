@@ -17,10 +17,16 @@ const AdminDayClosingPage = () => {
 
   const discrepancy = closingReport.cashInDrawer - closingReport.expectedCash;
 
+  /**
+   * Handles the approval of a day closing report.
+   * Sets the status to 'Approved'.
+   * Displays a success message.
+   * Calls the backend to send the approval.
+   */
   const handleApprove = () => {
     setStatus("Approved");
     alert("Day closing approved successfully!");
-    // send approval to backend here
+    // Send approval to backend here
   };
 
   const handleReject = () => {
@@ -31,19 +37,29 @@ const AdminDayClosingPage = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white shadow rounded-lg">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Administrator Day Closing Review</h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-4">
+        Administrator Day Closing Review
+      </h2>
       <p className="text-xs text-gray-600 mb-6">
-        Review cashier’s closing report, check discrepancies, and approve or reject.
+        Review cashier’s closing report, check discrepancies, and approve or
+        reject.
       </p>
 
       {/* Report Summary */}
       <div className="grid grid-cols-2 gap-4 text-green-600 text-xs mb-6">
         <div className="bg-gray-50 p-3 rounded-lg">
-          <p><span className="font-semibold">Cashier:</span> {closingReport.cashierName}</p>
-          <p><span className="font-semibold">Date:</span> {closingReport.date}</p>
+          <p>
+            <span className="font-semibold">Cashier:</span>{" "}
+            {closingReport.cashierName}
+          </p>
+          <p>
+            <span className="font-semibold">Date:</span> {closingReport.date}
+          </p>
         </div>
         <div className="bg-gray-50 p-3 rounded-lg">
-          <p><span className="font-semibold">Status:</span> {status}</p>
+          <p>
+            <span className="font-semibold">Status:</span> {status}
+          </p>
         </div>
       </div>
 
@@ -55,15 +71,21 @@ const AdminDayClosingPage = () => {
         </div>
         <div className="flex justify-between">
           <span>Total Expenses:</span>
-          <span className="font-semibold">{closingReport.totalExpenses} RWF</span>
+          <span className="font-semibold">
+            {closingReport.totalExpenses} RWF
+          </span>
         </div>
         <div className="flex justify-between">
           <span>Cash in Drawer:</span>
-          <span className="font-semibold">{closingReport.cashInDrawer} RWF</span>
+          <span className="font-semibold">
+            {closingReport.cashInDrawer} RWF
+          </span>
         </div>
         <div className="flex justify-between">
           <span>Expected Cash:</span>
-          <span className="font-semibold">{closingReport.expectedCash} RWF</span>
+          <span className="font-semibold">
+            {closingReport.expectedCash} RWF
+          </span>
         </div>
         <div className="flex justify-between">
           <span>Discrepancy:</span>

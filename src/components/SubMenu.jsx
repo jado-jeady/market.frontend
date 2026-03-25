@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink } from "react-router-dom";
 
 const SubMenu = ({ items }) => {
   if (!items || items.length === 0) return null;
@@ -14,8 +14,8 @@ const SubMenu = ({ items }) => {
               className={({ isActive }) =>
                 `px-4 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
                   isActive
-                    ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-md'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    ? "bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-md"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                 }`
               }
             >

@@ -1,33 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
-import { getCurrentShift, closeShift, openShift } from "../utils/shift.util";
-import { BellDot, ChevronDown, ChevronUp } from "lucide-react";
-import { toast } from "react-toastify";
+import { getCurrentShift } from "../utils/shift.util";
+import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import NotificationBell from "./NotificationBell";
-
-
-
-
+import OpenShiftModal from "./Shifts/OpenShiftModal";
+import CloseShiftModal from "./Shifts/CloseShiftModal";
 
 const Header = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [shift, setShift] = useState(null);
+  const dropdownRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Modal states
   const [isOpenShiftModal, setIsOpenShiftModal] = useState(false);
   const [isCloseShiftModal, setIsCloseShiftModal] = useState(false);
-
-  // Loading state for preventing double clicks
-  const [loadingShift, setLoadingShift] = useState(false);
-
-  // Form fields
-  const [openingBalance, setOpeningBalance] = useState("");
-  const [shiftNote, setShiftNote] = useState("");
-  const [closingBalance, setClosingBalance] = useState("");
-  const [closingNote, setClosingNote] = useState("");
 
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser)?.data?.user : null;
@@ -37,15 +27,15 @@ const Header = () => {
     role === "Admin"
       ? "/admin/profile"
       : role === "Storekeeper"
-      ? "/storekeeper/profile"
-      : "/cashier/profile";
+        ? "/storekeeper/profile"
+        : "/cashier/profile";
 
   const settingsPath =
     role === "Admin"
       ? "/admin/settings"
       : role === "Storekeeper"
-      ? "/storekeeper/settings"
-      : "/cashier/settings";
+        ? "/storekeeper/settings"
+        : "/cashier/settings";
 
   useEffect(() => {
     if (role === "Cashier") {
@@ -56,9 +46,38 @@ const Header = () => {
     }
   }, [role]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen]);
+
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Navigate to search results page with query parameter
+      alert("Search results for: " + searchQuery);
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery("");
+    }
   };
 
   return (
@@ -66,11 +85,16 @@ const Header = () => {
       <div className="flex items-center justify-between px-6 py-1">
         {/* Search Bar */}
         <div className="flex-1 md:block hidden max-w-xl pl-8">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full pl-10 pr-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-          />
+          <form onSubmit={handleSearch} className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search products, orders, customers..."
+              className="w-full pl-10 pr-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+            />
+          </form>
         </div>
 
         {/* Right Section */}
@@ -81,16 +105,14 @@ const Header = () => {
               {!shift ? (
                 <button
                   onClick={() => setIsOpenShiftModal(true)}
-                  className="px-3 py-2 text-sm ml-10 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                  disabled={loadingShift}
+                  className="px-3 py-2 text-sm ml-10 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                 >
                   Open Shift
                 </button>
               ) : (
                 <button
                   onClick={() => setIsCloseShiftModal(true)}
-                  className="px-3 py-2 text-sm ml-10 text-white bg-red-600 hover:bg-red-700 rounded-lg transition disabled:opacity-50"
-                  disabled={loadingShift}
+                  className="px-3 py-2 text-sm ml-10 text-white bg-red-600 hover:bg-red-700 rounded-lg transition"
                 >
                   Close Shift
                 </button>
@@ -99,9 +121,7 @@ const Header = () => {
           )}
 
           {/* Notifications */}
-          
-           <NotificationBell />
-
+          <NotificationBell />
 
           {/* User Dropdown */}
           <div className="relative">
@@ -127,16 +147,21 @@ const Header = () => {
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+              <div
+                ref={dropdownRef}
+                className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2"
+              >
                 <Link
                   to={profilePath}
                   className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100"
+                  onClick={() => setDropdownOpen(false)}
                 >
                   Profile
                 </Link>
                 <Link
                   to={settingsPath}
                   className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100"
+                  onClick={() => setDropdownOpen(false)}
                 >
                   Settings
                 </Link>
@@ -153,157 +178,19 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Open Shift Modal */}
-      {isOpenShiftModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white text-gray-700 rounded-lg shadow-lg p-6 w-96">
-            <h2 className="text-xs md:text-lg font-bold mb-4">Open Shift</h2>
+      {/* Shift Modals */}
+      <OpenShiftModal
+        isOpen={isOpenShiftModal}
+        onClose={() => setIsOpenShiftModal(false)}
+        onShiftOpened={setShift}
+      />
 
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                if (!openingBalance || Number(openingBalance) <= 0) {
-                  toast.error("Opening balance must be greater than 0");
-                  return;
-                }
-                setLoadingShift(true);
-                try {
-                  const start_time = new Date().toISOString();
-                  const response = await openShift({
-                    opening_balance: openingBalance,
-                    start_time,
-                    shop_name: "Tyag_market",
-                    user,
-                    opening_note: shiftNote,
-                  });
-                  if (response.success) {
-                    setShift(response.data);
-                    setIsOpenShiftModal(false);
-                    setOpeningBalance("");
-                    setShiftNote("");
-                  } else {
-                    toast.error(response.message);
-                  }
-                } finally {
-                  setLoadingShift(false);
-                }
-              }}
-            >
-              <label className="block mb-2 text-xs">Opening Balance</label>
-              <input
-                type="number"
-                value={openingBalance}
-                onChange={(e) => setOpeningBalance(e.target.value)}
-                className="w-full text-xs text-gray-500 border rounded px-3 py-2 mb-4"
-                required
-                min="1"
-              />
-
-              <label className="block mb-2 text-xs">Shift Note</label>
-              <textarea
-                value={shiftNote}
-                onChange={(e) => setShiftNote(e.target.value)}
-                className="w-full text-gray-500 text-xs border rounded px-3 py-2 mb-4"
-                placeholder="Enter shift note"
-              />
-
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsOpenShiftModal(false)}
-                  className="px-2 py-1 bg-gray-300 text-xs rounded"
-                  disabled={loadingShift}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-2 py-1 bg-green-600 text-xs text-white rounded disabled:opacity-50"
-                  disabled={loadingShift}
-                >
-                  {loadingShift ? "Opening…" : "Open Shift"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Close Shift Modal */}
-      {isCloseShiftModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white text-gray-700 rounded-lg shadow-lg p-6 w-96">
-            <h2 className="lg:text-lg text-xs font-bold mb-1 text-center">
-              Close Shift
-            </h2>
-
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                if (!closingBalance || Number(closingBalance) <= 0) {
-                  toast.error("Closing balance must be greater than 0");
-                  return;
-                }
-                setLoadingShift(true);
-                try {
-                  const response = await closeShift({
-                    shiftId: shift.id,
-                    closingBalance,
-                    closing_note: closingNote,
-                  });
-                  if (response.success) {
-                    toast.success("Shift closed successfully!");
-                    setShift(null);
-                    setIsCloseShiftModal(false);
-                    setClosingBalance("");
-                    setClosingNote("");
-                  } else {
-                    toast.error(response.message);
-                  }
-                } finally {
-                  setLoadingShift(false);
-                }
-              }}
-            >
-              <label className="block mb-2 text-xs">Closing Balance</label>
-              <input
-                type="number"
-                value={closingBalance}
-                onChange={(e) => setClosingBalance(e.target.value)}
-                className="w-full text-xs text-gray-500 border rounded px-3 py-2 mb-4"
-                required
-                min="1"
-              />
-
-              <label className="block mb-2 text-xs">Closing Note</label>
-              <textarea
-                value={closingNote}
-                onChange={(e) => setClosingNote(e.target.value)}
-                className="w-full text-xs border rounded px-3 py-2 mb-4"
-                placeholder="Enter closing note"
-              />
-
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsCloseShiftModal(false)}
-                  className="px-2 py-1 text-gray-500 bg-gray-300 text-xs rounded"
-                  disabled={loadingShift}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-2 py-1 bg-red-600 text-xs text-white rounded disabled:opacity-50"
-                  disabled={loadingShift}
-                >
-                  {loadingShift ? "Closing…" : "Close Shift"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <CloseShiftModal
+        isOpen={isCloseShiftModal}
+        onClose={() => setIsCloseShiftModal(false)}
+        shift={shift}
+        onShiftClosed={() => setShift(null)}
+      />
     </header>
   );
 };

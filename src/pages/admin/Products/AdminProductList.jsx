@@ -102,30 +102,31 @@ const AdminiProductList = () => {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin h-12 w-12 border-b-2 border-gray-600 rounded-full" />
+        <p className="ml-2 text-gray-600">Loading products...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-3 sm:p-6 lg:p-8 max-w-[1600px] 2xl:max-w-[2000px] mx-auto transition-all duration-300">
+    <div className="p- sm:p-2 lg:p-8 max-w-[1600px] 2xl:max-w-[2000px] mx-auto transition-all duration-300">
       
       {/* HEADER SECTION */}
-      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+      <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
         <div>
-          <h2 className="text-xl sm:text-xl lg:text-xl font-bold text-gray-900 tracking-tight">Products</h2>
-          <p className="text-xs sm:text-xs lg:text-base text-gray-600">Search, filter & manage inventory</p>
+          <h2 className="text-xl sm:text-xl lg:text-xl mb-2 font-bold text-gray-900 tracking-tight">Product List</h2>
+          <p className="text-xs sm:text-xs lg:text-sm text-gray-600">Search, filter & manage inventory</p>
         </div>
         <div className="space-2 flex">
           
         <Link
           to="/admin/products/add"
-          className="px-2 py-2 lg:px-2 text-white lg:text-white lg:py-2 text-xs lg:text-base text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm transition-all whitespace-nowrap"
+          className="Link inline-flex items-center px-2 py-2 text-xs lg:text-xs text-white bg-gray-200 rounded-lg hover:bg-gray-300 shadow-sm transition-all"
         >
           + Add Product
         </Link>
        <button 
-  onClick={exportProductsToExcel} 
-  className="inline-flex items-center px-4 py-2 ml-5 lg:px-2 lg:py-1 text-xs lg:text-base text-white bg-green-600 rounded-lg hover:bg-green-700 shadow-sm transition-all"
+        onClick={exportProductsToExcel} 
+        className="inline-flex items-center px-2 py-1 ml-5 lg:px-2 lg:py-1 text-xs lg:text-xs text-white bg-green-600 rounded-lg hover:bg-green-700 shadow-sm transition-all"
 >
   Export Excel
   <Download className="ml-2 w-4 h-4" />
@@ -141,13 +142,13 @@ const AdminiProductList = () => {
             placeholder="Search name, barcode, SKU..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-2 py-2 h-10 lg:h-10 w-full text-gray-700 text-xs lg:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="px-2 py-1 h-8 lg:h-8 w-full text-gray-700 text-xs lg:text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
 
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="px-2 py-2 h-10 lg:h-10 w-full text-gray-700 text-xs lg:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="px-2 py-1 h-10 lg:h-8 w-full text-gray-700 text-xs lg:text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
             <option value="all">All Categories</option>
             {[...new Map(categories.map((p) => [p.id, p])).values()]
@@ -160,7 +161,7 @@ const AdminiProductList = () => {
           <select
             value={stockLevel}
             onChange={(e) => setStockLevel(e.target.value)}
-            className="px-2 py-2 h-10 lg:h-10 w-full text-gray-700 text-xs lg:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="px-2 py-1 h-10 lg:h-8 w-full text-gray-700 text-xs lg:text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
             <option value="all">All Stock Levels</option>
             <option value="in">In Stock</option>
@@ -170,7 +171,7 @@ const AdminiProductList = () => {
 
           <button
             onClick={() => { setSearch(""); setCategory("all"); setStockLevel("all"); }}
-            className="px-2 py-2 h-10 lg:h-10 w-full text-gray-700 text-xs lg:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="px-2 py-1 h-10 lg:h-8 w-full text-gray-700 text-xs lg:text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
             Clear Filters
           </button>
@@ -197,29 +198,29 @@ const AdminiProductList = () => {
             return (
               <div key={p.id} className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col group h-full">
                 {/* Visual Icon Area */}
-                <div className="h-20 lg:h-28 bg-gray-50 flex items-center justify-center rounded-t-xl group-hover:bg-blue-50 transition-colors">
+                {/* <div className="h-20 lg:h-28 bg-gray-50 flex items-center justify-center rounded-t-xl group-hover:bg-blue-50 transition-colors">
                   <svg xmlns="http://www.w3.org" className="w-8 h-8 lg:w-12 lg:h-12 text-blue-500 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
-                </div>
+                </div> */}
 
-                <div className="p-4 lg:p-6 flex-1 flex flex-col">
+                <div className="p-2 lg:p-3 flex-1 flex flex-col">
                   <div className="flex justify-between items-start mb-3 gap-2">
                     <div className="min-w-0 flex-1">
-                      <h4 className="font-bold text-sm lg:text-base text-gray-800 truncate">{p.name}</h4>
-                      <p className="text-[10px] lg:text-xs text-gray-400 font-mono mt-0.5">{p.barcode || 'N/A'}</p>
+                      <h4 className="font-bold text-xs lg:text-sm text-gray-800 truncate">{p.name}</h4>
+                      <p className="text-[9px] lg:text-xs text-gray-400 font-mono mt-0.5">{p.barcode || 'N/A'}</p>
                     </div>
-                    <span className={`px-2 py-0.5 rounded text-[10px] lg:text-xs font-bold uppercase tracking-wider ${stockColor}`}>
+                    <span className={`px-2 py-0.5 rounded text-[9px] lg:text-xs font-bold tracking-wider ${stockColor}`}>
                       {stockStatus}
                     </span>
                   </div>
 
-                  <div className="space-y-2 mb-4 text-xs lg:text-sm text-gray-600">
+                  <div className="space-y- mb-1 text-xs lg:text-sm text-gray-600">
                     <div className="flex justify-between border-b border-gray-50 pb-1">
                       <span>Price:</span>
-                      <span className="font-semibold text-gray-900">${Number(p.selling_price || 0).toFixed(2)}</span>
+                      <span className="font-semibold text-xs text-gray-900">${Number(p.selling_price || 0).toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between border-b border-gray-50 pb-1">
+                    <div className="flex justify-between text-xs border-b border-gray-50 pb-1">
                       <span>Stock:</span>
                       <span className="font-semibold">{p.stock_quantity} units</span>
                     </div>
