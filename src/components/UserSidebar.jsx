@@ -9,18 +9,30 @@ import {
   CalendarCheck,
   Settings,
   Menu,
-  X
+  X,
 } from "lucide-react";
 
 const UserSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const menuItems = [
-    { name: "Dashboard", path: "/user/dashboard", icon: <LayoutDashboard size={14} /> },
+    {
+      name: "Dashboard",
+      path: "/user/dashboard",
+      icon: <LayoutDashboard size={14} />,
+    },
     { name: "Sales", path: "/user/sales", icon: <ShoppingCart size={14} /> },
     { name: "Products", path: "/user/products", icon: <Package size={14} /> },
-    { name: "Consumables", path: "/user/consumables", icon: <Boxes size={14} /> },
+    {
+      name: "Consumables",
+      path: "/user/consumables",
+      icon: <Boxes size={14} />,
+    },
     { name: "Reports", path: "/user/reports", icon: <BarChart3 size={14} /> },
     { name: "Customers", path: "/user/customers", icon: <Users size={14} /> },
-    { name: "Day Closing", path: "/user/day-closing", icon: <CalendarCheck size={14} /> },
+    {
+      name: "Day Closing",
+      path: "/user/day-closing",
+      icon: <CalendarCheck size={14} />,
+    },
     { name: "Settings", path: "/user/settings", icon: <Settings size={14} /> },
   ];
 
@@ -96,7 +108,7 @@ const UserSidebar = ({ sidebarOpen, setSidebarOpen }) => {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-600">
           <div className="text-xs text-gray-500 text-center">
             <p>© 2024 POS System</p>
-            <p className="mt-1">Version 1.0.0</p>
+            <p className="mt-1">Version 1.2.0</p>
           </div>
         </div>
       </div>
