@@ -191,7 +191,7 @@ const ProductList = () => {
               stockStatus = "Low Stock";
               stockColor = "text-yellow-600";
             } else {
-              stockStatus = "In Stock";
+              stockStatus = "InStock";
               stockColor = "text-green-600";
             }
 
@@ -219,13 +219,13 @@ const ProductList = () => {
                 <div className="p-4 text-gray-500 text-xs md:text-sm">
                   <div className="flex justify-between mb-2">
                     <div>
-                      <h4 className="font-semibold concatenate bg-gray-100 rounded-sm ">
+                      <h4 className="font-semibold concatenate rounded-sm ">
                         {p.name}
                       </h4>
-                      <p className="text-gray-500 text-[10px] ">{p.barcode}</p>
+                      <p className="text-[10px] ">{p.barcode}</p>
                     </div>
                     <span
-                      className={`font-medium text-[10px] bg-gray-100 rounded-sm concatenate ${stockColor}`}
+                      className={`font-medium text-[9px] rounded-sm concatenate ${stockColor}`}
                     >
                       {stockStatus}
                     </span>
