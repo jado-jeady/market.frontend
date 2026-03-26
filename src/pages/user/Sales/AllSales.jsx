@@ -227,7 +227,9 @@ const AllSales = () => {
       {isReturnModalOpen && (
         <ReturnModal
           sale={selectedSale}
-          onClose={() => setIsReturnModalOpen(false)}
+          onClose={() => {
+            (setIsReturnModalOpen(false), fetchSales());
+          }}
         />
       )}
 

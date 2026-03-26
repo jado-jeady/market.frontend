@@ -1,28 +1,53 @@
 import { useState } from "react";
+import { createReturn } from "../../../utils/sales.util";
+import { toast } from "react-toastify";
 
-const ReturnModal = ({ sale, onClose }) => {
-  console.log(sale);
+const ReturnModal = ({ sale, onClose, userId, token }) => {
   const [returnItems, setReturnedItems] = useState(
     sale.items.map((item) => ({
       product_id: item.product_id,
       name: item.product.name,
       maxQty: item.quantity,
-      qty: null,
+      quantity: null,
       reason: "",
     })),
   );
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (index, field, value) => {
     const updated = [...returnItems];
     updated[index][field] = value;
+
+    const newErrors = { ...errors };
+    if (field === "quantity" && Number(value) > updated[index].maxQty) {
+      newErrors[index] = `Quantity cannot exceed ${updated[index].maxQty}`;
+    } else {
+      delete newErrors[index];
+    }
+
     setReturnedItems(updated);
+    setErrors(newErrors);
   };
 
-  const handleSubmit = () => {
-    // Only include items with qty > 0
-    const filtered = returnItems.filter((item) => item.qty > 0);
-    console.log(filtered);
-    onClose();
+  const handleSubmit = async () => {
+    const filtered = returnItems.filter((item) => item.quantity > 0);
+    if (Object.keys(errors).length > 0) {
+      toast.error("Please fix validation errors before submitting");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const result = await createReturn(sale.id, filtered, userId, token);
+      toast.success("Return request submitted!");
+      console.log("Return result:", result);
+      onClose();
+    } catch (err) {
+      toast.error("Failed to submit return");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,10 +66,10 @@ const ReturnModal = ({ sale, onClose }) => {
                   type="number"
                   min="0"
                   max={item.maxQty}
-                  value={item?.quantity}
+                  value={item?.quantity || ""}
                   placeholder="Qty"
                   onChange={(e) =>
-                    handleChange(idx, "qty", Number(e.target.value))
+                    handleChange(idx, "quantity", Number(e.target.value))
                   }
                   className="w-16 border rounded px-1 py-1 text-xs"
                 />
@@ -56,6 +81,9 @@ const ReturnModal = ({ sale, onClose }) => {
                   className="flex-1 border rounded px-2 py-1 text-xs"
                 />
               </div>
+              {errors[idx] && (
+                <p className="text-red-500 text-xs mt-1">{errors[idx]}</p>
+              )}
             </div>
           ))}
         </div>
@@ -64,14 +92,18 @@ const ReturnModal = ({ sale, onClose }) => {
           <button
             onClick={onClose}
             className="text-gray-500 text-xs hover:underline"
+            disabled={loading}
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="bg-blue-600 text-white text-xs px-3 py-1 rounded hover:bg-blue-700"
+            disabled={loading}
+            className={`${
+              loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+            } text-white text-xs px-3 py-1 rounded`}
           >
-            Submit Return
+            {loading ? "Submitting..." : "Submit Return"}
           </button>
         </div>
       </div>

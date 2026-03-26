@@ -5,10 +5,11 @@ const USERS_BASE = `${BASE_URL}/api/users`;
 
 /* ===================== HELPERS ===================== */
 
-const getAuthHeaders = () => {
-  const authData = JSON.parse(localStorage.getItem("user"));
-  const token = authData?.data?.token;
+const authData = JSON.parse(localStorage.getItem("user"));
+const token = authData?.data?.token;
+const userId = authData?.data?.user?.id;
 
+const getAuthHeaders = () => {
   return {
     "Content-Type": "application/json",
     Authorization: token ? `Bearer ${token}` : "",
@@ -222,5 +223,31 @@ export const getSalesByPaymentMethod = async (paymentMethod) => {
       success: false,
       message: "Failed to fetch sales by payment method",
     };
+  }
+};
+
+/* ===================== CREATING A RETURN BY CASHIER ===================== */
+// utils/return.util.js
+
+export const createReturn = async (saleId, items) => {
+  try {
+    const payload = { sale_id: saleId, items, requested_by: userId };
+
+    const response = await fetch(`${SALES_BASE}/return`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
+    });
+    console.log(response);
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to process return");
+    }
+
+    return await response.json();
+  } catch (err) {
+    console.error("Error processing return:", err);
+    throw err;
   }
 };
