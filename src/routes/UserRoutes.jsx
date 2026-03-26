@@ -54,8 +54,6 @@ export const UserRoutes = (
       <Route path="all" element={<AllApprovals />} />
       <Route path="pending" element={<CashierApproval />} />
       <Route path="approved" element={<Approved />} />
-
-    
     </Route>
     <Route path="reports" element={<UserReport />}>
       <Route index element={<DailySales />} />
@@ -64,6 +62,7 @@ export const UserRoutes = (
       <Route path="expenses" element={<Expenses />} />
     </Route>
     <Route path="settings" element={<UserSettings />}>
+      <Route index element={<TaxSettings />} />
       <Route path="tax" element={<TaxSettings />} />
       <Route path="currency" element={<CurrencySettings />} />
       <Route path="receipt" element={<ReceiptFormatSettings />} />

@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAllCategories } from "../../../utils/category.util";
-import { exportProductsToExcel, getAllProducts } from "../../../utils/product.util";
+import {
+  exportProductsToExcel,
+  getAllProducts,
+} from "../../../utils/product.util";
 import StockAdjustmentModal from "../Stock/StockAdjustmentModal";
 import EditProductModal from "./EditProduct";
 import { Download } from "lucide-react";
@@ -36,7 +39,7 @@ const AdminiProductList = () => {
       }
     } catch (err) {
       toast.error("Error fetching products");
-      console.log(err)
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -71,7 +74,7 @@ const AdminiProductList = () => {
         [p.name, p.barcode, p.sku, p.selling_price?.toString()]
           .join(" ")
           .toLowerCase()
-          .includes(q)
+          .includes(q),
       );
     }
     if (category !== "all") {
@@ -80,7 +83,8 @@ const AdminiProductList = () => {
     if (stockLevel !== "all") {
       data = data.filter((p) => {
         if (stockLevel === "in") return p.stock_quantity > p.min_stock;
-        if (stockLevel === "low") return p.stock_quantity > 0 && p.stock_quantity <= p.min_stock;
+        if (stockLevel === "low")
+          return p.stock_quantity > 0 && p.stock_quantity <= p.min_stock;
         if (stockLevel === "out") return p.stock_quantity === 0;
         return true;
       });
@@ -109,28 +113,30 @@ const AdminiProductList = () => {
 
   return (
     <div className="p- sm:p-2 lg:p-8 max-w-[1600px] 2xl:max-w-[2000px] mx-auto transition-all duration-300">
-      
       {/* HEADER SECTION */}
       <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
         <div>
-          <h2 className="text-xl sm:text-xl lg:text-xl mb-2 font-bold text-gray-900 tracking-tight">Product List</h2>
-          <p className="text-xs sm:text-xs lg:text-sm text-gray-600">Search, filter & manage inventory</p>
+          <h2 className="text-xl sm:text-xl lg:text-xl mb-2 font-bold text-gray-900 tracking-tight">
+            Product List
+          </h2>
+          <p className="text-xs sm:text-xs lg:text-sm text-gray-600">
+            Search, filter & manage inventory
+          </p>
         </div>
         <div className="space-2 flex">
-          
-        <Link
-          to="/admin/products/add"
-          className="Link inline-flex items-center px-2 py-2 text-xs lg:text-xs text-white bg-gray-200 rounded-lg hover:bg-gray-300 shadow-sm transition-all"
-        >
-          + Add Product
-        </Link>
-       <button 
-        onClick={exportProductsToExcel} 
-        className="inline-flex items-center px-2 py-1 ml-5 lg:px-2 lg:py-1 text-xs lg:text-xs text-white bg-green-600 rounded-lg hover:bg-green-700 shadow-sm transition-all"
->
-  Export Excel
-  <Download className="ml-2 w-4 h-4" />
-</button>
+          <Link
+            to="/admin/products/add"
+            className="Link inline-flex items-center px-2 py-2 text-xs lg:text-xs text-white bg-gray-200 rounded-lg hover:bg-gray-300 shadow-sm transition-all"
+          >
+            + Add Product
+          </Link>
+          <button
+            onClick={exportProductsToExcel}
+            className="inline-flex items-center px-2 py-1 ml-5 lg:px-2 lg:py-1 text-xs lg:text-xs text-white bg-green-600 rounded-lg hover:bg-green-700 shadow-sm transition-all"
+          >
+            Export Excel
+            <Download className="ml-2 w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -154,7 +160,9 @@ const AdminiProductList = () => {
             {[...new Map(categories.map((p) => [p.id, p])).values()]
               .filter(Boolean)
               .map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
               ))}
           </select>
 
@@ -170,7 +178,11 @@ const AdminiProductList = () => {
           </select>
 
           <button
-            onClick={() => { setSearch(""); setCategory("all"); setStockLevel("all"); }}
+            onClick={() => {
+              setSearch("");
+              setCategory("all");
+              setStockLevel("all");
+            }}
             className="px-2 py-1 h-10 lg:h-8 w-full text-gray-700 text-xs lg:text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
             Clear Filters
@@ -181,22 +193,30 @@ const AdminiProductList = () => {
       {/* PRODUCTS GRID (Scaling for 2K/4K) */}
       {paginatedProducts.length === 0 ? (
         <div className="bg-white p-20 text-center rounded-xl shadow-sm border border-dashed border-gray-300">
-          <p className="text-gray-500 text-lg">No products match your current filters</p>
+          <p className="text-gray-500 text-lg">
+            No products match your current filters
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-2 xs:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4 lg:gap-6 xl:gap-8">
           {paginatedProducts.map((p) => {
             let stockStatus, stockColor;
             if (p.stock_quantity === 0) {
-              stockStatus = "No Stock"; stockColor = "text-red-600 bg-red-50";
+              stockStatus = "No Stock";
+              stockColor = "text-red-600 bg-red-50";
             } else if (p.stock_quantity <= p.min_stock) {
-              stockStatus = "Low Stock"; stockColor = "text-amber-600 bg-amber-50";
+              stockStatus = "Low Stock";
+              stockColor = "text-amber-600 bg-amber-50";
             } else {
-              stockStatus = "In Stock"; stockColor = "text-emerald-600 bg-emerald-50";
+              stockStatus = "In Stock";
+              stockColor = "text-emerald-600 bg-emerald-50";
             }
 
             return (
-              <div key={p.id} className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col group h-full">
+              <div
+                key={p.id}
+                className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col group h-full"
+              >
                 {/* Visual Icon Area */}
                 {/* <div className="h-20 lg:h-28 bg-gray-50 flex items-center justify-center rounded-t-xl group-hover:bg-blue-50 transition-colors">
                   <svg xmlns="http://www.w3.org" className="w-8 h-8 lg:w-12 lg:h-12 text-blue-500 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -207,10 +227,16 @@ const AdminiProductList = () => {
                 <div className="p-2 lg:p-3 flex-1 flex flex-col">
                   <div className="flex justify-between items-start mb-3 gap-2">
                     <div className="min-w-0 flex-1">
-                      <h4 className="font-bold text-xs lg:text-sm text-gray-800 truncate">{p.name}</h4>
-                      <p className="text-[9px] lg:text-xs text-gray-400 font-mono mt-0.5">{p.barcode || 'N/A'}</p>
+                      <h4 className="font-bold text-xs lg:text-sm text-gray-800 truncate">
+                        {p.name}
+                      </h4>
+                      <p className="text-[9px] lg:text-xs text-gray-400 font-mono mt-0.5">
+                        {p.barcode || "N/A"}
+                      </p>
                     </div>
-                    <span className={`px-2 py-0.5 rounded text-[9px] lg:text-xs font-bold tracking-wider ${stockColor}`}>
+                    <span
+                      className={`px-2 py-0.5 rounded text-[9px] lg:text-xs font-bold tracking-wider ${stockColor}`}
+                    >
                       {stockStatus}
                     </span>
                   </div>
@@ -218,11 +244,15 @@ const AdminiProductList = () => {
                   <div className="space-y- mb-1 text-xs lg:text-sm text-gray-600">
                     <div className="flex justify-between border-b border-gray-50 pb-1">
                       <span>Price:</span>
-                      <span className="font-semibold text-xs text-gray-900">${Number(p.selling_price || 0).toFixed(2)}</span>
+                      <span className="font-semibold text-xs text-gray-900">
+                        {Number(p.selling_price || 0).toFixed()} Frw
+                      </span>
                     </div>
                     <div className="flex justify-between text-xs border-b border-gray-50 pb-1">
                       <span>Stock:</span>
-                      <span className="font-semibold">{p.stock_quantity} units</span>
+                      <span className="font-semibold">
+                        {p.stock_quantity} units
+                      </span>
                     </div>
                   </div>
 
@@ -250,20 +280,20 @@ const AdminiProductList = () => {
 
       {/* MODALS */}
       {isAdjustOpen && (
-        <StockAdjustmentModal 
-          isOpen={isAdjustOpen} 
-          onClose={() => setIsAdjustOpen(false)} 
-          product={selectedProduct} 
-          refresh={fetchProducts} 
+        <StockAdjustmentModal
+          isOpen={isAdjustOpen}
+          onClose={() => setIsAdjustOpen(false)}
+          product={selectedProduct}
+          refresh={fetchProducts}
         />
       )}
-      
+
       {isEditModalOpen && (
-        <EditProductModal 
-          isOpen={isEditModalOpen} 
-          onClose={() => setIsEditModalOpen(false)} 
-          product={productToEdit} 
-          refresh={fetchProducts} 
+        <EditProductModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          product={productToEdit}
+          refresh={fetchProducts}
         />
       )}
     </div>

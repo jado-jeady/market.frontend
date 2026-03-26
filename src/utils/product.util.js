@@ -125,11 +125,11 @@ export async function updateProduct(id, product) {
     });
 
     const result = await response.json();
-    console.log(result);
-    if (!response.ok) {
-      throw new Error(result.message || "Failed to update product");
-    }
 
+    console.log(" results", result);
+    if (!response.success) {
+      return result || `Failed to update product: ${response.status}`;
+    }
     return result;
   } catch (err) {
     console.error("Error updating product:", err);
@@ -258,5 +258,22 @@ export const getAllConsumables = async () => {
     return consumables;
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const getLowStockItems = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/products/lowstock`, {
+      method: "GET",
+      Authorization: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new error(errorData.message || `error:${response.status}`);
+    }
+    const lowstockItems = response.json();
+    return lowstockItems;
+  } catch (error) {
+    console.log(`error Fetching the lowstockItems : ${error}`);
   }
 };

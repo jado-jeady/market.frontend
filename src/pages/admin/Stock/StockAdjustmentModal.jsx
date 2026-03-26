@@ -5,31 +5,34 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
   const [type, setType] = useState("IN");
   const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState("");
-  const [QuantityError, setQauntityError] = useState('');
+  const [QuantityError, setQauntityError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
-const handleClose = () => {
-  // Reset all local states to default
-  setType("IN");
-  setQuantity("");
-  setReason("");
-  setQauntityError("");
-  // Finally, call the parent's onClose
-  onClose();
-};
+  const handleClose = () => {
+    // Reset all local states to default
+    setType("IN");
+    setQuantity("");
+    setReason("");
+    setQauntityError("");
+    setLoading(false);
+    // Finally, call the parent's onClose
+    onClose();
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if(quantity<=0 ){
-      setQauntityError("Quantity Must Be greather than zero")
+    setLoading(true);
+
+    if (quantity <= 0) {
+      setQauntityError("Quantity Must Be greather than zero");
       return;
     }
-    if(type==="OUT" && quantity> product.stock_quantity){
+    if (type === "OUT" && quantity > product.stock_quantity) {
       setQauntityError("You can't remove stock you don't Have!");
       return;
     }
-    
 
     try {
       const response = await adjustStock({
@@ -37,19 +40,22 @@ const handleClose = () => {
         type,
         quantity: Number(quantity),
         reason,
-        barcode: product.barcode
+        barcode: product.barcode,
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
+        setLoading(false);
         throw new Error(errorData.message || "Failed to adjust stock");
       }
 
       toast.success("Stock adjusted successfully");
+      setLoading(false);
       refresh();
       onClose();
     } catch (error) {
       toast.error(error.response?.data?.message || "Error adjusting stock");
+      setLoading(false);
     }
   };
 
@@ -60,14 +66,18 @@ const handleClose = () => {
           Adjust Stock - {product.name}
         </h2>
 
-       <div className="flex justify-between mb-4 text-sm ">
-         <p className="">
-          <span>Current Stock: <strong>{product.stock_quantity}</strong></span>
-        </p>
-        <p>
-          <span>Product Barcode: <strong>{product.barcode}</strong></span>
-        </p>
-       </div>
+        <div className="flex justify-between mb-4 text-sm ">
+          <p className="">
+            <span>
+              Current Stock: <strong>{product.stock_quantity}</strong>
+            </span>
+          </p>
+          <p>
+            <span>
+              Product Barcode: <strong>{product.barcode}</strong>
+            </span>
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <select
@@ -89,7 +99,6 @@ const handleClose = () => {
             required
           />
           <p className="text-sm text-red-600 ">{QuantityError}</p>
-          
 
           <input
             type="text"
@@ -104,7 +113,6 @@ const handleClose = () => {
             <button
               type="button"
               onClick={handleClose}
-              
               className="px-4 py-2 bg-gray-300 rounded"
             >
               Cancel
@@ -114,7 +122,7 @@ const handleClose = () => {
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded"
             >
-              Save
+              {loading ? "Adjusting..." : "Adjust Stock"}
             </button>
           </div>
         </form>
