@@ -1,55 +1,175 @@
-import React from 'react';
+import { useState, useEffect } from "react";
+import {
+  getAllReturns,
+  approveReturn,
+  rejectReturn,
+} from "../../../utils/sales.util";
+import { toast } from "react-toastify";
 
 const SalesClaim = () => {
-    return (
-        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-white">
-            {/* Animated Background Gradients */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-white-900/30 blur-[120px] animate-pulse" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-white-900/30 blur-[120px] animate-pulse delay-700" />
+  const [claims, setClaims] = useState([]);
+  const [loading, setLoading] = useState(false);
+  // get admin user id
+  const authData = JSON.parse(localStorage.getItem("user"));
+  const userId = authData?.data?.user?.id;
 
-            <div className="relative z-10 text-center px-6">
-                {/* Floating Main Rocket */}
-                <div className="mb-8 inline-block animate-bounce duration-[2000ms]">
-                    <span className="text-7xl lg:text-9xl drop-shadow-[0_0_25px_rgba(168,85,247,0.5)]">
-                        
-                    </span>
-                </div>
-                
-                {/* Text Content */}
-                <h1 className="text-5xl md:text-7xl lg:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white-400 via-gray-300 to-blue-400 mb-6 tracking-tighter">
-                    Coming Soon
-                </h1>
-                
-                <p className="text-lg md:text-xl lg:text-3xl text-slate-400 font-light max-w-2xl mx-auto mb-12 leading-relaxed">
-                    We're currently <span className="text-white-400 font-medium italic">refining the engine</span>. 
-                    Prepare for a sales experience that defies gravity.
-                </p>
-                
-                {/* Modern Loading Dots */}
-                <div className="flex justify-center items-center gap-3 mb-16">
-                    <div className="w-3 h-3 lg:w-4 lg:h-4 bg-white-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                    <div className="w-3 h-3 lg:w-4 lg:h-4 bg-white-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                    <div className="w-3 h-3 lg:w-4 lg:h-4 bg-white-500 rounded-full animate-bounce" />
-                </div>
-                
-                {/* Glassmorphism Floating Elements */}
-                <div className="absolute inset-0 -z-10 pointer-events-none">
-                    <div className="absolute top-10 left-10 text-4xl animate-[spin_10s_linear_infinite] opacity-40 lg:opacity-80"></div>
-                    <div className="absolute bottom-20 right-20 text-4xl animate-pulse opacity-40 lg:opacity-80"></div>
-                    <div className="absolute top-1/2 -left-20 text-5xl animate-bounce opacity-30"></div>
-                    <div className="absolute bottom-10 left-1/4 text-3xl animate-ping opacity-20"></div>
-                </div>
+  const fetchClaims = async () => {
+    setLoading(true);
+    try {
+      const res = await getAllReturns();
+      console.log("Fetched claims:", res);
+      setClaims(res || []);
+    } catch (err) {
+      toast.error("Failed to load claims");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                {/* Optional Notify Me Button */}
-                <button className="px-8 py-3 lg:px-12 lg:py-5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-full backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95 text-sm lg:text-lg font-semibold tracking-wide">
-                    Get Early Access
-                </button>
-            </div>
-            
-            {/* Subtle Grid Overlay */}
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app')] opacity-20 pointer-events-none" />
-        </div>
-    );
+  useEffect(() => {
+    fetchClaims();
+  }, []);
+
+  const handleApprove = async (return_id, approved_by) => {
+    try {
+      await approveReturn(return_id, approved_by);
+      toast.success("Return approved");
+      fetchClaims();
+    } catch {
+      toast.error("Failed to approve return");
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await rejectReturn(id);
+      toast.success("Return rejected");
+      fetchClaims();
+    } catch {
+      toast.error("Failed to reject return");
+    }
+  };
+
+  return (
+    <div className="p-4 text-gray-600">
+      <h3 className="text-lg font-semibold mb-4">Sales Return Claims</h3>
+
+      {loading ? (
+        <p className="text-gray-500 text-sm">Loading claims...</p>
+      ) : (
+        <>
+          {/* TABLE for desktop */}
+          <div className="hidden md:block overflow-x-auto bg-white rounded shadow">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 text-gray-600">
+                <tr>
+                  <th className="px-6 py-3 text-left">Invoice</th>
+                  <th className="px-6 py-3 text-left">Product</th>
+                  <th className="px-6 py-3 text-left">Qty</th>
+                  <th className="px-6 py-3 text-left">Reason</th>
+                  <th className="px-6 py-3 text-left">Requested By</th>
+                  <th className="px-6 py-3 text-left">Status</th>
+                  <th className="px-6 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y text-gray-600">
+                {claims.length > 0 ? (
+                  claims.map((claim) => (
+                    <tr key={claim.id}>
+                      <td className="px-6 py-4">
+                        {claim.Sale?.invoice_number}
+                      </td>
+                      <td className="px-6 py-4">
+                        {claim?.SaleItem?.Product?.name}
+                      </td>
+                      <td className="px-6 py-4">{claim.quantity}</td>
+                      <td className="px-6 py-4">{claim.reason || "-"}</td>
+                      <td className="px-6 py-4">
+                        {claim.Requester?.full_name}
+                      </td>
+                      <td className="px-6 py-4">{claim.status}</td>
+                      <td className="px-6 py-4 text-right space-x-2">
+                        <button
+                          onClick={() => handleApprove(claim.id, userId)}
+                          className="text-green-600 text-xs hover:underline"
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={() => handleReject(claim.id)}
+                          className="text-red-600 text-xs hover:underline"
+                        >
+                          Reject
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="7"
+                      className="px-6 py-6 text-center text-gray-500"
+                    >
+                      No claims available
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* CARDS for mobile */}
+          <div className="block md:hidden grid grid-cols-2 space-y-2">
+            {claims.length > 0 ? (
+              claims.map((claim) => (
+                <div
+                  key={claim.id}
+                  className="p-4 border rounded-lg shadow-sm bg-white flex flex-col"
+                >
+                  <div className="text-sm font-semibold text-gray-800">
+                    Invoice: {claim.Sale?.invoice_number}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    Product: {claim.SaleItem?.Product?.name}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    Qty: {claim.quantity}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    Reason: {claim.reason || "-"}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    Cashier: {claim.Requester?.full_name}
+                  </div>
+                  <div className="text-xs text-gray-600 mb-2">
+                    Status: {claim.status}
+                  </div>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => handleApprove(claim.id, userId)}
+                      className="text-green-600 text-xs hover:underline"
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      onClick={() => handleReject(claim.id)}
+                      className="text-red-600 text-xs hover:underline"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-500 text-xs py-4">
+                No claims available
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
 };
 
 export default SalesClaim;

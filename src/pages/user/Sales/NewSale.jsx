@@ -282,7 +282,9 @@ const NewSale = () => {
           {/* PRODUCTS GRID */}
 
           {loadingProducts ? (
-            <div className="text-center text-gray-500">Loading products...</div>
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+            </div>
           ) : (
             <>
               {isShiftOpen ? (

@@ -230,24 +230,81 @@ export const getSalesByPaymentMethod = async (paymentMethod) => {
 // utils/return.util.js
 
 export const createReturn = async (saleId, items) => {
-  try {
-    const payload = { sale_id: saleId, items, requested_by: userId };
+  const payload = { sale_id: saleId, items, requested_by: userId };
 
+  const response = await fetch(`${SALES_BASE}/return`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    // Throw the specific message from the backend
+    throw new Error(
+      result.message || result.error || "Failed to process return",
+    );
+  }
+  return result;
+};
+
+// ------------------ GET ALL RETURN  (ADMIN) ------------------
+
+export const getAllReturns = async () => {
+  try {
     const response = await fetch(`${SALES_BASE}/return`, {
-      method: "POST",
+      method: "GET",
       headers: getAuthHeaders(),
-      body: JSON.stringify(payload),
     });
     console.log(response);
-
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || "Failed to process return");
+      throw new Error(error.error || "Failed to fetch returns");
     }
 
     return await response.json();
   } catch (err) {
-    console.error("Error processing return:", err);
+    console.error("Error fetching returns:", err);
+    throw err;
+  }
+};
+
+// ------------------ APPROVE RETURN (ADMIN) ------------------// Fetch all returns
+
+// Approve a return
+export const approveReturn = async (return_id, adminId) => {
+  try {
+    const res = await fetch(`${SALES_BASE}/return/${return_id}/approve`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ approved_by: adminId }),
+    });
+
+    if (!res.ok) throw new Error("Failed to approve return");
+    return await res.json();
+  } catch (err) {
+    console.error(`Error approving return ${id}:`, err);
+    throw err;
+  }
+};
+
+// Reject a return
+export const rejectReturn = async (id, adminId, rejectionReason) => {
+  try {
+    const res = await fetch(`/api/returns/${id}/reject`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        approved_by: adminId,
+        rejection_reason: rejectionReason,
+      }),
+    });
+
+    if (!res.ok) throw new Error("Failed to reject return");
+    return await res.json();
+  } catch (err) {
+    console.error(`Error rejecting return ${id}:`, err);
     throw err;
   }
 };

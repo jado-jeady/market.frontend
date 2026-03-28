@@ -9,6 +9,7 @@ const ReturnModal = ({ sale, onClose, userId, token }) => {
       name: item.product.name,
       maxQty: item.quantity,
       quantity: null,
+      sale_item_id: item.id,
       reason: "",
     })),
   );
@@ -32,19 +33,29 @@ const ReturnModal = ({ sale, onClose, userId, token }) => {
 
   const handleSubmit = async () => {
     const filtered = returnItems.filter((item) => item.quantity > 0);
-    if (Object.keys(errors).length > 0) {
-      toast.error("Please fix validation errors before submitting");
+
+    if (filtered.length === 0) {
+      toast.info("Please select at least one item to return");
       return;
     }
 
     try {
       setLoading(true);
-      const result = await createReturn(sale.id, filtered, userId, token);
+      await createReturn(sale.id, filtered);
+
       toast.success("Return request submitted!");
-      console.log("Return result:", result);
       onClose();
+      refresh(); // Refresh the list if you have a refresh function
     } catch (err) {
-      toast.error("Failed to submit return");
+      // Check for the specific "exists" error
+      if (err.message.includes("already exist")) {
+        toast.warning(
+          "⚠️ This return is already pending. You cannot submit it again.",
+        );
+      } else {
+        toast.error(err.message || "Failed to submit return");
+      }
+      console.error("Return Error:", err.message);
     } finally {
       setLoading(false);
     }
