@@ -1,18 +1,17 @@
 const BASE_URL = import.meta.env.VITE_API_URL;
 const USERS_BASE = `${BASE_URL}/api/`;
 
-const getToken = () =>
-  JSON.parse(localStorage.getItem("user"))?.data?.token;
+const getToken = () => JSON.parse(localStorage.getItem("user"))?.data?.token;
 
 const getHeaders = () => ({
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${getToken()}`
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${getToken()}`,
 });
 
 /* GET USERS */
 export const getUsers = async () => {
   const res = await fetch(`${USERS_BASE}users`, {
-    headers: getHeaders()
+    headers: getHeaders(),
   });
   return await res.json();
 };
@@ -20,11 +19,11 @@ export const getUsers = async () => {
 /* CREATE USER */
 export const createUser = async (payload) => {
   const res = await fetch(`${USERS_BASE}auth/register`, {
-    method: 'POST',
+    method: "POST",
     headers: getHeaders(),
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
-  console.log('API response status:', res);
+  console.log("API response status:", res);
   if (!res.ok) throw await res.json();
   return await res.json();
 };
@@ -33,27 +32,26 @@ export const createUser = async (payload) => {
 export const disableUser = async (id) => {
   const payload = { is_active: false };
   const res = await fetch(`${USERS_BASE}users/delete/${id}`, {
-    method: 'PATCH',
+    method: "PATCH",
     headers: getHeaders(),
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
   return await res.json();
 };
 
 /* UPDATE USER */
 export const updateUser = async (id, payload) => {
-  const res = await fetch(`${USERS_BASE}/${id}`, {
-    method: 'PUT',
+  const res = await fetch(`${USERS_BASE}users/${id}`, {
+    method: "PUT",
     headers: getHeaders(),
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
   return await res.json();
 };
 // GET USERname BY ID
 export const getUserNameById = async (id) => {
   const res = await fetch(`${USERS_BASE}users/username/${id}`, {
-    headers: getHeaders()
-    
+    headers: getHeaders(),
   });
   return await res.json();
-}
+};

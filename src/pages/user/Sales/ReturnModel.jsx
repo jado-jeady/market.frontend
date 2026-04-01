@@ -45,7 +45,7 @@ const ReturnModal = ({ sale, onClose, userId, token }) => {
 
       toast.success("Return request submitted!");
       onClose();
-      refresh(); // Refresh the list if you have a refresh function
+      // Refresh the list if you have a refresh function
     } catch (err) {
       // Check for the specific "exists" error
       if (err.message.includes("already exist")) {

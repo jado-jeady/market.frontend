@@ -275,11 +275,13 @@ export const getAllReturns = async () => {
 // Approve a return
 export const approveReturn = async (return_id, adminId) => {
   try {
+    console.log(return_id, adminId);
     const res = await fetch(`${SALES_BASE}/return/${return_id}/approve`, {
       method: "PUT",
       headers: getAuthHeaders(),
       body: JSON.stringify({ approved_by: adminId }),
     });
+    console.log(res);
 
     if (!res.ok) throw new Error("Failed to approve return");
     return await res.json();

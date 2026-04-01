@@ -7,9 +7,10 @@ import {
   Boxes,
   BarChart3,
   CalendarCheck,
-  Settings,
   Menu,
   X,
+  SettingsIcon,
+  Settings,
 } from "lucide-react";
 
 const AdminSidebar = () => {
@@ -22,7 +23,7 @@ const AdminSidebar = () => {
     { name: "Stock", path: "/admin/stock", icon: Boxes },
     { name: "Report", path: "/admin/report", icon: BarChart3 },
     { name: "Shifts", path: "/admin/shifts", icon: CalendarCheck },
-    { name: "Management", path: "/admin/management", icon: Settings },
+    { name: "Management", path: "/admin/management", icon: SettingsIcon },
   ];
 
   return (
@@ -72,15 +73,15 @@ const AdminSidebar = () => {
                     to={item.path}
                     onClick={() => setIsOpen(false)}
                     className={({ isActive }) =>
-                      `flex items-center space-x-3 px-4 py-3 rounded-lg text-sm transition-all duration-200 ${
+                      `flex items-center space-x-3 px-1 py-3 rounded-lg text-sm transition-all duration-200 ${
                         isActive
-                          ? "bg-secondary-500 text-white shadow-md"
-                          : "hover:bg-primary-600 text-primary-100"
+                          ? "bg-gray-100 text-white shadow-md"
+                          : "hover:bg-gray-200 text-primary-100"
                       }`
                     }
                   >
                     <Icon size={18} />
-                    <span>{item.name}</span>
+                    <span className="">{item.name}</span>
                   </NavLink>
                 </li>
               );
