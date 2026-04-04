@@ -99,7 +99,6 @@ const NewSale = () => {
         toast.warning("Not enough stock available");
         return;
       }
-
       setCart(
         cart.map((item) =>
           item.id === product.id
@@ -108,8 +107,20 @@ const NewSale = () => {
         ),
       );
     } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
+      const isJibu = product.barcode === "792382470938";
+      setCart([
+        ...cart,
+        { ...product, quantity: 1, withBottle: isJibu ? false : undefined },
+      ]);
     }
+  };
+
+  const toggleBottle = (id) => {
+    setCart(
+      cart.map((item) =>
+        item.id === id ? { ...item, withBottle: !item.withBottle } : item,
+      ),
+    );
   };
 
   const updateQuantity = (id, quantity) => {
@@ -134,8 +145,16 @@ const NewSale = () => {
   };
 
   /* ===================== TOTALS ===================== */
+
+  const BOTTLE_PRICE = 16000;
+
+  // ── calculateTotal ──────────────────────────────────────
   const calculateTotal = () =>
-    cart.reduce((total, item) => total + item.selling_price * item.quantity, 0);
+    cart.reduce((total, item) => {
+      const price = parseFloat(item.selling_price);
+      const bottleExtra = item.withBottle ? BOTTLE_PRICE : 0;
+      return total + (price + bottleExtra) * item.quantity;
+    }, 0);
 
   const totalItems = cart.length;
 
@@ -150,8 +169,15 @@ const NewSale = () => {
     }
 
     // Take snapshot BEFORE confirmation
+    // inside handleCheckout, update items mapping:
     setInvoiceSnapshot({
-      items: [...cart],
+      items: cart.map((item) => ({
+        ...item,
+        // ✅ bake the bottle surcharge into unit_price at snapshot time
+        unit_price: item.selling_price + (item.withBottle ? BOTTLE_PRICE : 0),
+        // ✅ label to show on receipt
+        display_name: item.withBottle ? `${item.name} (+ Bottle)` : item.name,
+      })),
       totalItems,
       totalQuantity,
       totalAmount: calculateTotal(),
@@ -161,7 +187,7 @@ const NewSale = () => {
       invoiceNumber: invoiceNumber,
     });
 
-    setIsConfirmed(false); // reset confirmation state
+    setIsConfirmed(false);
     setShowInvoiceModal(true);
   };
   // HANDLE PRINT
@@ -202,7 +228,10 @@ const NewSale = () => {
         items: invoiceSnapshot.items.map((item) => ({
           product_id: item.id,
           quantity: item.quantity,
-          unit_price: item.selling_price,
+          // ✅ force number + add bottle price here as the final safety net
+          unit_price:
+            parseFloat(item.selling_price) +
+            (item.withBottle ? BOTTLE_PRICE : 0),
         })),
       };
 
@@ -211,6 +240,7 @@ const NewSale = () => {
         return;
       }
       // Create sale
+      console.log(payload || "no payload");
       const response = await createSale(payload);
 
       if (!response.success) {
@@ -376,57 +406,97 @@ const NewSale = () => {
                   {cart.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-gray-500 grid-cols-3 rounded-lg flex justify-between items-center p-2"
+                      className="bg-gray-500 grid-cols-3 rounded-lg flex flex-col p-2 gap-1"
                     >
-                      <div>
-                        <h4 className="text-xs font-semibold">{item.name}</h4>
-                        <p className="text-[0.625rem]">
-                          {item.selling_price} frw
-                        </p>
-                      </div>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="text-xs font-semibold">{item.name}</h4>
 
-                      <div className="flex items-center gap-1">
+                          <p className="text-[0.625rem]">
+                            {item.withBottle
+                              ? `${parseFloat(item.selling_price).toLocaleString()} + ${BOTTLE_PRICE.toLocaleString()} frw`
+                              : `${parseFloat(item.selling_price).toLocaleString()} frw`}
+                          </p>
+
+                          <p className="text-xs font-bold text-white">
+                            {(
+                              (item.selling_price +
+                                (item.withBottle ? BOTTLE_PRICE : 0)) *
+                              item.quantity
+                            ).toLocaleString()}{" "}
+                            frw
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity - 1)
+                            }
+                            className="w-5 text-gray-700 bg-white border rounded text-xs"
+                          >
+                            -
+                          </button>
+                          <input
+                            value={item.quantity}
+                            onChange={(e) =>
+                              updateQuantity(
+                                item.id,
+                                parseInt(e.target.value) || 1,
+                              )
+                            }
+                            className="w-8 text-center text-xs border rounded"
+                          />
+                          <button
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity + 1)
+                            }
+                            className="w-5 bg-white text-gray-700 border rounded text-xs"
+                          >
+                            +
+                          </button>
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">
+                            {(
+                              (parseFloat(item.selling_price) +
+                                (item.withBottle ? BOTTLE_PRICE : 0)) *
+                              item.quantity
+                            ).toLocaleString()}{" "}
+                            frw
+                          </p>
+                        </div>
+
                         <button
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
-                          }
-                          className="w-5 text-gray-700 bg-white border rounded text-xs"
+                          onClick={() => removeFromCart(item.id)}
+                          className="text-red-500 text-xs"
                         >
-                          -
+                          ✕
                         </button>
+                      </div>
 
-                        <input
-                          value={item.quantity}
-                          onChange={(e) =>
-                            updateQuantity(
-                              item.id,
-                              parseInt(e.target.value) || 1,
-                            )
-                          }
-                          className="w-8 text-center text-xs border rounded"
-                        />
-
+                      {/* ── Bottle option (Jibu only) ── */}
+                      {item.withBottle !== undefined && (
                         <button
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
-                          }
-                          className="w-5 bg-white text-gray-700 border rounded text-xs"
+                          onClick={() => toggleBottle(item.id)}
+                          className={`flex items-center gap-2 text-xs px-2 py-1 rounded border transition w-fit
+          ${
+            item.withBottle
+              ? "bg-blue-100 border-blue-400 text-blue-700"
+              : "bg-white border-gray-300 text-gray-500"
+          }`}
                         >
-                          +
+                          <span
+                            className={`w-3 h-3 rounded-sm border flex items-center justify-center
+          ${item.withBottle ? "bg-blue-500 border-blue-500" : "border-gray-400"}`}
+                          >
+                            {item.withBottle && (
+                              <span className="text-white text-[8px]">✓</span>
+                            )}
+                          </span>
+                          With Bottle (+16,000 frw)
                         </button>
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-white">
-                          {item.selling_price * item.quantity} frw
-                        </p>
-                      </div>
-
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="text-red-500 text-xs"
-                      >
-                        ✕
-                      </button>
+                      )}
                     </div>
                   ))}
 
@@ -591,14 +661,17 @@ const NewSale = () => {
               {invoiceSnapshot?.items.map((item) => (
                 <div key={item.id} className="text-xs">
                   <div className="flex justify-between">
-                    <span>{item.name}</span>
-                    <span>{item.selling_price} frw</span>
+                    {/* ✅ shows "Jibu (+ Bottle)" if applicable */}
+                    <span>{item.display_name}</span>
+                    <span>{item.unit_price.toLocaleString()} frw</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>
-                      {item.quantity} × {item.selling_price} frw
+                      {item.quantity} × {item.unit_price.toLocaleString()} frw
                     </span>
-                    <span>{item.selling_price * item.quantity} frw</span>
+                    <span>
+                      {(item.unit_price * item.quantity).toLocaleString()} frw
+                    </span>
                   </div>
                 </div>
               ))}

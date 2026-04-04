@@ -270,6 +270,27 @@ export const getAllReturns = async () => {
   }
 };
 
+// ------------------ GET RETURN BY CASHIER (CASHIER) ------------------
+
+export const getMyReturns = async (cashierId) => {
+  try {
+    const response = await fetch(`${SALES_BASE}/return/${cashierId}`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to fetch returns");
+    }
+
+    return await response.json();
+  } catch (err) {
+    console.error("Error fetching returns:", err);
+    throw err;
+  }
+};
+
 // ------------------ APPROVE RETURN (ADMIN) ------------------// Fetch all returns
 
 // Approve a return

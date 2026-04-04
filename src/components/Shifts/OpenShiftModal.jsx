@@ -2,11 +2,17 @@ import { useEffect, useState } from "react";
 import { openShift } from "../../utils/shift.util";
 import { toast } from "react-toastify";
 import { Coffee } from "lucide-react";
+import { getAllConsumables } from "../../utils/product.util";
 
 const OpenShiftModal = ({ isOpen, onClose, onShiftOpened }) => {
   const [openingBalance, setOpeningBalance] = useState("");
   const [shiftNote, setShiftNote] = useState("");
   const [loading, setLoading] = useState(false);
+  const [consumables, setConsumables] = useState([]);
+
+  useEffect(() => {
+    fetchConsumables();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,6 +57,7 @@ const OpenShiftModal = ({ isOpen, onClose, onShiftOpened }) => {
     try {
       const data = await getAllConsumables();
       console.log("COnsumables", data);
+
       setConsumables(data || []);
     } catch (error) {
       console.error("Failed to fetch consumables:", error);
@@ -69,6 +76,15 @@ const OpenShiftModal = ({ isOpen, onClose, onShiftOpened }) => {
             </div>
             <h2 className="text-xl font-bold text-gray-800">Open Shift</h2>
           </div>
+
+          <p className="text-gray-600 mb-4">
+            Enter the opening balance and any notes for this shift.
+          </p>
+
+          <p className="text-gray-600 mb-4">
+            <span className="font-semibold">Consumables:</span>{" "}
+            {consumables.data.map((consumable) => consumable.name).join(", ")}
+          </p>
 
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
