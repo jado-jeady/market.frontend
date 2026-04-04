@@ -308,9 +308,9 @@ const AllSales = () => {
         )}
 
         <table className="w-full text-xs min-w-[800px]">
-          <thead className="bg-gray-100 text-gray-700">
+          <thead className="bg-gray-100 text-center text-gray-700">
             <tr>
-              <th className="px-2 py-2 text-left">Order ID</th>
+              <th className="px-2 py-2">Order ID</th>
               <th className="px-2 py-2">Customer</th>
               <th className="px-2 py-2">Cashier</th>
               <th className="px-2 py-2">Date</th>
@@ -326,7 +326,7 @@ const AllSales = () => {
               limitedSales.map((sale) => (
                 <tr
                   key={sale.id}
-                  className="border-t text-gray-600 hover:bg-gray-50"
+                  className="border-t text-center text-gray-600 hover:bg-gray-50"
                 >
                   <td className="px-2 py-2 font-semibold">
                     {sale.invoice_number}
@@ -342,23 +342,14 @@ const AllSales = () => {
                     {Number(sale.subtotal).toFixed(2)}
                   </td>
                   <td className="px-2 py-2">{sale.status}</td>
-                  <td className="px-2 py-2 space-x-2">
+                  <td className="px-2 text-center py-2 space-x-2">
                     <button
                       onClick={() => openSaleDetails(sale)}
-                      className="text-green-600 hover:text-green-800"
+                      className="text-blue-600  hover:text-green-800"
                       disabled={tableLoading}
                     >
-                      View
+                      More details...
                     </button>
-                    {sale.status === "COMPLETED" && (
-                      <button
-                        onClick={() => handleReturn(sale.id)}
-                        className="text-blue-600 hover:text-blue-800"
-                        disabled={tableLoading}
-                      >
-                        Return
-                      </button>
-                    )}
                   </td>
                 </tr>
               ))

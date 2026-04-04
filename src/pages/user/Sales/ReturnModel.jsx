@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createReturn } from "../../../utils/sales.util";
 import { toast } from "react-toastify";
 
-const ReturnModal = ({ sale, onClose, userId, token }) => {
+const ReturnModal = ({ sale, onClose, userId, token, onCuncel }) => {
   const [returnItems, setReturnedItems] = useState(
     sale.items.map((item) => ({
       product_id: item.product_id,
@@ -101,7 +101,7 @@ const ReturnModal = ({ sale, onClose, userId, token }) => {
 
         <div className="flex justify-end space-x-2 mt-4">
           <button
-            onClick={onClose}
+            onClick={onCuncel}
             className="text-gray-500 text-xs hover:underline"
             disabled={loading}
           >

@@ -4,7 +4,7 @@ import { getAllProducts } from "../../../utils/product.util";
 import { createSale } from "../../../utils/sales.util";
 import { getCurrentShift } from "../../../utils/shift.util";
 import { useShift } from "../../../context/ShiftContext";
-import { Store, MoveUpRight } from "lucide-react";
+import { Store, MoveUpRight, RotateCw } from "lucide-react";
 
 const NewSale = () => {
   const [products, setProducts] = useState([]);
@@ -346,13 +346,14 @@ const NewSale = () => {
                     Your shop is currently on standby. Open a new shift to start
                     processing sales and tracking your inventory.
                   </p>
-
-                  <div className="flex items-center gap-2 text-sm font-semibold text-blue-600 animate-bounce">
-                    <span className="bg-blue-100 px-3 py-1 rounded-full">
-                      Click "Open Shift" to begin
-                    </span>
-                    <MoveUpRight className="w-4 h-4" />
-                  </div>
+                  {/* Refresh Button */}
+                  <button
+                    onClick={() => window.location.reload()} // Or call your checkShiftStatus() function
+                    className="mb-6 flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors bg-gray-50 px-4 py-2 rounded-full border border-gray-100 hover:border-blue-100"
+                  >
+                    <RotateCw className="w-3 h-3" />
+                    Refresh Status
+                  </button>
                 </div>
               )}
             </>
