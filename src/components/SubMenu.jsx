@@ -14,7 +14,7 @@ const SubMenu = ({ items }) => {
               className={({ isActive }) =>
                 `px-4 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
                   isActive
-                    ? "bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-md"
+                    ? "bg-gray-200 text-white shadow-md"
                     : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                 }`
               }

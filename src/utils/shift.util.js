@@ -161,3 +161,18 @@ export const getShiftBusinessDates = async () => {
     };
   }
 };
+
+// get Consumables snapshoot
+export const getConsumablesSnapshot = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/shift/consumables`, {
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    return {
+      success: false,
+      message: error?.message || "Failed to fetch shift",
+    };
+  }
+};
