@@ -16,11 +16,7 @@ const ShiftStatus = () => {
   }, []);
 
   if (!shift) {
-    return (
-      <div className="bg-red-100 p-3 rounded">
-        ❌ No active shift
-      </div>
-    );
+    return <div className="bg-red-100 p-3 rounded">❌ No active shift</div>;
   }
 
   return (

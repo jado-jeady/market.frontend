@@ -1,179 +1,324 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import { getMyReturns } from "../../utils/sales.util";
+import { toast } from "react-toastify";
+import {
+  Search,
+  Filter,
+  Loader2,
+  RotateCcw,
+  Eye,
+  X,
+  Hash,
+  List,
+} from "lucide-react";
 
 const Returns = () => {
   const [returns, setReturns] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  // States for the Item Preview Modal
+  const [previewReturn, setPreviewReturn] = useState(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  // Get cashier ID from local storage
+  const authData = JSON.parse(localStorage.getItem("user"));
+  const userId = authData?.data?.user?.id;
+
+  const fetchReturns = async () => {
+    setLoading(true);
+    try {
+      // Use your dynamic function with the cashier's ID
+      const data = await getMyReturns(userId);
+
+      // Access 'returns' from the { returns, count } response object
+      if (data && data.returns) {
+        setReturns(data.returns);
+      } else {
+        setReturns([]);
+      }
+    } catch (error) {
+      toast.error("Failed to load your returns");
+      console.error("Fetch error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchReturns = async () => {
-      try {
-        // TODO: Replace with your actual API endpoint
-        const response = await fetch('/api/sales/returns');
-        if (response.ok) {
-          const data = await response.json();
-          setReturns(data);
-        }
-      } catch (error) {
-        console.error('Error fetching returns:',returns, error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (userId) fetchReturns();
+  }, [userId]);
 
-    fetchReturns();
-  }, []);
+  // Filtering Logic
+  const filteredReturns = returns.filter((item) => {
+    const matchesInvoice = item.Sale?.invoice_number
+      ?.toLowerCase()
+      .includes(search.toLowerCase());
+    const matchesStatus = statusFilter === "" || item.status === statusFilter;
+    return matchesInvoice && matchesStatus;
+  });
 
-  if (loading) {
-    return (
-      <div className="p-6 flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
+  // Stats for the top cards
+  const stats = {
+    total: filteredReturns.length,
+    pending: filteredReturns.filter((r) => r.status === "PENDING").length,
+    approved: filteredReturns.filter((r) => r.status === "APPROVED").length,
+  };
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
+      {/* HEADER & REFRESH */}
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h3 className="text-xl font-bold text-gray-900">Returns</h3>
-          <p className="text-gray-600 text-xs mt-1">Manage product returns and exchanges</p>
+          <h3 className="text-xl font-bold text-gray-900">My Returns</h3>
+          <p className="text-gray-500 text-xs mt-1">
+            Status of your submitted return requests
+          </p>
         </div>
         <button
-          className="px-6 py-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-lg hover:from-primary-700 hover:to-secondary-700 transition shadow-md"
+          onClick={fetchReturns}
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-semibold transition shadow-sm"
         >
-          Process Return
+          <RotateCcw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          Refresh
         </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-gray-600 text-sm">Total Returns</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">24</p>
+      {/* STATS CARDS */}
+      <div className="grid grid-cols-4 gap-3 mb-1">
+        <div className="bg-white rounded-xl shadow-sm p-1 border border-gray-100 text-center">
+          <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">
+            Total
+          </p>
+          <p className="text-xl font-black text-gray-800">{stats.total}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-gray-600 text-sm">Pending</p>
-          <p className="text-2xl font-bold text-yellow-600 mt-1">8</p>
+        <div className="bg-white rounded-xl shadow-sm p-1 border border-gray-100 text-center">
+          <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">
+            Pending
+          </p>
+          <p className="text-xl font-black text-yellow-600">{stats.pending}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-gray-600 text-sm">Completed</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">16</p>
+        <div className="bg-white rounded-xl shadow-sm p-1 border border-gray-100 text-center">
+          <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">
+            Aproved
+          </p>
+          <p className="text-xl font-black text-yellow-600">{stats.approved}</p>
         </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input
-            type="text"
-            placeholder="Search by transaction ID..."
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-          />
-          <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none">
-            <option>All Status</option>
-            <option>Pending</option>
-            <option>Approved</option>
-            <option>Rejected</option>
-            <option>Completed</option>
-          </select>
-          <input
-            type="date"
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-          />
-          <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
-            Apply Filters
-          </button>
+        <div className="bg-white rounded-xl shadow-sm p-1 border border-gray-100 text-center">
+          <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">
+            Rejected
+          </p>
+          <p className="text-xl font-black text-red-600">
+            {stats.rejected || "None"}
+          </p>
         </div>
       </div>
 
-      {/* Returns Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gradient-to-r from-primary-600 to-secondary-600 text-white">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Return ID</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Transaction ID</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Customer</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Product</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Amount</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Date</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Status</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {[1, 2, 3, 4, 5].map((item) => {
-                const statuses = ['Pending', 'Approved', 'Completed', 'Rejected'];
-                const status = statuses[item % 4];
-                const statusColors = {
-                  Pending: 'bg-yellow-100 text-yellow-700',
-                  Approved: 'bg-blue-100 text-blue-700',
-                  Completed: 'bg-green-100 text-green-700',
-                  Rejected: 'bg-red-100 text-red-700',
-                };
+      {/* FILTERS */}
+      <div className="bg-white p-1 text-gray-500 rounded-xl shadow-sm mb-1 grid grid-cols-1 md:grid-cols-2 gap-3 border border-gray-100">
+        <div className="relative">
+          <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Invoice #"
+            className="w-full pl-9 h-9 text-xs border rounded-lg bg-gray-50 outline-none"
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="h-9 text-xs border rounded-lg bg-gray-50 px-3 outline-none"
+        >
+          <option value="">All Status</option>
+          <option value="PENDING">Pending</option>
+          <option value="APPROVED">Approved</option>
+          <option value="REJECTED">Rejected</option>
+        </select>
+      </div>
 
-                return (
-                  <tr key={item} className="hover:bg-gray-50 transition">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                      RET-{3000 + item}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      TXN-{2000 + item}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      Customer {item}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      Product Name {item}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                      ${(Math.random() * 100 + 20).toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      2024-01-{String(item).padStart(2, '0')}
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-dashed border-gray-200">
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-2" />
+          <p className="text-xs text-gray-400">Loading returns...</p>
+        </div>
+      ) : (
+        <>
+          {/* DESKTOP TABLE */}
+          <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <table className="min-w-full">
+              <thead className="bg-gray-50 border-b text-[10px] uppercase font-bold text-gray-400 tracking-widest">
+                <tr>
+                  <th className="px-6 py-4 text-left">Invoice</th>
+                  <th className="px-6 py-4 text-left">Refunded Item</th>
+                  <th className="px-6 py-4 text-center">Qty</th>
+                  <th className="px-6 py-4 text-left">Date</th>
+                  <th className="px-6 py-4 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50 text-gray-600">
+                {filteredReturns.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm font-bold">
+                      {item.Sale?.invoice_number}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[status]}`}>
-                        {status}
+                      <button
+                        onClick={() => {
+                          setPreviewReturn(item);
+                          setIsPreviewOpen(true);
+                        }}
+                        className="text-xs text-blue-600 hover:text-blue-800 underline decoration-dotted font-medium text-left"
+                      >
+                        {/* Find specific product name from included SaleItems */}
+                        {item.Sale?.SaleItems?.find(
+                          (si) => si.id === item.Sale_item_id,
+                        )?.product_name || "View Item"}
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-center font-bold">
+                      {item.quantity}
+                    </td>
+                    <td className="px-6 py-4 text-xs">
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span
+                        className={`px-3 py-1 rounded-full text-[10px] font-black ${
+                          item.status === "PENDING"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : item.status === "APPROVED"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {item.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm">
-                      <button className="text-primary-600 hover:text-primary-700 font-medium mr-3">
-                        View
-                      </button>
-                      {status === 'Pending' && (
-                        <button className="text-secondary-600 hover:text-secondary-700 font-medium">
-                          Process
-                        </button>
-                      )}
-                    </td>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Pagination */}
-        <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
-          <div className="text-sm text-gray-700">
-            Showing <span className="font-medium">1</span> to <span className="font-medium">5</span> of{' '}
-            <span className="font-medium">24</span> results
+          {/* MOBILE GRID VIEW */}
+          <div className="md:hidden grid grid-cols-1 gap-3">
+            {filteredReturns.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white p-4 rounded-xl shadow-sm border border-gray-100"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="text-sm font-bold text-gray-800">
+                    {item.Sale?.invoice_number}
+                  </h4>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      item.status === "PENDING"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-green-100 text-green-700"
+                    }`}
+                  >
+                    {item.status}
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    setPreviewReturn(item);
+                    setIsPreviewOpen(true);
+                  }}
+                  className="text-xs text-blue-600 font-medium underline decoration-dotted"
+                >
+                  {item.Sale?.SaleItems?.find(
+                    (si) => si.id === item.Sale_item_id,
+                  )?.product_name || "View Item"}
+                </button>
+                <div className="flex justify-between items-center text-[10px] text-gray-400 mt-3 pt-3 border-t">
+                  <span>Qty: {item.quantity}</span>
+                  <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="flex space-x-2">
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
-              Previous
-            </button>
-            <button className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition">
-              1
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
-              Next
-            </button>
+
+          {filteredReturns.length === 0 && (
+            <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-200">
+              <p className="text-gray-400 text-sm italic">
+                No return requests found.
+              </p>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ITEM PREVIEW MODAL */}
+      {isPreviewOpen && previewReturn && (
+        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden border border-gray-100">
+            <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+              <div className="flex items-center gap-2">
+                <List className="w-4 h-4 text-blue-600" />
+                <h3 className="font-bold text-xs text-gray-800 uppercase tracking-tight">
+                  Refund Details
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsPreviewOpen(false)}
+                className="text-gray-400 hover:text-red-500"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5">
+              <div className="flex items-center gap-3 mb-4 p-3 bg-blue-50 rounded-lg">
+                <div className="p-2 bg-blue-500 rounded-md text-white">
+                  <Hash className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-blue-600 font-bold uppercase">
+                    Refunded Quantity
+                  </p>
+                  <p className="text-xl font-black text-blue-900">
+                    {previewReturn.quantity}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">
+                    Product Name
+                  </label>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {previewReturn.Sale?.SaleItems?.find(
+                      (si) => si.id === previewReturn.Sale_item_id,
+                    )?.product_name || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    Return Reason
+                  </label>
+                  <p className="text-xs text-gray-600 italic bg-gray-50 p-3 rounded border border-gray-100 mt-1">
+                    "{previewReturn.reason || "No reason specified"}"
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t bg-gray-50 flex justify-center">
+              <button
+                onClick={() => setIsPreviewOpen(false)}
+                className="w-full py-2.5 bg-gray-800 text-white text-[10px] font-bold uppercase rounded-lg hover:bg-gray-700 transition tracking-widest"
+              >
+                Close Preview
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -17,6 +17,7 @@ const AddProduct = () => {
     expire_date: '',
     min_stock: '',
     description: '',
+    isConsumable: false,
     supplier: '',
   });
   const [categories, setCategories] = useState([]);
@@ -24,6 +25,9 @@ const AddProduct = () => {
   const [Pricing_error, setPricing_errors] = useState(null);
   const [stock_error, setStock_error] = useState(null);
   const [barcode_error, setBarcode_error] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+
 
   // Getting All Categories
   useEffect(() => {
@@ -36,8 +40,16 @@ const AddProduct = () => {
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    
+     // If it's a checkbox, use the boolean 'checked' value
+  const finalValue = type === 'checkbox' ? checked : value;
+
+  setFormData((prev) => ({ 
+    ...prev, 
+    [name]: finalValue 
+  }));
+
 
     // Real-time validation
     if (name === 'selling_price' || name === 'buying_price') {
@@ -83,6 +95,7 @@ const AddProduct = () => {
     setPricing_errors(null);
     setStock_error(null);
     setBarcode_error(null);
+    setIsLoading(true);
 
     let hasError = false;
 
@@ -110,6 +123,7 @@ const AddProduct = () => {
     if (hasError) return;
 
     try {
+      console.log("this is data to send on bakcedn",formData);
       const res = await createProduct(formData);
 
       if (res?.success) {
@@ -125,6 +139,7 @@ const AddProduct = () => {
           min_stock: "",
           expire_date: "",
           description: "",
+          isConsumable: false,
           supplier: "",
         });
         // Clear all errors
@@ -132,6 +147,7 @@ const AddProduct = () => {
         setPricing_errors(null);
         setStock_error(null);
         setBarcode_error(null);
+        setIsLoading(false);
       } else {
         console.error("Error response from backend:", res);
         // Check if the error is related to duplicate barcode
@@ -140,22 +156,25 @@ const AddProduct = () => {
             res?.message?.toLowerCase().includes('already exists') ||
             res?.error?.toLowerCase().includes('duplicate')) {
           setBarcode_error("This barcode already exists. Please use a different barcode.");
+          
         }
         
         toast.error(<Link to="/admin/products" className="text-red-500 text-sm hover:underline">Product with barcode <i className="text-red-500">{formData.barcode} </i> exists. Click here to adjust its stock </Link>,{
           autoClose: 10000,
         });
-        console.error("Error response SASASASfrom backend:", res);
+        setIsLoading(false);
       }
     } catch (error) {
       // Check if error response contains barcode duplicate message
       if (error?.response?.data?.message?.toLowerCase().includes('barcode') ||
           error?.response?.data?.error?.toLowerCase().includes('barcode')) {
         setBarcode_error("This barcode already exists. Please use a different barcode.");
+        setIsLoading(false);
       }
       
       toast.error("Failed to add product");
       console.error('Error adding product:', error);
+      setIsLoading(false);
     }
   };
 
@@ -163,7 +182,7 @@ const AddProduct = () => {
     <div className="p-6 pt-2">
       {/* Header */}
       <div className="mb-2">
-        <h3 className="text-xl font-bold text-gray-900">Create New Product</h3>
+        <h3 className="text-xl font-bold text-gray-900">Add a new product</h3>
         <p className="text-sm text-gray-600 mt-1">
           Fill in the product details below to add it on the marketplace platform.
         </p>
@@ -269,6 +288,19 @@ const AddProduct = () => {
                 {Expire_error && (
                   <p className="text-red-500 text-xs mt-1">{Expire_error}</p>
                 )}
+                <div className="flex items-center text-xs text-gray-600 mt-6 space-x-2">
+  <input
+  type="checkbox"
+  id="consumable"
+  name="isConsumable" // Add this!
+  checked={formData.isConsumable} // Use 'checked', not 'value'
+  onChange={handleChange}
+  className="h-4 w-4 bg-transparent appearance-white accent-blue-500 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+/>
+  <label htmlFor="consumable" className="cursor-pointer text-lg ">
+    Consumable
+  </label>
+</div>
               </div>
 
               <div className="md:col-span-1">
@@ -418,6 +450,7 @@ const AddProduct = () => {
               setPricing_errors(null);
               setStock_error(null);
               setBarcode_error(null);
+              setIsLoading(false);
             }}
             className="px-2 py-2 border rounded-lg text-gray-700 hover:bg-gray-100"
           >
@@ -425,9 +458,18 @@ const AddProduct = () => {
           </button>
           <button
             type="submit"
+            disabled={isLoading}
             className="px-2 py-1 lg:bg-gray-700 bg:text-white sm:bg-gray-700 sm:text-white  bg-gray-600 text-sm text-white rounded-lg hover:bg-gray-900"
           >
-            Add Product
+            {isLoading ? (
+              <div className="flex items-center justify-center space-x-2">
+                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                <span>Adding Prodcut...</span>
+              </div>
+            ) : (
+              "Add Product"
+            )}
+            
           </button>
         </div>
       </form>

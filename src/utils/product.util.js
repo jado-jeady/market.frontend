@@ -1,7 +1,4 @@
-
-
 import * as XLSX from "xlsx";
-
 const API_URL = import.meta.env.VITE_API_URL;
 // Get token safely
 const getAuthHeaders = () => {
@@ -9,19 +6,17 @@ const getAuthHeaders = () => {
   const token = authData?.data?.token;
 
   return {
-    'Content-Type': 'application/json',
-    Authorization: token ? `Bearer ${token}` : ''
+    "Content-Type": "application/json",
+    Authorization: token ? `Bearer ${token}` : "",
   };
 };
-
 
 const buildQueryParams = (filters = {}) =>
   new URLSearchParams(
     Object.entries(filters).filter(
-      ([, value]) => value !== undefined && value !== ''
-    )
+      ([, value]) => value !== undefined && value !== "",
+    ),
   ).toString();
-
 
 /* ============================
    CREATE PRODUCT
@@ -37,11 +32,9 @@ export async function createProduct(product) {
     const result = await response.json();
 
     if (!response.ok) {
-        
       return result.message || "Failed to create product";
     }
     return result; // { success, data }
-
   } catch (err) {
     console.error("Error creating product:", err);
     return null;
@@ -52,14 +45,13 @@ export async function createProduct(product) {
    GET ALL PRODUCTS
 ============================ */
 
-
 export async function getAllProducts(filters = {}) {
   try {
     const params = buildQueryParams(filters);
-    
+
     // Add the "?" only if params isn't an empty string
     const queryString = params ? `?${params}` : "";
-    
+
     const response = await fetch(`${API_URL}/api/products${queryString}`, {
       method: "GET",
       headers: getAuthHeaders(),
@@ -67,9 +59,8 @@ export async function getAllProducts(filters = {}) {
 
     if (!response.ok) {
       // Improved: Log the status code to help debugging
-      console.log(response)
+      console.log(response);
       throw new Error(`Failed to fetch products: ${response.status}`);
-      
     }
 
     return await response.json();
@@ -105,13 +96,10 @@ export async function getProductById(id) {
 ============================ */
 export async function getProductByBarcode(barcode) {
   try {
-    const response = await fetch(
-      `${API_URL}/api/products/barcode/${barcode}`,
-      {
-        method: "GET",
-        headers: getAuthHeaders()
-      }
-    );
+    const response = await fetch(`${API_URL}/api/products/barcode/${barcode}`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
 
     if (!response.ok) {
       throw new Error("Product not found");
@@ -129,19 +117,19 @@ export async function getProductByBarcode(barcode) {
 ============================ */
 export async function updateProduct(id, product) {
   try {
-    console.log(product)
+    console.log(product);
     const response = await fetch(`${API_URL}/api/products/${id}`, {
       method: "PUT",
-      headers:getAuthHeaders(),
+      headers: getAuthHeaders(),
       body: JSON.stringify(product),
     });
 
     const result = await response.json();
-  console.log(result)
-    if (!response.ok) {
-      throw new Error(result.message || "Failed to update product");
-    }
 
+    console.log(" results", result);
+    if (!response.success) {
+      return result || `Failed to update product: ${response.status}`;
+    }
     return result;
   } catch (err) {
     console.error("Error updating product:", err);
@@ -156,7 +144,7 @@ export async function deleteProduct(id) {
   try {
     const response = await fetch(`${API_URL}/api/products/${id}`, {
       method: "DELETE",
-      headers:getAuthHeaders
+      headers: getAuthHeaders,
     });
 
     if (!response.ok) {
@@ -174,12 +162,10 @@ export async function deleteProduct(id) {
 
 export async function adjustStock(product) {
   try {
-    
-  
     const response = await fetch(`${API_URL}/api/stock/adjust`, {
       method: "POST",
       headers: getAuthHeaders(),
-      body: JSON.stringify(product)
+      body: JSON.stringify(product),
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -192,7 +178,6 @@ export async function adjustStock(product) {
     return null;
   }
 }
-
 
 /**
  * Fetches all stock adjustment history records
@@ -214,14 +199,11 @@ export async function getStockAdjustments() {
 
     // Standardize return: ensure it returns an array even if backend wraps it in { data: [...] }
     return Array.isArray(result) ? result : result?.data || [];
-    
   } catch (err) {
     console.error("Error fetching stock adjustments:", err);
     return []; // Return empty array so the UI .filter() doesn't crash
   }
 }
-
-
 
 export const exportProductsToExcel = async () => {
   try {
@@ -245,8 +227,8 @@ export const exportProductsToExcel = async () => {
         p.stock_quantity === 0
           ? "Out of Stock"
           : p.stock_quantity <= p.min_stock
-          ? "Low Stock"
-          : "In Stock",
+            ? "Low Stock"
+            : "In Stock",
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(data);
@@ -258,5 +240,40 @@ export const exportProductsToExcel = async () => {
     XLSX.writeFile(workbook, "products.xlsx");
   } catch (error) {
     console.error(error);
+  }
+};
+
+export const getAllConsumables = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/products/consumables`, {
+      method: "GET",
+      Authorization: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `Error: ${response.status}`);
+    }
+    const consumables = await response.json();
+    return consumables;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const getLowStockItems = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/products/lowstock`, {
+      method: "GET",
+      Authorization: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new error(errorData.message || `error:${response.status}`);
+    }
+    const lowstockItems = response.json();
+    return lowstockItems;
+  } catch (error) {
+    console.log(`error Fetching the lowstockItems : ${error}`);
   }
 };

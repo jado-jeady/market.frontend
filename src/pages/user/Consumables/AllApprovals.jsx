@@ -4,6 +4,7 @@ import {
   approveProduction,
   rejectProduction,
 } from "../../../utils/storekeeper.utils";
+import { toast } from "react-toastify";
 
 const AllApprovals = () => {
   const [approvals, setApprovals] = useState([]);
@@ -15,6 +16,7 @@ const AllApprovals = () => {
   const [actionType, setActionType] = useState(null); // "approve" or "reject"
   const [note, setNote] = useState("");
   const limit = 10;
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     const fetchApprovals = async () => {
@@ -46,32 +48,44 @@ const AllApprovals = () => {
 
   const handleConfirm = async () => {
     if (!selectedProduction || !actionType) return;
-    let response;
-    if (actionType === "approve") {
-      response = await approveProduction(selectedProduction.id, note);
-    } else {
-      response = await rejectProduction(selectedProduction.id, note);
-    }
 
-    if (response.success) {
-      alert(`Production ${actionType}d successfully!`);
-      setApprovals((prev) =>
-        prev.map((prod) =>
-          prod.id === selectedProduction.id
-            ? {
-                ...prod,
-                status: actionType.toUpperCase(),
-                approval_note: actionType === "approve" ? note : prod.approval_note,
-                rejection_reason: actionType === "reject" ? note : prod.rejection_reason,
-              }
-            : prod
-        )
-      );
-      setSelectedProduction(null);
-      setNote("");
-      setActionType(null);
-    } else {
-      alert(`Failed to ${actionType} production`);
+    setActionLoading(true);
+
+    let response;
+    try {
+      if (actionType === "approve") {
+        response = await approveProduction(selectedProduction.id, note);
+      } else {
+        response = await rejectProduction(selectedProduction.id, note);
+      }
+
+      if (response.success) {
+        toast.success(`Production ${actionType}d successfully!`);
+        setApprovals((prev) =>
+          prev.map((prod) =>
+            prod.id === selectedProduction.id
+              ? {
+                  ...prod,
+                  status: actionType.toUpperCase(),
+                  approval_note:
+                    actionType === "approve" ? note : prod.approval_note,
+                  rejection_reason:
+                    actionType === "reject" ? note : prod.rejection_reason,
+                }
+              : prod,
+          ),
+        );
+        setSelectedProduction(null);
+        setNote("");
+        setActionType(null);
+      } else {
+        toast.error(`Failed to ${actionType} production`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong");
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -79,7 +93,7 @@ const AllApprovals = () => {
     filter === "all"
       ? approvals
       : approvals.filter(
-          (prod) => prod.status?.toLowerCase() === filter.toLowerCase()
+          (prod) => prod.status?.toLowerCase() === filter.toLowerCase(),
         );
 
   const totalPages = Math.ceil(total / limit);
@@ -113,9 +127,13 @@ const AllApprovals = () => {
             <tr>
               <th className="px-6 py-3 text-left font-semibold">Batch ID</th>
               <th className="px-6 py-3 text-left font-semibold">Items</th>
-              <th className="px-6 py-3 text-left font-semibold">Total Quantity</th>
+              <th className="px-6 py-3 text-left font-semibold">
+                Total Quantity
+              </th>
               <th className="px-6 py-3 text-left font-semibold">Time Added</th>
-              <th className="px-6 py-3 text-left font-semibold">Approved/Rejected By</th>
+              <th className="px-6 py-3 text-left font-semibold">
+                Approved/Rejected By
+              </th>
               <th className="px-6 py-3 text-left font-semibold">Status</th>
               <th className="px-6 py-3 text-left font-semibold">Actions</th>
             </tr>
@@ -139,13 +157,15 @@ const AllApprovals = () => {
                   <td className="px-6 py-4 font-medium">BATCH-{prod.id}</td>
                   <td className="px-6 py-4">
                     {prod.items
-                      ?.map((item) => `${item.product?.name} (${item.quantity})`)
+                      ?.map(
+                        (item) => `${item.product?.name} (${item.quantity})`,
+                      )
                       .join(", ") || "—"}
                   </td>
                   <td className="px-6 py-4 font-semibold">
                     {prod.items?.reduce(
                       (sum, item) => sum + Number(item.quantity || 0),
-                      0
+                      0,
                     )}
                   </td>
                   <td className="px-6 py-4">
@@ -161,7 +181,7 @@ const AllApprovals = () => {
                   <td className="px-6 py-4">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                        prod.status
+                        prod.status,
                       )}`}
                     >
                       {prod.status}
@@ -240,112 +260,120 @@ const AllApprovals = () => {
           Next
         </button>
       </div>
-{/* Modal for Approve/Reject Info */}
-{selectedProduction && (
-  <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-      <h2 className="text-xl font-bold mb-4 text-gray-900">
-        {actionType === "approve"
-          ? `Approve Batch-${selectedProduction.id}`
-          : actionType === "reject"
-          ? `Reject Batch-${selectedProduction.id}`
-          : selectedProduction.status === "APPROVED"
-          ? `Approval Details (Batch-${selectedProduction.id})`
-          : `Rejection Details (Batch-${selectedProduction.id})`}
-      </h2>
+      {/* Modal for Approve/Reject Info */}
+      {selectedProduction && (
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+            <h2 className="text-xl font-bold mb-4 text-gray-900">
+              {actionType === "approve"
+                ? `Approve Batch-${selectedProduction.id}`
+                : actionType === "reject"
+                  ? `Reject Batch-${selectedProduction.id}`
+                  : selectedProduction.status === "APPROVED"
+                    ? `Approval Details (Batch-${selectedProduction.id})`
+                    : `Rejection Details (Batch-${selectedProduction.id})`}
+            </h2>
 
-      {/* If pending and user clicked Approve/Reject, show textarea */}
-      {selectedProduction.status === "PENDING" && actionType && (
-        <>
-          <p className="text-sm text-gray-600 mb-4">
-            Please enter a {actionType} note before confirming.
-          </p>
-          <textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className="w-full border  text-gray-700 border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none mb-4"
-            rows="4"
-            placeholder={`${actionType} note...`}
-          />
-          <div className="flex justify-end gap-3">
+            {/* If pending and user clicked Approve/Reject, show textarea */}
+            {selectedProduction.status === "PENDING" && actionType && (
+              <>
+                <p className="text-sm text-gray-600 mb-4">
+                  Please enter a {actionType} note before confirming.
+                </p>
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  className="w-full border  text-gray-700 border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none mb-4"
+                  rows="4"
+                  placeholder={`${actionType} note...`}
+                />
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      setSelectedProduction(null);
+                      setNote("");
+                      setActionType(null);
+                    }}
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirm}
+                    disabled={actionLoading}
+                    className={`px-4 py-2 ${
+                      actionType === "approve"
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-red-600 hover:bg-red-700"
+                    } text-white text-sm font-medium rounded-lg disabled:opacity-50`}
+                  >
+                    {actionLoading
+                      ? actionType === "approve"
+                        ? "Approving..."
+                        : "Rejecting..."
+                      : actionType === "approve"
+                        ? "Approve"
+                        : "Reject"}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* If already approved/rejected, show info */}
+            {selectedProduction.status === "APPROVED" && (
+              <>
+                <p className="text-sm text-gray-600 mb-4">
+                  Note:{" "}
+                  <span className="text-green-600 font-medium">
+                    {selectedProduction.approval_note || "No note provided"}
+                  </span>
+                </p>
+                <p className="text-sm text-gray-600 mb-4">
+                  Approved By: {selectedProduction.approvedBy?.full_name || "—"}
+                </p>
+                <p className="text-sm text-gray-600 mb-4">
+                  Date:{" "}
+                  {selectedProduction.approved_at
+                    ? new Date(selectedProduction.approved_at).toLocaleString()
+                    : "—"}
+                </p>
+              </>
+            )}
+
+            {selectedProduction.status === "REJECTED" && (
+              <>
+                <p className="text-sm text-gray-600 mb-4">
+                  Reason:{" "}
+                  <span className="text-red-600 font-medium">
+                    {selectedProduction.rejection_reason ||
+                      "No reason provided"}
+                  </span>
+                </p>
+                <p className="text-sm text-gray-600 mb-4">
+                  Rejected By: {selectedProduction.rejectedBy?.full_name || "—"}
+                </p>
+                <p className="text-sm text-gray-600 mb-4">
+                  Date & Time of Approval:{" "}
+                  {selectedProduction.rejected_at
+                    ? new Date(selectedProduction.rejected_at).toLocaleString()
+                    : "—"}
+                </p>
+              </>
+            )}
+
             <button
               onClick={() => {
                 setSelectedProduction(null);
                 setNote("");
                 setActionType(null);
               }}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg"
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
             >
-              Cancel
-            </button>
-            <button
-              onClick={handleConfirm}
-              className={`px-4 py-2 ${
-                actionType === "approve"
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-red-600 hover:bg-red-700"
-              } text-white text-sm font-medium rounded-lg`}
-            >
-              {actionType === "approve" ? "Approve" : "Reject"}
+              ✕
             </button>
           </div>
-        </>
+        </div>
       )}
-
-      {/* If already approved/rejected, show info */}
-      {selectedProduction.status === "APPROVED" && (
-        <>
-          <p className="text-sm text-gray-600 mb-4">
-            Note:{" "}
-            <span className="text-green-600 font-medium">
-              {selectedProduction.approval_note || "No note provided"}
-            </span>
-          </p>
-          <p className="text-sm text-gray-600 mb-4">
-            Approved By: {selectedProduction.approvedBy?.full_name || "—"}
-          </p>
-          <p className="text-sm text-gray-600 mb-4">
-            Date:{" "}
-            {selectedProduction.approved_at
-              ? new Date(selectedProduction.approved_at).toLocaleString()
-              : "—"}
-          </p>
-        </>
-      )}
-
-      {selectedProduction.status === "REJECTED" && (
-        <>
-          <p className="text-sm text-gray-600 mb-4">
-            Reason:{" "}
-            <span className="text-red-600 font-medium">
-              {selectedProduction.rejection_reason || "No reason provided"}
-            </span>
-          </p>
-          <p className="text-sm text-gray-600 mb-4">
-            Rejected By: {selectedProduction.rejectedBy?.full_name || "—"}
-          </p>
-          <p className="text-sm text-gray-600 mb-4">
-            Date:{" "}
-            {selectedProduction.rejected_at
-              ? new Date(selectedProduction.rejected_at).toLocaleString()
-              : "—"}
-          </p>
-        </>
-      )}
-
-      <button
-        onClick={() => {
-          setSelectedProduction(null);
-          setNote("");
-          setActionType(null);
-        }}
-        className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-      >
-        ✕
-      </button>
-    </div>
-  </div>
-)}
     </div>
   );
 };

@@ -31,7 +31,7 @@ const UserDashboard = () => {
         const todaySalesList = todaySalesRes?.data || [];
         const todayTotal = todaySalesList.reduce(
           (sum, sale) => sum + Number(sale.subtotal || 0),
-          0
+          0,
         );
 
         /* ================= BEST SELLING ITEM ================= */
@@ -49,7 +49,7 @@ const UserDashboard = () => {
           });
         });
         const sortedProducts = Object.values(productSalesMap).sort(
-          (a, b) => b.quantity - a.quantity
+          (a, b) => b.quantity - a.quantity,
         );
         if (sortedProducts.length > 0) bestItem = sortedProducts[0];
 
@@ -64,7 +64,7 @@ const UserDashboard = () => {
           customerSalesMap[customerName].total += Number(sale.subtotal || 0);
         });
         const sortedCustomers = Object.values(customerSalesMap).sort(
-          (a, b) => b.total - a.total
+          (a, b) => b.total - a.total,
         );
         if (sortedCustomers.length > 0) topCustomer = sortedCustomers[0];
 
@@ -86,15 +86,18 @@ const UserDashboard = () => {
         setRecentSales(recentSalesRes?.data || []);
         setLoadingRecentSales(false);
 
-        /* ================= LOW STOCK ================= */
+        /* ================= OUT OF STOCK ================= */
         setLoadingLowStock(true);
-        const productsRes = await getAllProducts({out_of_stock:true});
+        const productsRes = await getAllProducts({ out_of_stock: true });
         console.log("Low stock response:", productsRes);
         const products = productsRes?.data || [];
 
         const lowStockCount = products.length;
         setOutOfStock(products);
+
+        /* ================= LOW OF STOCK ================= */
         
+
         setStats((prev) => ({ ...prev, lowStockItems: lowStockCount }));
         setLoadingLowStock(false);
       } catch (error) {
@@ -125,7 +128,7 @@ const UserDashboard = () => {
             <p className="text-xs text-gray-400 mt-2">Loading...</p>
           ) : (
             <h3 className="text-sm font-bold text-green-600 mt-2">
-              {stats.todaySales.toLocaleString()} RWF
+              {stats.todaySales.toLocaleString() || `0`} RWF
             </h3>
           )}
         </div>
@@ -137,19 +140,21 @@ const UserDashboard = () => {
             <p className="text-xs text-gray-400 mt-2">Loading...</p>
           ) : (
             <h3 className="text-sm font-bold text-blue-600 mt-2">
-              {stats.totalTransactions}
+              {stats.totalTransactions || `No sale made`}
             </h3>
           )}
         </div>
 
         {/* Best Selling Item */}
         <div className="shadow rounded-lg p-5">
-          <p className="text-sm text-gray-500">Best Selling Item</p>
+          <p className="text-sm text-gray-500">Fast move Items</p>
           {loadingStats ? (
             <p className="text-xs text-gray-400 mt-2">Loading...</p>
           ) : (
             <h3 className="text-sm font-bold mt-2">
-              <span className="text-xs text-green-500">{stats.bestItemname}</span>
+              <span className="text-xs text-green-500">
+                {stats.bestItemname || "Not applicable"}
+              </span>
               <span className="bg-gray-700 p-1 pl-1 pr-2 rounded-lg text-white text-[9px] ml-7">
                 {stats.bestItemquantity} pcs
               </span>
@@ -159,12 +164,14 @@ const UserDashboard = () => {
 
         {/* Top Customer */}
         <div className="bg-white shadow rounded-lg pt-5 p-3">
-          <p className="text-sm text-gray-500">Top Customer</p>
+          <p className="text-sm text-gray-500">Loyal Customer</p>
           {loadingStats ? (
             <p className="text-xs text-gray-400 mt-2">Loading...</p>
           ) : (
             <h3 className="text-sm font-bold mt-2">
-              <span className="text-xs text-green-500">{stats.topCustomername}</span>
+              <span className="text-xs text-green-500">
+                {stats.topCustomername || "None"}
+              </span>
               <span className="bg-gray-700 p-1 rounded-lg text-white text-[10px] ml-7">
                 {stats.topCustomerpurchase} Frw
               </span>
@@ -187,78 +194,89 @@ const UserDashboard = () => {
 
       {/* ================= QUICK ACTIONS ================= */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <Link to="/user/sales/new" className="hover:bg-gray-200 border-1 text-white rounded-lg p-6 text-center hover:bg-primary-700 transition">
+        <Link
+          to="/user/sales/new"
+          className="hover:bg-gray-200 border-1 text-white rounded-lg p-6 text-center hover:bg-primary-700 transition"
+        >
           New Sale
         </Link>
-        <Link to="/user/products" className="hover:bg-gray-200 text-white rounded-lg border-1 p-6 text-center hover:bg-secondary-700 transition">
+        <Link
+          to="/user/products"
+          className="hover:bg-gray-200 text-white rounded-lg border-1 p-6 text-center hover:bg-secondary-700 transition"
+        >
           View Products
         </Link>
-        <Link to="/user/reports" className="hover:bg-gray-200 border-1 text-white rounded-lg p-6 text-center hover:bg-blue-700 transition">
+        <Link
+          to="/user/reports"
+          className="hover:bg-gray-200 border-1 text-white rounded-lg p-6 text-center hover:bg-blue-700 transition"
+        >
           View Reports
         </Link>
       </div>
 
-{/* ================= LOW STOCK & RECENT SALES ================= */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-  {/* ================= Low Stock ================= */}
-  <div className="bg-white text-gray-700 shadow rounded-lg p-5">
-    <h3 className="text-lg font-semibold mb-4">Low Stock Items</h3>
-    {loadingLowStock ? (
-      <p className="text-gray-400 text-sm">Loading low stock items...</p>
-    ) : outOfStock.length === 0 ? (
-      <p className="text-gray-500 text-sm">No low stock items found.</p>
-    ) : (
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="text-left">
-              <th className="px-4 py-2">Product</th>
-              <th className="px-4 py-2">Quantity</th>
-            </tr>
-          </thead>
-          <tbody>
-            {outOfStock.map((item) => (
-              <tr key={item.id} className="border-b">
-                <td className="px-4 py-2">{item.name}</td>
-                <td className="px-4 py-2">{item.stock_quantity}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    )}
-  </div>
+      {/* ================= LOW STOCK & RECENT SALES ================= */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* ================= Low Stock ================= */}
+        <div className="bg-white text-gray-700 shadow rounded-lg p-5">
+          <h3 className="text-lg font-semibold mb-4">Low stock items</h3>
+          {loadingLowStock ? (
+            <p className="text-gray-400 text-sm">Loading low stock items...</p>
+          ) : outOfStock.length === 0 ? (
+            <p className="text-gray-500 text-sm">No low stock items found.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left">
+                    <th className="px-4 py-2">Product</th>
+                    <th className="px-4 py-2">Quantity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {outOfStock.map((item) => (
+                    <tr key={item.id} className="border-b">
+                      <td className="px-4 py-2">{item.name}</td>
+                      <td className="px-4 py-2">{item.stock_quantity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
-  {/* ================= out of stock items ================= */}
-  <div className="bg-white text-gray-700 shadow rounded-lg p-5">
-    <h3 className="text-lg font-semibold mb-4">Out of Stock Items</h3>
-    {loadingLowStock ? (
-      <p className="text-gray-400 text-sm">Loading out of stock items...</p>
-    ) : outOfStock.length === 0 ? (
-      <p className="text-gray-500 text-sm">No out of stock items found.</p>
-    ) : (
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="text-left">
-              <th className="px-4 py-2">Product</th>
-              <th className="px-4 py-2">Quantity</th>
-            </tr>
-          </thead>
-          <tbody>
-            {outOfStock.map((item) => (
-              <tr key={item.id} className="border-b">
-                <td className="px-4 py-2">{item.name}</td>
-                <td className="px-4 py-2">{item.stock_quantity}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    )}
-  </div>
-
-
+        {/* ================= out of stock items ================= */}
+        <div className="bg-white text-gray-700 shadow rounded-lg p-5">
+          <h3 className="text-lg font-semibold mb-4">Out of Stock Items</h3>
+          {loadingLowStock ? (
+            <p className="text-gray-400 text-sm">
+              Loading out of stock items...
+            </p>
+          ) : outOfStock.length === 0 ? (
+            <p className="text-gray-500 text-sm">
+              No out of stock items found.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left">
+                    <th className="px-4 py-2">Product</th>
+                    <th className="px-4 py-2">Quantity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {outOfStock.map((item) => (
+                    <tr key={item.id} className="border-b">
+                      <td className="px-4 py-2">{item.name}</td>
+                      <td className="px-4 py-2">{item.stock_quantity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ================= RECENT SALES ================= */}
@@ -273,7 +291,7 @@ const UserDashboard = () => {
             <table className="w-full">
               <thead>
                 <tr className="text-left">
-                  <th  className="px-4 py-2">Invoice</th>
+                  <th className="px-4 py-2">Invoice</th>
                   <th className="px-4 py-2">Items</th>
                   <th className="px-4 py-2">Customer</th>
                   <th className="px-4 py-2">Date</th>
@@ -286,7 +304,9 @@ const UserDashboard = () => {
                     <td className="px-4 text-xs py-2">{sale.invoice_number}</td>
                     <td className="px-4 py-2">{sale?.items.length}</td>
                     <td className="px-4 py-2">{sale.customerName}</td>
-                    <td className="px-4 py-2">{sale.created_at.split("T")[0]}</td>
+                    <td className="px-4 py-2">
+                      {sale.created_at.split("T")[0]}
+                    </td>
                     <td className="px-4 py-2">{sale.subtotal}</td>
                   </tr>
                 ))}
@@ -295,9 +315,6 @@ const UserDashboard = () => {
           </div>
         )}
       </div>
-
-
-
     </div>
   );
 };
