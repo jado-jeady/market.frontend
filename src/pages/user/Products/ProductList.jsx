@@ -9,6 +9,7 @@ import {
   Search,
   RotateCcw,
   X,
+  ScanBarcode,
   MessageSquareText,
   Eye,
   Info,
@@ -114,7 +115,6 @@ const ProductList = () => {
           <RotateCcw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
         </button>
       </div>
-
       <div className="bg-white border border-gray-100 rounded-2xl p-1 mb-3 shadow-sm grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         <div className="relative">
           <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
@@ -159,14 +159,20 @@ const ProductList = () => {
           Clear
         </button>
       </div>
-
       {/* ITEMS AREA */}
+
       <div className="min-h-[400px]">
         {loading ? (
           <div className="flex flex-col justify-center items-center py-32">
             <Loader2 className="h-10 w-10 text-blue-600 animate-spin mb-4" />
             <p className="text-gray-400 text-xs font-black tracking-widest uppercase">
               Fetching Data...
+            </p>
+          </div>
+        ) : paginatedProducts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-32">
+            <p className="text-gray-400 text-xs font-black tracking-widest uppercase">
+              No products found.
             </p>
           </div>
         ) : (
@@ -248,7 +254,6 @@ const ProductList = () => {
           </div>
         )}
       </div>
-
       {/* VIEW DETAILS MODAL */}
       {isViewModalOpen && selectedProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
@@ -306,11 +311,6 @@ const ProductList = () => {
                   val={`${Number(selectedProduct.buying_price).toLocaleString()} F`}
                   icon={<DollarSign className="w-3.5 h-3.5" />}
                 />
-                <DetailRow
-                  label="details"
-                  val={selectedProduct.description}
-                  icon={<Calendar className="w-3.5 h-3.5" />}
-                />
 
                 <DetailRow
                   label="Expiry Date"
@@ -334,7 +334,11 @@ const ProductList = () => {
                   val={selectedProduct?.created_at || "Not Available"}
                   icon={<Info className="w-3.5 h-3.5" />}
                 />
-                <DetailRow label="Barcode" val={selectedProduct.barcode} />
+                <DetailRow
+                  label="Barcode"
+                  val={selectedProduct.barcode}
+                  icon={<ScanBarcode className="w-3.5 h-3.5" />}
+                />
               </div>
             </div>
             <div className="p-4 bg-gray-50 border-t">
@@ -342,13 +346,12 @@ const ProductList = () => {
                 Product Description
               </h4>
               <p className="text-xs text-gray-600 italic">
-                "{selectedProduct.description}"
+                "{selectedProduct.description || `Not Available`}"
               </p>
             </div>
           </div>
         </div>
       )}
-
       {/* ALERT NOTE MODAL */}
       {isNoteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
