@@ -198,9 +198,12 @@ const GetShifts = () => {
               <thead className="bg-gray-50 text-gray-400 text-[10px] font-bold uppercase tracking-wider border-b">
                 <tr>
                   <th className="px-4 py-4 text-left">Cashier</th>
-                  <th className="px-4 py-4 text-left">Shop</th>
+                  <th className="px-4 py-4 text-left">Open Note</th>
                   <th className="px-4 py-4 text-center">Status</th>
                   <th className="px-4 py-4 text-right">Opening</th>
+                  <th className="px-4 py-4 text-right">Opened At</th>
+                  <th className="px-4 py-4 text-right">Closing</th>
+                  <th className="px-4 py-4 text-right">Closed At</th>
                   <th className="px-4 py-4 text-right">Sales</th>
                   <th className="px-4 py-4 text-right">Diff</th>
                   <th className="px-4 py-4 text-center">Actions</th>
@@ -220,7 +223,7 @@ const GetShifts = () => {
                         ID: {shift.id}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-xs">{shift.shop_name}</td>
+                    <td className="px-4 py-3 text-xs">{shift.opening_note}</td>
                     <td className="px-4 py-3 text-center">
                       <span
                         className={`px-2 py-1 rounded-full text-[10px] font-black uppercase ${
@@ -231,6 +234,18 @@ const GetShifts = () => {
                       >
                         {shift.status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-xs">
+                      {Number(shift.opening_balance).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-xs">
+                      {new Date(shift.opened_at).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-xs">
+                      {Number(shift.closing_balance).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-xs">
+                      {new Date(shift.closed_at).toLocaleString()}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-xs">
                       {Number(shift.opening_balance).toLocaleString()}
