@@ -6,6 +6,7 @@ import { getAllConsumables } from "../../utils/product.util";
 
 const CloseShiftModal = ({ isOpen, onClose, shift, onShiftClosed }) => {
   const [closingBalance, setClosingBalance] = useState("");
+  const [cashInHand, setCashInHand] = useState("");
   const [closingNote, setClosingNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [consumablesLoading, setConsumablesLoading] = useState(false); // New loading state
@@ -35,6 +36,7 @@ const CloseShiftModal = ({ isOpen, onClose, shift, onShiftClosed }) => {
         shiftId: shift?.id,
         closing_balance: closingBalance,
         closing_note: closingNote,
+        cash_in_hand: cashInHand,
         consumables_snapshot: consumableData,
         closed_by: user?.id,
       });
@@ -142,12 +144,26 @@ const CloseShiftModal = ({ isOpen, onClose, shift, onShiftClosed }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Closing Balance (RWF)
+                  Momo Closing Balance (RWF)
                 </label>
                 <input
                   type="number"
                   value={closingBalance}
                   onChange={(e) => setClosingBalance(e.target.value)}
+                  className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0.00"
+                  required
+                  min="0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cash in-Hand (RWF)
+                </label>
+                <input
+                  type="number"
+                  value={cashInHand}
+                  onChange={(e) => setCashInHand(e.target.value)}
                   className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="0.00"
                   required

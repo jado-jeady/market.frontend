@@ -102,7 +102,7 @@ export const getAllShifts = async (filters = {}) => {
   try {
     // Build query string from filters
     const params = buildQueryParams(filters);
-    const res = await fetch(`${BASE_URL}/api/shift?${params}`, {
+    const res = await fetch(`${BASE_URL}/api/shift/all?${params}`, {
       headers: getAuthHeaders(),
     });
     const data = await handleResponse(res);
@@ -115,6 +115,22 @@ export const getAllShifts = async (filters = {}) => {
     };
   }
 };
+
+/* ================= GET SHIFTS ONLY ================= */
+export const getShiftsOnly = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/shift/`, {
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    return {
+      success: false,
+      message: error?.message || "Failed to fetch shifts",
+    };
+  }
+};
+
 /* ================= GET SHIFT BY ID (ADMIN) ================= */
 export const getShiftById = async (id) => {
   try {

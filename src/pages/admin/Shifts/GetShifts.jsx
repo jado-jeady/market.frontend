@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { getAllShifts } from "../../../utils/shift.util";
+import { getAllShifts, getShiftsOnly } from "../../../utils/shift.util";
 import { getUserNameById } from "../../../utils/user.util";
 import { toast } from "react-toastify";
 import AdminCloseShiftModal from "../../../components/Shifts/AdminCloseShiftModal.jsx";
@@ -37,7 +37,7 @@ const GetShifts = () => {
   const fetchShifts = async () => {
     setLoading(true);
     try {
-      const response = await getAllShifts({ limit: 1000000, page: 1 });
+      const response = await getShiftsOnly();
       if (response.success) {
         setShifts(response.data);
         const uniqueIds = [...new Set(response.data.map((s) => s.cashier_id))];

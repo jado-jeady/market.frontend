@@ -4,7 +4,14 @@ import { getAllProducts } from "../../../utils/product.util";
 import { createSale } from "../../../utils/sales.util";
 import { getCurrentShift } from "../../../utils/shift.util";
 import { useShift } from "../../../context/ShiftContext";
-import { Store, MoveUpRight, RotateCw } from "lucide-react";
+import {
+  Store,
+  MoveUpRight,
+  RotateCw,
+  Check,
+  CheckIcon,
+  CheckCheckIcon,
+} from "lucide-react";
 
 const NewSale = () => {
   const [products, setProducts] = useState([]);
@@ -744,6 +751,11 @@ const NewSale = () => {
                     </svg>
                     <span>Processing...</span>
                   </>
+                ) : isConfirmed ? (
+                  <p className="text-center">
+                    Confirmed
+                    <Check className="w-4 h-4 text-white-500 ml-5" />
+                  </p>
                 ) : (
                   <span>Confirm Payment</span>
                 )}
