@@ -4,12 +4,15 @@ const MY_SALES_BASE = `${BASE_URL}/api/sales/my-sale`;
 const USERS_BASE = `${BASE_URL}/api/users`;
 
 /* ===================== HELPERS ===================== */
-
-const authData = JSON.parse(localStorage.getItem("user"));
-const token = authData?.data?.token;
-const userId = authData?.data?.user?.id;
+const getUserId = () => {
+  const authData = JSON.parse(localStorage.getItem("user"));
+  return authData?.data?.user?.id;
+};
 
 const getAuthHeaders = () => {
+  const authData = JSON.parse(localStorage.getItem("user"));
+  const token = authData?.data?.token;
+
   return {
     "Content-Type": "application/json",
     Authorization: token ? `Bearer ${token}` : "",

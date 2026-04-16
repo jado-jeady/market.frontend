@@ -24,19 +24,29 @@ const AllSales = () => {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [date, setDate] = useState("");
   const [page, setPage] = useState(1);
-
   const [selectedSale, setSelectedSale] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
 
+  // geting user id from local storage
+  const authData = JSON.parse(localStorage.getItem("user"));
+  const token = authData?.data?.token;
+  const userId = authData?.data?.user?.id;
+
   // States for the Item Quick Preview
+
   const [itemPreviewSale, setItemPreviewSale] = useState(null);
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
 
   const fetchSales = async () => {
     setLoading(true);
     try {
-      const filters = { page, limit: 10, payment_method: paymentMethod };
+      const filters = {
+        page,
+        limit: 10,
+        user_id: userId,
+        payment_method: paymentMethod,
+      };
       if (date) {
         filters.start_date = `${date}T00:00:00`;
         filters.end_date = `${date}T23:59:59`;
