@@ -4,12 +4,15 @@ const MY_SALES_BASE = `${BASE_URL}/api/sales/my-sale`;
 const USERS_BASE = `${BASE_URL}/api/users`;
 
 /* ===================== HELPERS ===================== */
-
-const authData = JSON.parse(localStorage.getItem("user"));
-const token = authData?.data?.token;
-const userId = authData?.data?.user?.id;
+const getUserId = () => {
+  const authData = JSON.parse(localStorage.getItem("user"));
+  return authData?.data?.user?.id;
+};
 
 const getAuthHeaders = () => {
+  const authData = JSON.parse(localStorage.getItem("user"));
+  const token = authData?.data?.token;
+
   return {
     "Content-Type": "application/json",
     Authorization: token ? `Bearer ${token}` : "",
@@ -123,17 +126,13 @@ export const getSaleById = async (saleId) => {
 };
 
 /* ===================== Get Sale by shift cashier ===================== */
-export const getSalesByShift = async ({ cashierId, businessDate }) => {
+export const getCashierSalesByShiftDate = async (businessDate) => {
   try {
-    const params = new URLSearchParams();
-    if (cashierId) params.append("cashierId", cashierId);
-    if (businessDate) params.append("businessDate", businessDate);
-
-    const res = await fetch(`${SALES_BASE}/today-sales?${params}`, {
+    // Construct the URL to match /api/sales/sales-by-shift/2024-01-01
+    const res = await fetch(`${SALES_BASE}/sales-by-shift/${businessDate}`, {
       headers: getAuthHeaders(),
     });
 
-    console;
     return await res.json();
   } catch (error) {
     return {
@@ -230,7 +229,7 @@ export const getSalesByPaymentMethod = async (paymentMethod) => {
 // utils/return.util.js
 
 export const createReturn = async (saleId, items) => {
-  const payload = { sale_id: saleId, items, requested_by: userId };
+  const payload = { sale_id: saleId, items, requested_by: getUserId() };
 
   const response = await fetch(`${SALES_BASE}/return`, {
     method: "POST",

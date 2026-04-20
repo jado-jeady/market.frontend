@@ -11,7 +11,7 @@ import Returns from "../pages/user/Returns";
 import SalesStake from "../pages/user/Sales/SaleStake";
 import ProductList from "../pages/user/Products/ProductList";
 import UserReport from "../pages/user/Reports/UserReports";
-import DailySales from "../pages/user/Reports/TodaySales";
+import DailySales from "../pages/user/Reports/Dailysales";
 import TransactionHistory from "../pages/user/Reports/TransactionHistory";
 import Expenses from "../pages/user/Expenses";
 import UserSettings from "../pages/user/Settings/UserSettings";

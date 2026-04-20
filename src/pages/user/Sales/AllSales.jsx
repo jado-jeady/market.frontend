@@ -12,6 +12,9 @@ import {
 } from "lucide-react";
 
 const AllSales = () => {
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const currentUserId = currentUser?.id;
+
   const [sales, setSales] = useState([]);
   const [pagination, setPagination] = useState({
     total: 0,
@@ -36,7 +39,11 @@ const AllSales = () => {
   const fetchSales = async () => {
     setLoading(true);
     try {
-      const filters = { page, limit: 10, payment_method: paymentMethod };
+      const filters = {
+        page,
+        limit: 10,
+        payment_method: paymentMethod,
+      };
       if (date) {
         filters.start_date = `${date}T00:00:00`;
         filters.end_date = `${date}T23:59:59`;
@@ -55,9 +62,18 @@ const AllSales = () => {
     fetchSales();
   }, [page, paymentMethod, date]);
 
-  const filteredSales = sales.filter((sale) =>
-    sale.invoice_number?.toLowerCase().includes(search.toLowerCase()),
-  );
+  // Search by invoice number, item product_name, or item barcode
+  const filteredSales = sales.filter((sale) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    const matchesInvoice = sale.invoice_number?.toLowerCase().includes(q);
+    const matchesItem = sale.items?.some(
+      (item) =>
+        item.product_name?.toLowerCase().includes(q) ||
+        item.barcode?.toLowerCase().includes(q),
+    );
+    return matchesInvoice || matchesItem;
+  });
 
   const handleOpenDetails = (sale) => {
     setSelectedSale(sale);
@@ -83,7 +99,7 @@ const AllSales = () => {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Invoice #"
+          placeholder="Invoice #, item name or barcode..."
           className="border px-2 h-9 text-sm rounded-md bg-gray-50 outline-none"
         />
         <select
@@ -183,7 +199,7 @@ const AllSales = () => {
               <thead className="bg-gray-50 border-b">
                 <tr className="text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                   <th className="px-6 py-4">Invoice</th>
-                  <th className="px-6 py-4">Date</th>
+                  <th className="px-6 py-4">Date Time</th>
                   <th className="px-6 py-4">Payment</th>
                   <th className="px-6 py-4 text-right">item Count</th>
                   <th className="px-6 py-4 text-right">Amount</th>
@@ -199,7 +215,13 @@ const AllSales = () => {
                       {sale.invoice_number}
                     </td>
                     <td className="px-6 py-2 text-xs">
-                      {new Date(sale.created_at).toLocaleDateString()}
+                      {new Intl.DateTimeFormat("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }).format(new Date(sale.created_at))}
                     </td>
                     <td className="px-6 py-4 text-xs capitalize">
                       {sale.payment_method}

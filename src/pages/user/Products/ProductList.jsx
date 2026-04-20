@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "react-toastify";
 import { getAllCategories } from "../../../utils/category.util";
 import { getAllProducts } from "../../../utils/product.util";
 import {

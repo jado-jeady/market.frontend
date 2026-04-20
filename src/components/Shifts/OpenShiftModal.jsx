@@ -8,6 +8,7 @@ import { data } from "autoprefixer";
 const OpenShiftModal = ({ isOpen, onClose, onShiftOpened }) => {
   const [openingBalance, setOpeningBalance] = useState("");
   const [shiftNote, setShiftNote] = useState("");
+  const [pettyCash, setPettyCash] = useState("");
   const [loading, setLoading] = useState(false);
   const [consumables, setConsumables] = useState([]);
 
@@ -33,6 +34,7 @@ const OpenShiftModal = ({ isOpen, onClose, onShiftOpened }) => {
         start_time,
         shop_name: "Tyag_market",
         user_id: user?.id,
+        petty_cash: pettyCash,
         opening_note: shiftNote,
       });
 
@@ -57,7 +59,6 @@ const OpenShiftModal = ({ isOpen, onClose, onShiftOpened }) => {
   const fetchConsumables = async () => {
     try {
       const consumables_data = await getConsumablesSnapshot();
-      console.log("Consumables", consumables_data.data.consumables_snapshot);
 
       // Convert object {key: value} into array of {name, quantity}
       const snapshot = consumables_data?.data?.consumables_snapshot || {};
@@ -65,9 +66,7 @@ const OpenShiftModal = ({ isOpen, onClose, onShiftOpened }) => {
         name,
         quantity: qty,
       }));
-
       setConsumables(consumablesArray);
-      console.log("Consumables", consumables);
     } catch (error) {
       console.error("Failed to fetch consumables:", error);
     }
@@ -113,12 +112,27 @@ const OpenShiftModal = ({ isOpen, onClose, onShiftOpened }) => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Opening Balance (RWF)
+                  Opening Momo Balance (RWF){" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
                   value={openingBalance}
                   onChange={(e) => setOpeningBalance(e.target.value)}
+                  className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0.00"
+                  required
+                  min="0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Petty Cash (RWF) <span className="text-red-500"> *</span>
+                </label>
+                <input
+                  type="number"
+                  value={pettyCash}
+                  onChange={(e) => setPettyCash(e.target.value)}
                   className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="0.00"
                   required
