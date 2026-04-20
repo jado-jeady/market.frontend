@@ -43,7 +43,7 @@ const AllSales = () => {
     if (showTableLoader) setTableLoading(true);
     setLoading(true);
 
-    const response = await getAllSales({ limit: 10000, page: 1 });
+    const response = await getAllSales({ limit, page: 1 });
     if (response?.success) {
       setSales(response.data);
     }
@@ -64,6 +64,14 @@ const AllSales = () => {
       await Promise.all([fetchSales(), fetchCashiers()]);
     })();
   }, []);
+
+  /* ===================== RE-FETCH WHEN LIMIT CHANGES ===================== */
+  useEffect(() => {
+    if (loading === false) {
+      // Only refetch if initial load is done
+      fetchSales(true);
+    }
+  }, [limit]);
 
   /* ===================== FILTERING ===================== */
 
@@ -215,8 +223,10 @@ const AllSales = () => {
           >
             <option value="">All Status</option>
             <option value="COMPLETED">Completed</option>
-            <option value="RETURNED">Returned</option>
-            <option value="CANCELLED">Cancelled</option>
+            <option value="PARTIALLY_PENDING">Partially Pending</option>
+            <option value="PENDING">Pending</option>
+            <option value="REFUNDED">Refunded</option>
+            <option value="PARTIALLY_REFUNDED">Partially Refunded</option>
           </select>
 
           <select
@@ -267,12 +277,12 @@ const AllSales = () => {
             className="h-7 px-2 text-xs border rounded w-full"
             disabled={tableLoading}
           >
-            <option value={20}>Show 20</option>
-            <option value={40}>Show 40</option>
-            <option value={60}>Show 60</option>
-            <option value={80}>Show 80</option>
-            <option value={100}>Show 100</option>
-            <option value={200}>Show 200</option>
+            <option value={20}>Load 20</option>
+            <option value={40}>Load 40</option>
+            <option value={60}>Load 60</option>
+            <option value={80}>Load 80</option>
+            <option value={100}>Load 100</option>
+            <option value={200}>Load 200</option>
           </select>
 
           <button
@@ -287,6 +297,7 @@ const AllSales = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mt-2">
           <span className="text-sm font-bold text-gray-900">
             Showing {limitedSales.length} of {filteredSales.length} sales
+            (loaded {sales.length})
           </span>
           <p className="text-sm text-gray-600">
             {filters.shiftDate
