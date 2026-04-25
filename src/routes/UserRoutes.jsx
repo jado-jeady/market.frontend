@@ -13,7 +13,7 @@ import ProductList from "../pages/user/Products/ProductList";
 import UserReport from "../pages/user/Reports/UserReports";
 import DailySales from "../pages/user/Reports/Dailysales";
 import TransactionHistory from "../pages/user/Reports/TransactionHistory";
-import Expenses from "../pages/user/Expenses";
+import Expenses from "../pages/user/Reports/Expenses";
 import UserSettings from "../pages/user/Settings/UserSettings";
 import TaxSettings from "../pages/user/Settings/TaxSettings";
 import CurrencySettings from "../pages/user/Settings/CurrencySettings";

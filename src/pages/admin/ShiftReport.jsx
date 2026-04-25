@@ -6,8 +6,8 @@ const ShiftReport = () => {
 
   useEffect(() => {
     const loadShifts = async () => {
-      const res = await getAllShifts({limit: 1000000});
-      console.log(res)
+      const res = await getAllShifts({ limit: 1000000 });
+      console.log(res);
       if (res.success) {
         setShifts(res.data);
       }
@@ -43,9 +43,7 @@ const ShiftReport = () => {
               <td>{shift.total_sales}</td>
               <td
                 className={
-                  shift.difference !== 0
-                    ? "text-red-600 font-bold"
-                    : ""
+                  shift.difference !== 0 ? "text-red-600 font-bold" : ""
                 }
               >
                 {shift.difference}

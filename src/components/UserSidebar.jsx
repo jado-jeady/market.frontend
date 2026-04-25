@@ -26,7 +26,7 @@ const UserSidebar = ({ sidebarOpen, setSidebarOpen }) => {
       path: "/user/consumables",
       icon: <Boxes size={14} />,
     },
-    { name: "Reports", path: "/user/reports", icon: <BarChart3 size={14} /> },
+    { name: "Reporting", path: "/user/reports", icon: <BarChart3 size={14} /> },
     { name: "Customers", path: "/user/customers", icon: <Users size={14} /> },
     {
       name: "Day Closing",
