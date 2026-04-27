@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 import {
+  createNewExpense,
+  updateExistingExpense,
+  abortExpense,
+} from "../../../utils/expenses.util.js";
+import { getCurrentShift } from "../../../utils/shift.util.js";
+import {
   Plus,
   Edit2,
   Ban,
@@ -40,9 +46,15 @@ const ExpenseTracker = () => {
     description: "",
     receipt: null,
     paymentMethod: "cash",
-    approvedBy: "Pending",
+    status: "Pending",
     notes: "",
   });
+
+  /* ===================== Get user Id ===================== */
+  const getUserId = () => {
+    const authData = JSON.parse(localStorage.getItem("user"));
+    return authData?.data?.user?.id;
+  };
 
   /* ===================== API HANDLERS ===================== */
   const fetchExpenses = async () => {
@@ -95,17 +107,15 @@ const ExpenseTracker = () => {
     return now - createdTime < 24 * 60 * 60 * 1000; // 24 Hours in ms
   };
 
-  const handleAbort = (id) => {
-    if (
-      window.confirm(
-        "Abort this expense? It will remain in records as 'Aborted'.",
-      )
-    ) {
-      const updated = expenses.map((e) =>
-        e.id === id ? { ...e, status: "aborted" } : e,
-      );
-      setExpenses(updated);
-      localStorage.setItem("cashier_expenses", JSON.stringify(updated));
+  const handleAbort = async (id) => {
+    if (window.confirm("Abort this expense?")) {
+      const result = await abortExpense(id);
+      if (result.success) {
+        // Update local state by mapping through and changing the status
+        setExpenses((prev) =>
+          prev.map((ex) => (ex.id === id ? { ...ex, status: "aborted" } : ex)),
+        );
+      }
     }
   };
 
@@ -119,26 +129,49 @@ const ExpenseTracker = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = {
-      id: editingId || Date.now(),
-      ...formData,
-      status: "pending",
-      createdAt: editingId
-        ? expenses.find((ex) => ex.id === editingId).createdAt
-        : new Date().toISOString(),
-    };
 
-    // Use fetch here for backend saving:
-    // await fetch('/api/expenses', { method: editingId ? 'PUT' : 'POST', ... })
+    try {
+      let result;
+      const shift = await getCurrentShift();
+      const currentShiftId = shift?.data?.id;
+      const currentUserId = await getUserId();
+      console.log(
+        "Submitting form with data:",
+        formData,
+        "Shift ID:",
+        currentShiftId,
+        "User ID:",
+        currentUserId,
+      );
+      if (editingId) {
+        // Logic for Update
+        result = await updateExistingExpense(editingId, formData);
+      } else {
+        // Logic for Create
+        // Add shiftId and userId if they aren't in formData already
+        const payload = {
+          ...formData,
+          shiftId: currentShiftId,
+          userId: currentUserId,
+        };
+        console.log("Final payload for creation:", payload);
+        result = await createNewExpense(payload);
+      }
 
-    const updated = editingId
-      ? expenses.map((ex) => (ex.id === editingId ? payload : ex))
-      : [payload, ...expenses];
+      if (result.success) {
+        // Refresh list from backend to ensure data integrity
+        const freshData = await fetchAllExpenses();
+        setExpenses(freshData.data);
 
-    setExpenses(updated);
-    localStorage.setItem("cashier_expenses", JSON.stringify(updated));
-    setShowForm(false);
-    resetForm();
+        setShowForm(false);
+        resetForm();
+      } else {
+        alert(result.message || "Operation failed");
+        console.error("API error response:", result); // Log the full API response for debugging
+      }
+    } catch (error) {
+      console.error("Operation failed:", error);
+    }
   };
 
   const resetForm = () => {
@@ -148,7 +181,7 @@ const ExpenseTracker = () => {
       description: "",
       receipt: null,
       paymentMethod: "cash",
-      approvedBy: "Pending",
+      status: "Pending",
       notes: "",
     });
     setEditingId(null);
@@ -283,6 +316,8 @@ const ExpenseTracker = () => {
           ))}
         </div>
       </div>
+
+      {/*      {showForm && <ExpenseForm />} */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -422,6 +457,88 @@ const ExpenseTracker = () => {
                   className="w-full px-2 py-2 bg-gray-50 border border-gray-300 rounded-md focus:border-blue-500 outline-none text-xs text-gray-800"
                   placeholder="What is this for?"
                 />
+              </div>
+
+              {/* Receipt Upload */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">
+                  Attachment/Receipt
+                </label>
+                <label className="flex flex-col items-center justify-center w-full px-3 py-2 bg-gray-50 border border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition-colors group">
+                  <Paperclip className="w-4 h-4 mb-1 text-gray-500 group-hover:text-blue-500" />
+                  <span className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                    Upload Receipt (PDF or Image, ≤10MB)
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*,.pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+
+                      // Validate size
+                      if (file.size > 10 * 1024 * 1024) {
+                        alert("File too large! Max 10MB allowed.");
+                        return;
+                      }
+
+                      // Validate type
+                      const allowedTypes = [
+                        "application/pdf",
+                        "image/jpeg",
+                        "image/png",
+                        "image/gif",
+                        "image/webp",
+                      ];
+                      if (!allowedTypes.includes(file.type)) {
+                        alert(
+                          "Invalid file type! Only PDF and images are allowed.",
+                        );
+                        return;
+                      }
+
+                      // Save file in state
+                      setFormData({ ...formData, receipt: file });
+
+                      // Preview
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        setFormData({
+                          ...formData,
+                          receipt: file,
+                          receiptPreview: reader.result,
+                        });
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+
+                {/* File Info + Preview */}
+                {formData.receipt && (
+                  <div className="mt-2 space-y-2">
+                    <p className="text-xs text-gray-600">
+                      Selected:{" "}
+                      <span className="font-semibold">
+                        {formData.receipt.name}
+                      </span>{" "}
+                      ({(formData.receipt.size / 1024 / 1024).toFixed(2)} MB)
+                    </p>
+                    {formData.receipt.type.startsWith("image/") && (
+                      <img
+                        src={formData.receiptPreview}
+                        alt="Receipt Preview"
+                        className="w-32 h-32 object-cover rounded-md border border-gray-200"
+                      />
+                    )}
+                    {formData.receipt.type === "application/pdf" && (
+                      <p className="text-xs text-blue-600">
+                        PDF file selected (no preview)
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Notes */}
