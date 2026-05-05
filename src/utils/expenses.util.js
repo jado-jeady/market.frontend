@@ -42,8 +42,17 @@ export const abortExpense = async (id) => {
 };
 
 export const fetchAllExpenses = async (params = "") => {
-  const res = await fetch(`${API_URL}?${params}`);
-  return res.json();
+  try {
+    const res = await fetch(`${API_URL}/?${params}`);
+    if (!res.ok) throw new Error("Failed to fetch expenses");
+    return await res.json();
+  } catch (error) {
+    console.error("API fetch failed, using local fallback:", error);
+    const localData = JSON.parse(
+      localStorage.getItem("cashier_expenses") || "[]",
+    );
+    return { success: true, data: localData };
+  }
 };
 
 export const fetchExpenseById = async (id) => {

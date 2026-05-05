@@ -3,6 +3,7 @@ import {
   createNewExpense,
   updateExistingExpense,
   abortExpense,
+  fetchAllExpenses,
 } from "../../../utils/expenses.util.js";
 import { getCurrentShift } from "../../../utils/shift.util.js";
 import {
@@ -14,6 +15,7 @@ import {
   FileText,
   Clock,
   CheckCircle,
+  ArrowUpRightFromSquareIcon,
   Search,
   TrendingUp,
   Filter,
@@ -21,6 +23,7 @@ import {
   User,
   Paperclip,
 } from "lucide-react";
+import { toast } from "react-toastify";
 
 const ExpenseTracker = () => {
   /* ===================== STATE ===================== */
@@ -48,6 +51,7 @@ const ExpenseTracker = () => {
     paymentMethod: "cash",
     status: "Pending",
     notes: "",
+    userId: null,
   });
 
   /* ===================== Get user Id ===================== */
@@ -60,16 +64,12 @@ const ExpenseTracker = () => {
   const fetchExpenses = async () => {
     setLoading(true);
     try {
-      // Mocked API call - replace with your actual backend URL
-      const res = await fetch("/api/expenses");
-      const data = await res.json();
-      setExpenses(data);
+      const result = await fetchAllExpenses();
+      console.log("Fetched expenses:", result.data);
+      setExpenses(result.data);
     } catch (e) {
-      // Fallback for local testing
-      const localData = JSON.parse(
-        localStorage.getItem("cashier_expenses") || "[]",
-      );
-      setExpenses(localData);
+      console.error("Unexpected error fetching expenses:", e);
+      setExpenses([]);
     } finally {
       setLoading(false);
     }
@@ -135,6 +135,14 @@ const ExpenseTracker = () => {
       const shift = await getCurrentShift();
       const currentShiftId = shift?.data?.id;
       const currentUserId = await getUserId();
+
+      // 🚫 Stop if no open shift
+      if (!currentShiftId) {
+        alert("You must have an open shift to record an expense.");
+        console.error("No current shift found. Expense creation blocked.");
+        return; // Exit early, do not continue
+      }
+
       console.log(
         "Submitting form with data:",
         formData,
@@ -143,12 +151,12 @@ const ExpenseTracker = () => {
         "User ID:",
         currentUserId,
       );
+
       if (editingId) {
         // Logic for Update
         result = await updateExistingExpense(editingId, formData);
       } else {
         // Logic for Create
-        // Add shiftId and userId if they aren't in formData already
         const payload = {
           ...formData,
           shiftId: currentShiftId,
@@ -159,15 +167,16 @@ const ExpenseTracker = () => {
       }
 
       if (result.success) {
-        // Refresh list from backend to ensure data integrity
+        // Update local statewith fresh data from server to ensure consistency
         const freshData = await fetchAllExpenses();
         setExpenses(freshData.data);
+        toast.success(result.message || "Operation successful");
 
         setShowForm(false);
         resetForm();
       } else {
         alert(result.message || "Operation failed");
-        console.error("API error response:", result); // Log the full API response for debugging
+        console.error("API error response:", result);
       }
     } catch (error) {
       console.error("Operation failed:", error);
@@ -263,57 +272,161 @@ const ExpenseTracker = () => {
         </div>
 
         {/* Dense List */}
-        <div className="divide-y divide-gray-100">
-          {filteredExpenses.map((expense) => (
-            <div
-              key={expense.id}
-              className="group hover:bg-gray-50 p-3 flex items-center gap-4 transition-all"
-            >
-              <div className="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
-                <Tag className="w-3.5 h-3.5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <p className="font-bold text-gray-900 truncate uppercase">
-                    {expense.description}
+
+        {/* Mobile: Grid view */}
+        <div className="block lg:hidden">
+          <div className="grid grid-cols-1 gap-3 divide-y divide-gray-100">
+            {filteredExpenses.map((expense) => (
+              <div
+                key={expense.id}
+                className="group hover:bg-gray-50 p-3 flex items-center gap-4 transition-all"
+              >
+                <div className="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
+                  <Tag className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="font-bold text-gray-900 truncate uppercase">
+                      {expense.description}
+                    </p>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-bold uppercase">
+                      {expense.category}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-gray-400 font-medium">
+                    {new Date(expense.createdAt).toLocaleString()} •{" "}
+                    {expense.paymentMethod}
                   </p>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-bold uppercase">
-                    {expense.category}
-                  </span>
-                </div>
-                <p className="text-[10px] text-gray-400 font-medium">
-                  {new Date(expense.createdAt).toLocaleString()} •{" "}
-                  {expense.paymentMethod}
-                </p>
-              </div>
-              <div className="text-right flex items-center gap-4">
-                <p className="font-black text-gray-900 text-sm">
-                  {Number(expense.amount).toLocaleString()}{" "}
-                  <span className="text-[9px] text-gray-400">RWF</span>
-                </p>
-                <div className="flex gap-1">
-                  {canEdit(expense.createdAt) && (
-                    <button
-                      onClick={() => {
-                        setFormData(expense);
-                        setEditingId(expense.id);
-                        setShowForm(true);
-                      }}
-                      className="p-1.5 hover:bg-gray-200 rounded text-gray-400 hover:text-gray-900 transition-colors"
+                  {expense.receiptUrl && (
+                    <a
+                      href={expense.receiptUrl}
+                      target="_blank"
+                      className="text-blue-500 hover:text-blue-700 text-[10px]"
                     >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
+                      View Receipt{" "}
+                      <ArrowUpRightFromSquareIcon className="w-2 h-2 inline-block" />
+                    </a>
                   )}
-                  <button
-                    onClick={() => handleAbort(expense.id)}
-                    className="p-1.5 hover:bg-gray-200 rounded text-gray-400 hover:text-red-600 transition-colors"
-                  >
-                    <Ban className="w-3.5 h-3.5" />
-                  </button>
+                </div>
+                <div className="text-right flex items-center gap-4">
+                  <p className="font-black text-gray-900 text-sm">
+                    {Number(expense.amount).toLocaleString()}{" "}
+                    <span className="text-[9px] text-gray-400">RWF</span>
+                  </p>
+                  <div className="flex gap-1">
+                    {canEdit(expense.createdAt) && (
+                      <button
+                        onClick={() => {
+                          setFormData(expense);
+                          setEditingId(expense.id);
+                          setShowForm(true);
+                        }}
+                        className="p-1.5 hover:bg-gray-200 rounded text-gray-400 hover:text-gray-900 transition-colors"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleAbort(expense.id)}
+                      className="p-1.5 hover:bg-gray-200 rounded text-gray-400 hover:text-red-600 transition-colors"
+                    >
+                      <Ban className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop: Table view */}
+        <div className="hidden lg:block">
+          <table className="min-w-full divide-y divide-gray-100">
+            <thead>
+              <tr>
+                <th className="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase">
+                  Description
+                </th>
+                <th className="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase">
+                  Category
+                </th>
+                <th className="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase">
+                  Date
+                </th>
+                <th className="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase">
+                  Payment
+                </th>
+                <th className="px-3 py-2 text-right text-xs font-bold text-gray-500 uppercase">
+                  Invoice #
+                </th>
+                <th className="px-3 py-2 text-right text-xs font-bold text-gray-500 uppercase">
+                  Amount
+                </th>
+                <th className="px-3 py-2 text-right text-xs font-bold text-gray-500 uppercase">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {filteredExpenses.map((expense) => (
+                <tr
+                  key={expense.id}
+                  className="hover:bg-gray-50 transition-all"
+                >
+                  <td className="px-3 py-2 font-bold text-gray-900 uppercase">
+                    {expense.description}
+                  </td>
+                  <td className="px-3 py-2 text-[9px] font-bold text-gray-500 uppercase">
+                    {expense.category}
+                  </td>
+                  <td className="px-3 py-2 text-[10px] text-gray-400 font-medium">
+                    {new Date(expense.createdAt).toLocaleString()}
+                  </td>
+                  <td className="px-3 py-2 text-[10px] text-gray-400 font-medium">
+                    {expense.paymentMethod}
+                  </td>
+                  <td className="px-3 py-2 text-right text-[10px] text-gray-400 font-medium">
+                    {expense.receiptUrl ? (
+                      <a
+                        href={expense.receiptUrl}
+                        target="_blank"
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        View Receipt{" "}
+                        <ArrowUpRightFromSquareIcon className="w-2 h-2 inline-block" />
+                      </a>
+                    ) : (
+                      "No Receipt"
+                    )}
+                  </td>
+                  <td className="px-3 py-2 text-right font-black text-gray-900 text-sm">
+                    {Number(expense.amount).toLocaleString()}{" "}
+                    <span className="text-[9px] text-gray-400">RWF</span>
+                  </td>
+                  <td className="px-3 py-2 text-right flex gap-1 justify-end">
+                    {canEdit(expense.createdAt) && (
+                      <button
+                        onClick={() => {
+                          setFormData(expense);
+                          setEditingId(expense.id);
+                          setShowForm(true);
+                        }}
+                        className="p-1.5 hover:bg-gray-200 rounded text-gray-400 hover:text-gray-900 transition-colors"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleAbort(expense.id)}
+                      className="p-1.5 hover:bg-gray-200 rounded text-gray-400 hover:text-red-600 transition-colors"
+                    >
+                      <Ban className="w-3.5 h-3.5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
