@@ -43,6 +43,9 @@ const ExpenseTracker = () => {
   ]);
   const [newCatName, setNewCatName] = useState("");
 
+  const [open, setOpen] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
+
   const [formData, setFormData] = useState({
     amount: "",
     category: "",
@@ -298,14 +301,16 @@ const ExpenseTracker = () => {
                     {expense.paymentMethod}
                   </p>
                   {expense.receiptUrl && (
-                    <a
-                      href={expense.receiptUrl}
-                      target="_blank"
-                      className="text-blue-500 hover:text-blue-700 text-[10px]"
+                    <button
+                      onClick={() => {
+                        setSelectedReceipt(expense.receiptUrl);
+                        setOpen(true);
+                      }}
+                      className="text-blue-500 hover:text-blue-700 text-[10px] flex items-center gap-1"
                     >
-                      View Receipt{" "}
+                      View Receipt
                       <ArrowUpRightFromSquareIcon className="w-2 h-2 inline-block" />
-                    </a>
+                    </button>
                   )}
                 </div>
                 <div className="text-right flex items-center gap-4">
@@ -337,6 +342,24 @@ const ExpenseTracker = () => {
               </div>
             ))}
           </div>
+          {/* model to display an image  */}
+          {open && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-4 rounded shadow-lg max-w-md w-full">
+                <img
+                  src={selectedReceipt}
+                  alt="Receipt"
+                  className="w-full h-auto"
+                />
+                <button
+                  onClick={() => setOpen(false)}
+                  className="mt-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Desktop: Table view */}
@@ -386,17 +409,17 @@ const ExpenseTracker = () => {
                     {expense.paymentMethod}
                   </td>
                   <td className="px-3 py-2 text-right text-[10px] text-gray-400 font-medium">
-                    {expense.receiptUrl ? (
-                      <a
-                        href={expense.receiptUrl}
-                        target="_blank"
-                        className="text-blue-500 hover:text-blue-700"
+                    {expense.receiptUrl && (
+                      <button
+                        onClick={() => {
+                          setSelectedReceipt(expense.receiptUrl);
+                          setOpen(true);
+                        }}
+                        className="text-blue-500 hover:text-blue-700 text-[10px] flex items-center gap-1"
                       >
-                        View Receipt{" "}
+                        View Receipt
                         <ArrowUpRightFromSquareIcon className="w-2 h-2 inline-block" />
-                      </a>
-                    ) : (
-                      "No Receipt"
+                      </button>
                     )}
                   </td>
                   <td className="px-3 py-2 text-right font-black text-gray-900 text-sm">
@@ -427,6 +450,24 @@ const ExpenseTracker = () => {
               ))}
             </tbody>
           </table>
+
+          {open && (
+            <div className="fixed inset-0 bg-black/40 bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-4 rounded shadow-lg max-w-md w-full">
+                <button
+                  onClick={() => setOpen(false)}
+                  className=" p-2 float-right  text-red-600  hover:text-red-800"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <img
+                  src={selectedReceipt}
+                  alt="Receipt"
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
