@@ -88,3 +88,7 @@ h1 {
   font-size: 12px;
   font-family: monospace;
 }
+
+body {
+  background-color: white;
+}

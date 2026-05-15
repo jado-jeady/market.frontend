@@ -204,16 +204,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="h-screen w-full bg-gray-100 flex overflow-hidden text-gray-800">
+    <div className="h-screen w-full mt- bg-gray-100 flex overflow-hidden text-gray-800">
       {/* LEFT SIDEBAR */}
       <div className="w-52 bg-white border-r border-gray-200 p-3 flex flex-col">
-        <div className="mb-5">
-          <h1 className="text-xl font-black tracking-tight">TYGA BARISTA</h1>
-          <p className="text-xs text-gray-400 uppercase font-semibold">
-            Tablet Ordering System
-          </p>
-        </div>
-
         <div className="space-y-2 overflow-y-auto">
           {categories.map((cat) => (
             <button
@@ -252,33 +245,37 @@ export default function Dashboard() {
         </div>
 
         {/* PRODUCT GRID */}
-        <div className="flex-1 overflow-y-auto p-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div className="flex-1 p-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {filteredProducts.map((product) => (
             <button
               key={product.id}
               onClick={() => addToCart(product)}
-              className="bg-white rounded-2xl overflow-hidden border border-gray-200 hover:border-black hover:shadow-xl transition-all active:scale-95"
+              className="bg-white rounded-2xl overflow-hidden border border-gray-200 hover:border-black hover:shadow-xl transition-all active:scale-95 h-[280px] flex flex-col"
             >
+              {/* Image */}
               <img
                 src={product.image}
                 alt={product.name}
-                className="w-full h-36 object-cover"
+                className="w-full h-32 object-cover"
               />
 
-              <div className="p-4 text-left">
-                <h3 className="font-black text-sm mb-1">{product.name}</h3>
+              {/* Content */}
+              <div className="p-2 flex-col flex-1 justify-around">
+                <div>
+                  <h3 className="font-bold text-sm mb-1 truncate">
+                    {product.name}
+                  </h3>
+                  <p className="text-xs text-gray-400 uppercase mb-1 truncate">
+                    {product.category}
+                  </p>
+                </div>
 
-                <p className="text-xs text-gray-400 uppercase mb-3">
-                  {product.category}
-                </p>
-
-                <div className="flex items-center justify-between">
-                  <span className="font-black text-lg">
-                    {product.price.toLocaleString()} RWF
+                <div className="flex items-center pt-7 justify-around">
+                  <span className="font-black text-xs">
+                    {product.price.toLocaleString()} Frw
                   </span>
-
-                  <span className="bg-black text-white text-xs px-3 py-1 rounded-full font-bold">
-                    ADD
+                  <span className="bg-black text-white text-xs px-2 py-1 rounded-full font-bold">
+                    Add
                   </span>
                 </div>
               </div>
