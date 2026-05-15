@@ -28,6 +28,7 @@ import Consumables from "../pages/user/Consumables/Consumables";
 import AllApprovals from "../pages/user/Consumables/AllApprovals";
 import Approved from "../pages/user/Consumables/Aproved";
 import DayClosing from "../pages/user/DayClosing";
+import Damage from "../pages/user/Reports/Damage";
 
 export const UserRoutes = (
   <Route
@@ -60,6 +61,7 @@ export const UserRoutes = (
       <Route path="daily-sales" element={<DailySales />} />
       <Route path="transactions" element={<TransactionHistory />} />
       <Route path="expenses" element={<Expenses />} />
+      <Route path="damaged-items" element={<Damage />} />
     </Route>
     <Route path="settings" element={<UserSettings />}>
       <Route index element={<TaxSettings />} />

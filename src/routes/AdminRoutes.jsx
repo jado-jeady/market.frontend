@@ -17,7 +17,7 @@ import ProductTransfer from "../pages/admin/Products/ProdcutTransfer";
 import Stock from "../pages/admin/Stock/Stock";
 import AllStock from "../pages/admin/Stock/AllStock";
 import StockIn from "../pages/admin/Stock/StockIn";
-import StockOut from "../pages/admin/Stock/StockOut";
+import Damages from "../pages/admin/Stock/Damages";
 import StockAdjustment from "../pages/admin/Stock/Stock.Adjsutment";
 import Management from "../pages/admin/Management/Management";
 import ManageRoles from "../pages/admin/Management/ManageRoles";
@@ -28,9 +28,9 @@ import TaxSettings from "../pages/user/Settings/TaxSettings";
 import CurrencySettings from "../pages/user/Settings/CurrencySettings";
 import ReceiptFormatSettings from "../pages/user/Settings/ReceiptFormat";
 import Report from "../pages/admin/Report";
-import ShiftReport from "../pages/admin/ShiftReport";
 import DailySales from "../pages/admin/Sales/DailySales";
 import GetShifts from "../pages/admin/Shifts/GetShifts";
+import BaristaDashboard from "../pages/Barista/Dashboard";
 
 export const AdminRoutes = (
   <Route
@@ -48,6 +48,7 @@ export const AdminRoutes = (
       <Route path="items" element={<ItemSales />} />
       <Route path="claim" element={<SalesClaim />} />
       <Route path="daily" element={<DailySales />} />
+      <Route path="BaristaDashboard" element={<BaristaDashboard />} />
       <Route path="all" element={<AdminAllSales />} />
     </Route>
     <Route path="products" element={<Products />}>
@@ -60,7 +61,7 @@ export const AdminRoutes = (
     <Route path="stock" element={<Stock />}>
       <Route index element={<AllStock />} />
       <Route path="in" element={<StockIn />} />
-      <Route path="out" element={<StockOut />} />
+      <Route path="damages" element={<Damages />} />
       <Route path="adjustment" element={<StockAdjustment />} />
     </Route>
     <Route path="management" element={<Management />}>

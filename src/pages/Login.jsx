@@ -66,6 +66,8 @@ const Login = () => {
           navigate("/user/dashboard");
         } else if (data?.data?.user?.role === "Storekeeper") {
           navigate("/storekeeper/dashboard");
+        } else if (data?.data?.user?.role === "Barista") {
+          navigate("/barista/dashboard");
         }
       } else {
         setError("Invalid username or password");
