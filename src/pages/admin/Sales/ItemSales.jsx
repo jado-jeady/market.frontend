@@ -12,6 +12,7 @@ const aggregateItemSales = (sales) => {
       hour: "2-digit",
       minute: "2-digit",
     });
+    const shiftDate = sale.shift?.business_date || null;
 
     sale.items.forEach((item) => {
       const id = item.product_id;
@@ -26,6 +27,7 @@ const aggregateItemSales = (sales) => {
           totalPrice: 0,
           lastSold: saleTime,
           lastCashier: cashierName,
+          shiftDates: new Set(),
         };
       }
 
@@ -34,12 +36,13 @@ const aggregateItemSales = (sales) => {
       itemMap[id].totalPrice += qty * Number(item.unit_price || 0);
       itemMap[id].lastSold = saleTime;
       itemMap[id].lastCashier = cashierName;
+      if (shiftDate) itemMap[id].shiftDates.add(shiftDate);
     });
   });
 
-  const sortedArray = Object.values(itemMap).sort(
-    (a, b) => b.quantity - a.quantity,
-  );
+  const sortedArray = Object.values(itemMap)
+    .map((i) => ({ ...i, shiftDates: [...i.shiftDates] }))
+    .sort((a, b) => b.quantity - a.quantity);
 
   return {
     itemSummary: sortedArray,
@@ -49,12 +52,9 @@ const aggregateItemSales = (sales) => {
 };
 
 const ItemSales = () => {
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().slice(0, 10),
-  );
   const [dataState, setDataState] = useState({ sales: [], loading: true });
-  const [barcodeSearch, setBarcodeSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [search, setSearch] = useState("");
+  const [selectedShiftDate, setSelectedShiftDate] = useState("");
   const [sortOrder, setSortOrder] = useState("desc");
 
   const fetchData = async () => {
@@ -63,7 +63,6 @@ const ItemSales = () => {
       const res = await getAllSales({
         limit: 1000000,
         page: 1,
-        start_date: selectedDate,
         status: "COMPLETED",
       });
       setDataState({
@@ -78,31 +77,39 @@ const ItemSales = () => {
 
   useEffect(() => {
     fetchData();
-  }, [selectedDate]);
+  }, []);
+
+  // All unique shift business dates from sales
+  const shiftDates = useMemo(() => {
+    const dates = new Set(
+      dataState.sales.map((s) => s.shift?.business_date).filter(Boolean),
+    );
+    return [...dates].sort((a, b) => b.localeCompare(a));
+  }, [dataState.sales]);
+
+  // Filter sales by shift date first, then aggregate
+  const salesForDate = useMemo(() => {
+    if (!selectedShiftDate) return dataState.sales;
+    return dataState.sales.filter(
+      (s) => s.shift?.business_date === selectedShiftDate,
+    );
+  }, [dataState.sales, selectedShiftDate]);
 
   const { itemSummary, grandTotalQuantity, grandTotalPrice } = useMemo(
-    () => aggregateItemSales(dataState.sales),
-    [dataState.sales],
+    () => aggregateItemSales(salesForDate),
+    [salesForDate],
   );
-
-  const categories = useMemo(() => {
-    const cats = [...new Set(itemSummary.map((i) => i.category))].filter(
-      Boolean,
-    );
-    return ["All", ...cats];
-  }, [itemSummary]);
 
   const filteredItems = useMemo(() => {
     let result = [...itemSummary];
 
-    if (barcodeSearch.trim()) {
-      result = result.filter((item) =>
-        item.barcode.toLowerCase().includes(barcodeSearch.trim().toLowerCase()),
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      result = result.filter(
+        (item) =>
+          item.name.toLowerCase().includes(q) ||
+          item.barcode.toLowerCase().includes(q),
       );
-    }
-
-    if (selectedCategory !== "All") {
-      result = result.filter((item) => item.category === selectedCategory);
     }
 
     result.sort((a, b) =>
@@ -110,7 +117,7 @@ const ItemSales = () => {
     );
 
     return result;
-  }, [itemSummary, barcodeSearch, selectedCategory, sortOrder]);
+  }, [itemSummary, search, sortOrder]);
 
   const filteredTotalQty = filteredItems.reduce((s, i) => s + i.quantity, 0);
   const filteredTotalPrice = filteredItems.reduce(
@@ -120,32 +127,17 @@ const ItemSales = () => {
 
   return (
     <div className="p-2 sm:p-4 max-w-[1600px] mx-auto text-gray-700 text-xs sm:text-sm">
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="mb-4 flex flex-wrap justify-between items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <div>
           <h3 className="text-lg font-bold text-gray-900 leading-tight">
             Itemized Sales
           </h3>
           <p className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">
-            Daily performance report
+            {selectedShiftDate
+              ? `Shift: ${selectedShiftDate}`
+              : "All time — cumulative totals"}
           </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="px-2 py-1.5 border rounded-lg text-xs font-bold text-blue-600 outline-none focus:ring-2 focus:ring-blue-100"
-          />
-          <button
-            onClick={() =>
-              setSelectedDate(new Date().toISOString().slice(0, 10))
-            }
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold rounded-lg transition-all"
-          >
-            Today
-          </button>
         </div>
 
         <div className="bg-emerald-50 px-4 py-2 rounded-lg border border-emerald-100">
@@ -159,42 +151,47 @@ const ItemSales = () => {
         </div>
       </div>
 
-      {/* ── Filters Bar ── */}
+      {/* Filters Bar */}
       <div className="mb-3 flex flex-wrap gap-2 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+        {/* Single search: name or barcode */}
         <input
           type="text"
-          placeholder="Search by barcode..."
-          value={barcodeSearch}
-          onChange={(e) => setBarcodeSearch(e.target.value)}
-          className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-100 w-48"
+          placeholder="Search by item name or barcode..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-100 w-56"
         />
 
+        {/* Shift date filter */}
         <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
+          value={selectedShiftDate}
+          onChange={(e) => setSelectedShiftDate(e.target.value)}
           className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-100 bg-white"
         >
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
+          <option value="">All shifts (cumulative)</option>
+          {shiftDates.map((date) => (
+            <option key={date} value={date}>
+              {date}
             </option>
           ))}
         </select>
 
+        {/* Sort toggle */}
         <button
           onClick={() =>
             setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
           }
           className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-lg transition-all"
         >
-          {sortOrder === "desc" ? <>↓ Highest Orders</> : <>↑ Lowest Orders</>}
+          {sortOrder === "desc" ? <>↓ Most sold</> : <>↑ Least sold</>}
         </button>
 
-        {(barcodeSearch || selectedCategory !== "All") && (
+        {/* Clear */}
+        {(search || selectedShiftDate) && (
           <button
             onClick={() => {
-              setBarcodeSearch("");
-              setSelectedCategory("All");
+              setSearch("");
+              setSelectedShiftDate("");
             }}
             className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-bold rounded-lg transition-all"
           >
@@ -207,14 +204,14 @@ const ItemSales = () => {
         </span>
       </div>
 
-      {/* ── Loading Spinner ── */}
+      {/* Loading */}
       {dataState.loading && (
         <div className="flex justify-center py-20">
           <div className="animate-spin h-6 w-6 border-2 border-blue-600 border-t-transparent rounded-full" />
         </div>
       )}
 
-      {/* ── Empty State ── */}
+      {/* Empty */}
       {!dataState.loading && filteredItems.length === 0 && (
         <div className="text-center py-16 text-gray-400 italic bg-white rounded-xl border border-gray-100">
           No items match the current filters.
@@ -223,16 +220,13 @@ const ItemSales = () => {
 
       {!dataState.loading && filteredItems.length > 0 && (
         <>
-          {/* ══════════════════════════════════════
-              MOBILE — Card Grid (visible < md)
-          ══════════════════════════════════════ */}
+          {/* Mobile cards */}
           <div className="grid grid-cols-2 gap-2 md:hidden">
             {filteredItems.map((item, idx) => (
               <div
                 key={idx}
                 className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 flex flex-col gap-2"
               >
-                {/* Name + Category */}
                 <div className="flex items-start justify-between gap-1">
                   <p className="font-bold text-gray-800 text-[11px] leading-tight line-clamp-2">
                     {item.name}
@@ -241,15 +235,11 @@ const ItemSales = () => {
                     {item.category}
                   </span>
                 </div>
-
-                {/* Barcode */}
                 {item.barcode && (
                   <p className="font-mono text-[9px] text-gray-400 truncate">
                     {item.barcode}
                   </p>
                 )}
-
-                {/* Stats row */}
                 <div className="grid grid-cols-2 gap-1 mt-auto">
                   <div className="bg-blue-50 rounded-lg px-2 py-1.5 text-center">
                     <p className="text-[8px] text-blue-400 font-bold uppercase">
@@ -270,8 +260,6 @@ const ItemSales = () => {
                     </p>
                   </div>
                 </div>
-
-                {/* Unit price + cashier */}
                 <div className="flex justify-between items-center pt-1 border-t border-gray-50">
                   <span className="text-[9px] text-gray-400">
                     {item.unitPrice.toLocaleString()} RWF/unit
@@ -284,7 +272,7 @@ const ItemSales = () => {
             ))}
           </div>
 
-          {/* Mobile Footer Totals */}
+          {/* Mobile footer */}
           <div className="md:hidden mt-3 bg-gray-900 text-white rounded-xl p-4 flex justify-between items-center">
             <div>
               <p className="text-[9px] text-gray-400 uppercase font-bold">
@@ -305,22 +293,19 @@ const ItemSales = () => {
             </div>
           </div>
 
-          {/* ══════════════════════════════════════
-              DESKTOP — Table (visible >= md)
-          ══════════════════════════════════════ */}
+          {/* Desktop table */}
           <div className="hidden md:block bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto w-full">
-              <table className="w-full border-collapse min-w-[800px]">
+              <table className="w-full border-collapse min-w-[700px]">
                 <thead>
                   <tr className="bg-gray-50 text-gray-500 border-b text-[10px] font-bold uppercase tracking-wider">
-                    <th className="px-4 py-3 text-left">Product Details</th>
+                    <th className="px-4 py-3 text-left">#</th>
+                    <th className="px-4 py-3 text-left">Product</th>
                     <th className="px-3 py-3 text-left">Barcode</th>
-                    <th className="px-3 py-3 text-left">Category</th>
-                    <th className="px-3 py-3 text-right">Price</th>
-                    <th className="px-3 py-3 text-center">Qty</th>
-                    <th className="px-3 py-3 text-right">Subtotal</th>
-                    <th className="px-4 py-3 text-left pl-8">Last Cashier</th>
-                    <th className="px-4 py-3 text-right">Time</th>
+                    <th className="px-3 py-3 text-right">Unit Price</th>
+                    <th className="px-3 py-3 text-center">Qty Sold</th>
+                    <th className="px-3 py-3 text-right">Total Revenue</th>
+                    <th className="px-4 py-3 text-left">Last Cashier</th>
                   </tr>
                 </thead>
 
@@ -330,16 +315,12 @@ const ItemSales = () => {
                       key={idx}
                       className="hover:bg-blue-50/20 transition-colors"
                     >
+                      <td className="px-4 py-3 text-gray-400">{idx + 1}</td>
                       <td className="px-4 py-3">
                         <p className="font-bold text-gray-800">{item.name}</p>
                       </td>
                       <td className="px-3 py-3 font-mono text-gray-400 text-[10px]">
                         {item.barcode || "—"}
-                      </td>
-                      <td className="px-3 py-3">
-                        <span className="bg-purple-50 text-purple-600 text-[9px] font-bold px-2 py-0.5 rounded-full">
-                          {item.category}
-                        </span>
                       </td>
                       <td className="px-3 py-3 text-right font-mono text-gray-400">
                         {item.unitPrice.toLocaleString()}
@@ -358,14 +339,9 @@ const ItemSales = () => {
                       <td className="px-3 py-3 text-right font-bold text-gray-900">
                         {item.totalPrice.toLocaleString()}
                       </td>
-                      <td className="px-4 py-3 pl-8">
+                      <td className="px-4 py-3">
                         <span className="text-[10px] text-gray-500 font-medium">
                           {item.lastCashier}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className="text-[10px] font-mono text-gray-400">
-                          {item.lastSold}
                         </span>
                       </td>
                     </tr>
@@ -377,15 +353,17 @@ const ItemSales = () => {
                     <td className="px-4 py-4" colSpan="4">
                       {filteredItems.length < itemSummary.length
                         ? "Filtered Totals"
-                        : "Total Aggregates"}
+                        : selectedShiftDate
+                          ? `Shift ${selectedShiftDate} Totals`
+                          : "All-time Totals"}
                     </td>
                     <td className="px-3 py-4 text-center text-emerald-400">
-                      {filteredTotalQty} Items
+                      {filteredTotalQty} units
                     </td>
                     <td className="px-3 py-4 text-right text-emerald-400">
                       {filteredTotalPrice.toLocaleString()} RWF
                     </td>
-                    <td colSpan="2" className="px-4 py-4"></td>
+                    <td className="px-4 py-4" />
                   </tr>
                 </tfoot>
               </table>

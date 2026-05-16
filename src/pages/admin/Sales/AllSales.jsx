@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Tooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
 import {
   getAllSales,
   getCashiers,
@@ -32,6 +34,7 @@ const AllSales = () => {
     date: "",
     cashierId: "",
     shiftDate: "",
+    itemSearch: "",
   });
 
   const [selectedSale, setSelectedSale] = useState(null);
@@ -77,7 +80,15 @@ const AllSales = () => {
 
   const filteredSales = sales.filter((sale) => {
     const matchesOrderId =
-      !filters.orderId || sale.invoice_number?.includes(filters.orderId);
+      !filters.orderId ||
+      sale.invoice_number?.includes(filters.orderId) ||
+      sale.items?.some(
+        (item) =>
+          item.product_name
+            ?.toLowerCase()
+            .includes(filters.orderId.toLowerCase()) ||
+          item.barcode?.toLowerCase().includes(filters.orderId.toLowerCase()),
+      );
     const matchesStatus = !filters.status || sale.status === filters.status;
     const matchesCashier =
       !filters.cashierId || sale.user?.id === Number(filters.cashierId);
@@ -86,13 +97,7 @@ const AllSales = () => {
     const matchesShiftDate =
       !filters.shiftDate || sale.shift?.business_date === filters.shiftDate;
 
-    return (
-      matchesOrderId &&
-      matchesStatus &&
-      matchesCashier &&
-      matchesDate &&
-      matchesShiftDate
-    );
+    return matchesOrderId && matchesStatus && matchesCashier && matchesDate;
   });
 
   const limitedSales = filteredSales.slice(0, limit);
@@ -127,6 +132,7 @@ const AllSales = () => {
       date: "",
       cashierId: "",
       shiftDate: "",
+      itemSearch: "",
     });
   };
 
@@ -210,7 +216,7 @@ const AllSales = () => {
             onChange={(e) =>
               setFilters({ ...filters, orderId: e.target.value })
             }
-            placeholder="Search Order ID"
+            placeholder="Search by order ID, item name or barcode..."
             className="h-7 px-2 text-xs border rounded w-full"
             disabled={tableLoading}
           />
@@ -321,10 +327,12 @@ const AllSales = () => {
         <table className="w-full text-xs min-w-[800px]">
           <thead className="bg-gray-100 text-center text-gray-700">
             <tr>
-              <th className="px-2 py-2">Order ID</th>
+              <th className="px-2 py-2"># Invoice </th>
+              <th className="px-2 py-2">#Shift</th>
               <th className="px-2 py-2">Customer</th>
               <th className="px-2 py-2">Cashier</th>
               <th className="px-2 py-2">Date</th>
+              <th className="px-2 py-2">Items</th>
               <th className="px-2 py-2">Amount</th>
               <th className="px-2 py-2">Status</th>
               <th className="px-2 py-2">Actions</th>
@@ -342,17 +350,43 @@ const AllSales = () => {
                   <td className="px-2 py-2 font-semibold">
                     {sale.invoice_number}
                   </td>
+                  <td className="px-2 py-2 font-semibold">{sale?.shift_id}</td>
                   <td className="px-2 py-2">
                     {sale.customer_name || "Walk-in"}
                   </td>
                   <td className="px-2 py-2 text-center">
                     {sale.user?.full_name}
                   </td>
-                  <td className="px-2 py-2">{sale.created_at?.slice(0, 10)}</td>
+                  <td className="px-2 py-2">
+                    {new Date(sale.created_at).toLocaleString()}
+                  </td>
+
+                  {/* display only the first two items and other with a toast */}
+                  <td
+                    className="px-2 py-2 underline cursor-pointer text-blue-600"
+                    data-tooltip-id={`items-tooltip-${sale.id}`}
+                    data-tooltip-html={sale?.items
+                      ?.map((item) => item.product_name)
+                      .join("<br/>")} // HTML line breaks
+                  >
+                    {sale?.items?.length}
+                    <Tooltip
+                      id={`items-tooltip-${sale.id}`}
+                      place="top"
+                      delayShow={0}
+                    >
+                      <div>
+                        {sale?.items?.map((item) => (
+                          <div key={item.barcode}>{item.product_name}</div>
+                        ))}
+                      </div>
+                    </Tooltip>
+                  </td>
                   <td className="px-2 py-2 font-semibold">
                     {Number(sale.subtotal).toFixed(2)}
                   </td>
                   <td className="px-2 py-2">{sale.status}</td>
+
                   <td className="px-2 text-center py-2 space-x-2">
                     <button
                       onClick={() => openSaleDetails(sale)}
