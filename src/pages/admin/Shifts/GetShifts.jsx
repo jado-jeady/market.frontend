@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
-import { getShiftsOnly } from "../../../utils/shift.util";
+import { getShiftsOnly, withdrawMoney } from "../../../utils/shift.util";
 import { getUserNameById } from "../../../utils/user.util";
 import { toast } from "react-toastify";
 import AdminCloseShiftModal from "../../../components/Shifts/AdminCloseShiftModal.jsx";
+import WithdrawModal from "../../../components/Shifts/WithdrawMoney.jsx";
+
 import {
   Loader2,
   Search,
@@ -29,6 +31,7 @@ const GetShifts = () => {
 
   const [searchName, setSearchName] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [withdrawShift, setWithdrawShift] = useState(null);
 
   const handleOpenModal = (shift) => {
     setSelectedShift(shift);
@@ -62,6 +65,12 @@ const GetShifts = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const refetchShifts = () => {
+    useEffect(() => {
+      fetchShifts();
+    });
   };
 
   useEffect(() => {
@@ -193,17 +202,39 @@ const GetShifts = () => {
                     onClick={() => handleOpenDetails(shift)}
                     className="flex-1 py-3 bg-gray-50 text-gray-600 text-[10px] font-black uppercase rounded-xl flex items-center justify-center gap-2"
                   >
-                    <Eye className="w-4 h-4" /> View Details
+                    <Eye className="w-4 h-4" />
                   </button>
                   {shift.status === "OPEN" && (
-                    <button
-                      onClick={() => handleOpenModal(shift)}
-                      className="flex-1 py-3 bg-red-600 text-white text-[10px] font-black uppercase rounded-xl shadow-lg shadow-red-100"
-                    >
-                      Close Shift
-                    </button>
+                    <>
+                      <button
+                        onClick={() => handleOpenModal(shift)}
+                        className="px-4 py-1.5 bg-red-600 text-white text-[10px] font-black uppercase rounded-lg shadow-sm"
+                      >
+                        Close
+                      </button>
+
+                      <button
+                        onClick={() => setWithdrawShift(shift)}
+                        className="px-4 py-1.5 bg-green-600 text-white text-[10px] font-black uppercase rounded-lg shadow-sm"
+                      >
+                        Withdraw
+                      </button>
+                    </>
                   )}
                 </div>
+                {/* Render Withdraw Modal */}
+                {withdrawShift && (
+                  <WithdrawModal
+                    shift={withdrawShift}
+                    onClose={() => setWithdrawShift(null)}
+                    onConfirm={(amount) => {
+                      // Call your util function here
+                      withdrawMoney(withdrawShift.id, amount);
+                      setWithdrawShift(null);
+                      fetchShifts(); // Refresh the shifts after withdrawal
+                    }}
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -275,13 +306,23 @@ const GetShifts = () => {
                         >
                           <Eye className="w-5 h-5" />
                         </button>
+
                         {shift.status === "OPEN" && (
-                          <button
-                            onClick={() => handleOpenModal(shift)}
-                            className="px-4 py-1.5 bg-red-600 text-white text-[10px] font-black uppercase rounded-lg shadow-sm"
-                          >
-                            Close
-                          </button>
+                          <>
+                            <button
+                              onClick={() => handleOpenModal(shift)}
+                              className="px-4 py-1.5 bg-red-600 text-white text-[10px] font-black uppercase rounded-lg shadow-sm"
+                            >
+                              Close
+                            </button>
+
+                            <button
+                              onClick={() => setWithdrawShift(shift)}
+                              className="px-4 py-1.5 bg-green-600 text-white text-[10px] font-black uppercase rounded-lg shadow-sm"
+                            >
+                              Withdraw
+                            </button>
+                          </>
                         )}
                       </div>
                     </td>
@@ -289,6 +330,17 @@ const GetShifts = () => {
                 ))}
               </tbody>
             </table>
+            {withdrawShift && (
+              <WithdrawModal
+                shift={withdrawShift}
+                onClose={() => setWithdrawShift(null)}
+                onConfirm={(amount) => {
+                  withdrawMoney(withdrawShift.id, amount);
+                  setWithdrawShift(null);
+                  refetchShifts();
+                }}
+              />
+            )}
           </div>
         </>
       )}
