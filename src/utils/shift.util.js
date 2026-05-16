@@ -192,3 +192,21 @@ export const getConsumablesSnapshot = async () => {
     };
   }
 };
+
+// utils/withdrawMoneyUtil.js
+export async function withdrawMoney(shiftId, amount) {
+  try {
+    console.log("shiftId", shiftId);
+    console.log("amount", amount);
+    const res = await fetch(`${BASE_URL}/api/shift/${shiftId}/withdraw`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ amount }),
+    });
+    if (!res.ok) throw new Error("Failed to withdraw");
+    return await res.json();
+  } catch (err) {
+    console.error(err.message);
+    throw err;
+  }
+}

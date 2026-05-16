@@ -428,6 +428,7 @@ const UserManagement = () => {
                   <option value="Storekeeper">Store Keeper</option>
                   <option value="Cashier">Cashier</option>
                   <option value="Admin">Admin</option>
+                  <option value="Barista">Barista</option>
                 </select>
               </div>
 
@@ -590,6 +591,7 @@ const UserManagement = () => {
                   <option value="Storekeeper">Store Keeper</option>
                   <option value="Cashier">Cashier</option>
                   <option value="Admin">Admin</option>
+                  <option value="Barista">Barista</option>
                 </select>
               </div>
 

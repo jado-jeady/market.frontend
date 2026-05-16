@@ -12,28 +12,44 @@ import {
   X,
 } from "lucide-react";
 
-const UserSidebar = ({ sidebarOpen, setSidebarOpen }) => {
+const BaristaSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const menuItems = [
     {
       name: "Dashboard",
-      path: "/user/dashboard",
+      path: "/barista/dashboard",
       icon: <LayoutDashboard size={14} />,
     },
-    { name: "Sales", path: "/user/sales", icon: <ShoppingCart size={14} /> },
-    { name: "Products", path: "/user/products", icon: <Package size={14} /> },
+    { name: "Sales", path: "/barista/sales", icon: <ShoppingCart size={14} /> },
+    {
+      name: "Products",
+      path: "/barista/products",
+      icon: <Package size={14} />,
+    },
     {
       name: "Consumables",
-      path: "/user/consumables",
+      path: "/barista/consumables",
       icon: <Boxes size={14} />,
     },
-    { name: "Reporting", path: "/user/reports", icon: <BarChart3 size={14} /> },
-    { name: "Customers", path: "/user/customers", icon: <Users size={14} /> },
+    {
+      name: "Reporting",
+      path: "/barista/reports",
+      icon: <BarChart3 size={14} />,
+    },
+    {
+      name: "Customers",
+      path: "/barista/customers",
+      icon: <Users size={14} />,
+    },
     {
       name: "Day Closing",
-      path: "/user/day-closing",
+      path: "/barista/day-closing",
       icon: <CalendarCheck size={14} />,
     },
-    { name: "Settings", path: "/user/settings", icon: <Settings size={14} /> },
+    {
+      name: "Settings",
+      path: "/barista/settings",
+      icon: <Settings size={14} />,
+    },
   ];
 
   return (
@@ -116,4 +132,4 @@ const UserSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   );
 };
 
-export default UserSidebar;
+export default BaristaSidebar;

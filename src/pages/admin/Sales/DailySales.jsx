@@ -32,8 +32,12 @@ const DailySales = () => {
     (async () => {
       setLoading(true);
       const response = await getSalesByDate(selectedDate);
+      console.log(response);
       if (response?.success) setSalesSummary(response.data);
       else setSalesSummary([]);
+
+      console.log(salesSummary);
+      console.log("above id the sales summary");
       setLoading(false);
     })();
   }, [selectedDate]);

@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -6,6 +11,7 @@ import Login from "./pages/Login";
 import { AdminRoutes } from "./routes/AdminRoutes";
 import { UserRoutes } from "./routes/UserRoutes";
 import { StorekeeperRoutes } from "./routes/StoreKeeperRoutes";
+import { BaristaRoutes } from "./routes/BarisataRoutes";
 
 function App() {
   return (
@@ -15,6 +21,7 @@ function App() {
         <Route path="/" element={<Login />} />
         {AdminRoutes}
         {UserRoutes}
+        {BaristaRoutes}
         {StorekeeperRoutes}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

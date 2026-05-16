@@ -92,7 +92,7 @@ const AdminiProductList = () => {
   }, [search, category, stockLevel]);
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-[2000px] mx-auto min-h-screen bg-gray-50/50">
+    <div className="p-2 md:p-2 lg:p-3 max-w-[2000px] mx-auto min-h-screen bg-gray-50/50">
       {/* RESPONSIVE HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
@@ -121,7 +121,7 @@ const AdminiProductList = () => {
       </div>
 
       {/* RESPONSIVE FILTERS */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-1 mb-2 text-gray-900 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-1 mb-1 text-gray-900 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="relative">
           <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
           <input
