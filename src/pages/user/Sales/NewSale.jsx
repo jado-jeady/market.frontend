@@ -114,10 +114,28 @@ const NewSale = () => {
         ),
       );
     } else {
-      const isJibu = product.barcode === "792382470938";
+      const BOTTLE_PRODUCTS = [
+        { barcode: "792382470938", name: "Jibu", bottlePrice: 16000 },
+        {
+          barcode: "6164002583450",
+          name: "IMENA Vannila 2L",
+          bottlePrice: 10000,
+        },
+        { barcode: "YOUR_BARCODE_3", name: "Product 3", bottlePrice: 1000 },
+      ];
+      // Then inside addToCart, change the single line to:
+      const matchedBottle = BOTTLE_PRODUCTS.find(
+        (bp) => bp.barcode === product.barcode,
+      );
+
       setCart([
         ...cart,
-        { ...product, quantity: 1, withBottle: isJibu ? false : undefined },
+        {
+          ...product,
+          quantity: 1,
+          withBottle: matchedBottle ? false : undefined,
+          bottlePrice: matchedBottle?.bottlePrice ?? 0,
+        },
       ]);
     }
   };
@@ -151,15 +169,11 @@ const NewSale = () => {
     setCart(cart.filter((item) => item.id !== id));
   };
 
-  /* ===================== TOTALS ===================== */
-
-  const BOTTLE_PRICE = 16000;
-
   // ── calculateTotal ──────────────────────────────────────
   const calculateTotal = () =>
     cart.reduce((total, item) => {
       const price = parseFloat(item.selling_price);
-      const bottleExtra = item.withBottle ? BOTTLE_PRICE : 0;
+      const bottleExtra = item.withBottle ? item.bottlePrice : 0;
       return total + (price + bottleExtra) * item.quantity;
     }, 0);
 
@@ -181,7 +195,8 @@ const NewSale = () => {
       items: cart.map((item) => ({
         ...item,
         // ✅ bake the bottle surcharge into unit_price at snapshot time
-        unit_price: item.selling_price + (item.withBottle ? BOTTLE_PRICE : 0),
+        unit_price:
+          item.selling_price + (item.withBottle ? item.bottlePrice : 0),
         // ✅ label to show on receipt
         display_name: item.withBottle ? `${item.name} (+ Bottle)` : item.name,
       })),
@@ -220,9 +235,8 @@ const NewSale = () => {
     if (isProcessing || isConfirmed) return;
 
     try {
+      // get the current Shift
       const shift = await getCurrentShift();
-      console.log("that is a shift id");
-      console.log(shift?.data?.id);
       setIsProcessing(true);
       setProcessingSale("Confirming...");
 
@@ -235,10 +249,11 @@ const NewSale = () => {
         items: invoiceSnapshot.items.map((item) => ({
           product_id: item.id,
           quantity: item.quantity,
-          // ✅ force number + add bottle price here as the final safety net
           unit_price:
             parseFloat(item.selling_price) +
-            (item.withBottle ? BOTTLE_PRICE : 0),
+            (item.withBottle ? item.bottlePrice : 0),
+          with_bottle: item.withBottle === true, // explicit boolean, never undefined
+          bottle_price: item.withBottle ? item.bottlePrice : 0,
         })),
       };
 
@@ -246,16 +261,16 @@ const NewSale = () => {
         toast.error("Invalid sale data");
         return;
       }
+
       // Create sale
-      console.log(payload || "no payload");
+
       const response = await createSale(payload);
 
       if (!response.success) {
         throw new Error(response.message || "Sale failed");
       }
-      console.log("the data to bkc");
-      console.log(response);
 
+      // Clear cart
       setIsConfirmed(true);
       setProcessingSale("Confirmed ✓");
       setCart([]);
@@ -332,11 +347,11 @@ const NewSale = () => {
                       onClick={() => addToCart(product)}
                       disabled={product.stock_quantity === 0}
                       className={`bg-white rounded-lg shadow-md transition p-4 text-left border-2
-              ${
-                product.stock_quantity === 0
-                  ? "opacity-40 cursor-not-allowed"
-                  : "hover:shadow-lg hover:border-gray-500"
-              }`}
+                ${
+                  product.stock_quantity === 0
+                    ? "opacity-40 cursor-not-allowed"
+                    : "hover:shadow-lg hover:border-gray-500"
+                }`}
                     >
                       <div className="w-full h-15 bg-gradient-to-br from-gray-100 to-secondary-100 rounded-lg mb-0 flex items-center justify-center">
                         <svg
@@ -421,17 +436,8 @@ const NewSale = () => {
 
                           <p className="text-[0.625rem]">
                             {item.withBottle
-                              ? `${parseFloat(item.selling_price).toLocaleString()} + ${BOTTLE_PRICE.toLocaleString()} frw`
+                              ? `${parseFloat(item.selling_price).toLocaleString()} + ${parseFloat(item.bottlePrice).toLocaleString()} frw`
                               : `${parseFloat(item.selling_price).toLocaleString()} frw`}
-                          </p>
-
-                          <p className="text-xs font-bold text-white">
-                            {(
-                              (item.selling_price +
-                                (item.withBottle ? BOTTLE_PRICE : 0)) *
-                              item.quantity
-                            ).toLocaleString()}{" "}
-                            frw
                           </p>
                         </div>
 
@@ -467,7 +473,9 @@ const NewSale = () => {
                           <p className="text-xs font-bold text-white">
                             {(
                               (parseFloat(item.selling_price) +
-                                (item.withBottle ? BOTTLE_PRICE : 0)) *
+                                (item.withBottle
+                                  ? parseFloat(item.bottlePrice)
+                                  : 0)) *
                               item.quantity
                             ).toLocaleString()}{" "}
                             frw
@@ -487,21 +495,21 @@ const NewSale = () => {
                         <button
                           onClick={() => toggleBottle(item.id)}
                           className={`flex items-center gap-2 text-xs px-2 py-1 rounded border transition w-fit
-          ${
-            item.withBottle
-              ? "bg-blue-100 border-blue-400 text-blue-700"
-              : "bg-white border-gray-300 text-gray-500"
-          }`}
+            ${
+              item.withBottle
+                ? "bg-blue-100 border-blue-400 text-blue-700"
+                : "bg-white border-gray-300 text-gray-500"
+            }`}
                         >
                           <span
                             className={`w-3 h-3 rounded-sm border flex items-center justify-center
-          ${item.withBottle ? "bg-blue-500 border-blue-500" : "border-gray-400"}`}
+            ${item.withBottle ? "bg-blue-500 border-blue-500" : "border-gray-400"}`}
                           >
                             {item.withBottle && (
                               <span className="text-white text-[8px]">✓</span>
                             )}
                           </span>
-                          With Bottle (+16,000 frw)
+                          With Bottle ({item.bottlePrice} frw)
                         </button>
                       )}
                     </div>
@@ -670,14 +678,25 @@ const NewSale = () => {
                   <div className="flex justify-between">
                     {/* ✅ shows "Jibu (+ Bottle)" if applicable */}
                     <span>{item.display_name}</span>
-                    <span>{item.unit_price.toLocaleString()} frw</span>
+                    <span>{+item.selling_price} frw</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>
-                      {item.quantity} × {item.unit_price.toLocaleString()} frw
+                      {item.quantity} ×{" "}
+                      {Math.floor(
+                        (Number(item.unit_price) +
+                          (item.withBottle ? Number(item.bottlePrice) : 0)) *
+                          item.quantity,
+                      ).toLocaleString()}{" "}
+                      frw
                     </span>
                     <span>
-                      {(item.unit_price * item.quantity).toLocaleString()} frw
+                      {Math.floor(
+                        (Number(item.unit_price) +
+                          (item.withBottle ? Number(item.bottlePrice) : 0)) *
+                          item.quantity,
+                      ).toLocaleString()}{" "}
+                      frw
                     </span>
                   </div>
                 </div>
