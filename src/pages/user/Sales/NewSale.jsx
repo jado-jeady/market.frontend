@@ -114,15 +114,14 @@ const NewSale = () => {
         ),
       );
     } else {
-      const BOTTLE_PRODUCTS = [
-        { barcode: "792382470938", name: "Jibu", bottlePrice: 16000 },
-        {
-          barcode: "6164002583450",
-          name: "IMENA Vannila 2L",
-          bottlePrice: 10000,
-        },
-        { barcode: "YOUR_BARCODE_3", name: "Product 3", bottlePrice: 1000 },
-      ];
+      let BOTTLE_PRODUCTS = [];
+
+      // If you want to use the import.meta.env.VITE_BOTTLE_PRODUCTS variable, you can parse it at the top of your component like this:
+      try {
+        BOTTLE_PRODUCTS = JSON.parse(import.meta.env.VITE_BOTTLE_PRODUCTS);
+      } catch (e) {
+        console.error("Invalid BOTTLE_PRODUCTS env variable", e);
+      }
       // Then inside addToCart, change the single line to:
       const matchedBottle = BOTTLE_PRODUCTS.find(
         (bp) => bp.barcode === product.barcode,
