@@ -330,3 +330,29 @@ export const rejectReturn = async (id, adminId, rejectionReason) => {
     throw err;
   }
 };
+
+//  printing the receipt data in the console after creating a sale in NewSale.jsx
+// utils/printInvoice.js
+export async function printInvoice(saleResponse, ipAddress) {
+  try {
+    // Call your print service API
+    const res = await fetch(`http://${ipAddress}:4000/print`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(saleResponse), // send the confirmed sale data
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      console.log("Invoice sent to printer successfully");
+      return { success: true };
+    } else {
+      console.error("Print failed:", result.message);
+      return { success: false, message: result.message };
+    }
+  } catch (err) {
+    console.error("Error sending to printer:", err);
+    return { success: false, message: err.message };
+  }
+}
