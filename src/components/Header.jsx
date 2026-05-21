@@ -81,10 +81,14 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm max-h-16 fixed top-0 right-0 left-0 md:left-40 z-10">
+    <header
+      className={`bg-white border-b border-gray-200 shadow-sm max-h-16 fixed top-0 right-0 left-0 ${role === "Barista" ? "md:left-0" : "md:left-40"} z-10`}
+    >
       <div className="flex items-center justify-between px-6 py-1">
         {/* Search Bar */}
-        <div className="flex-1 md:block hidden max-w-xl pl-8">
+        <div
+          className={`flex-1 md:block hidden max-w-xl  ${role === "Barista" ? "ml-50" : "ml-10"}`}
+        >
           <form onSubmit={handleSearch} className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -92,7 +96,7 @@ const Header = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search products, orders, customers..."
-              className="w-full pl-10 pr-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+              className={`w-full pl-10 pr-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none`}
             />
           </form>
         </div>

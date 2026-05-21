@@ -24,7 +24,8 @@ const BaristaLayout = () => {
 
   return (
     <>
-      <div className="min-h-15 bg-gray-300 flex">
+      <div className="bg-white border-b border-gray-200 shadow-sm max-h-16  top-0 right-0 left-0 md:left-0 z-10">
+        {/* Buttons for full screen and refresh at the center */}
         <div className="fixed center bottom-4 right-1/2 flex gap-2 z-50">
           <button
             type="button"
@@ -76,13 +77,13 @@ const BaristaLayout = () => {
             setSidebarOpen={setSidebarOpen}
           />
         </div>
-        <div className="flex-1 flex flex-col   bg-white md:ml-30">
+        <div className="flex-1 flex flex-col bg-white md:ml-30">
           <Header />
         </div>
       </div>
 
       {/* <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} /> */}
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen pt-15 bg-gray-50 flex">
         {/* Content */}
 
         <div className="flex-1 flex flex-col  bg-white">

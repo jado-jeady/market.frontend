@@ -13,7 +13,7 @@ export default defineConfig({
       registerType: "autoUpdate", // Automatically patches layout files in background
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
       manifest: {
-        name: "POS Barista System Terminal",
+        name: "POS Terminal Web App",
         short_name: "POS Terminal",
         description:
           "Native landscape terminal web client layout for Barista POS operations.",
@@ -21,15 +21,15 @@ export default defineConfig({
         background_color: "#f3f4f6", // Matches your global bg-gray-100 color tone
         display: "standalone", // Hides browser bars completely to feel like a real native app
         orientation: "landscape", // Forces layout flat horizontally on tablet mount displays
-        start_url: "/barista/dashboard",
+        start_url: "/login", // Directs users to the login page on app launch for quick access
         icons: [
           {
-            src: "pwa-192x192.png",
+            src: "tyga_market_logo.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "pwa-512x512.png",
+            src: "tyga_market_logo.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any maskable", // Essential for Android scaling circular app grids
