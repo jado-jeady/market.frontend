@@ -1,3 +1,4 @@
+import React, { useEffect, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -8,128 +9,113 @@ import {
   Users,
   CalendarCheck,
   Settings,
-  Menu,
-  X,
+  LogOutIcon,
 } from "lucide-react";
 
-const BaristaSidebar = ({ sidebarOpen, setSidebarOpen }) => {
+export default function BaristaSidebar({ sidebarOpen, setSidebarOpen }) {
+  const dropdownRef = useRef(null);
+
   const menuItems = [
     {
       name: "Dashboard",
       path: "/barista/dashboard",
-      icon: <LayoutDashboard size={14} />,
-    },
-    { name: "Sales", path: "/barista/sales", icon: <ShoppingCart size={14} /> },
-    {
-      name: "Products",
-      path: "/barista/products",
-      icon: <Package size={14} />,
+      icon: <LayoutDashboard size={13} />,
     },
     {
-      name: "Consumables",
-      path: "/barista/consumables",
-      icon: <Boxes size={14} />,
+      name: "Sells",
+      path: "/barista/Sell",
+      icon: <ShoppingCart size={13} />,
+    },
+    { name: "Sales", path: "/barista/sales", icon: <ShoppingCart size={13} /> },
+    {
+      name: "Menus",
+      path: "/barista/menus",
+      icon: <Package size={13} />,
     },
     {
       name: "Reporting",
       path: "/barista/reports",
-      icon: <BarChart3 size={14} />,
+      icon: <BarChart3 size={13} />,
     },
     {
       name: "Customers",
       path: "/barista/customers",
-      icon: <Users size={14} />,
+      icon: <Users size={13} />,
     },
     {
       name: "Day Closing",
       path: "/barista/day-closing",
-      icon: <CalendarCheck size={14} />,
+      icon: <CalendarCheck size={13} />,
     },
     {
       name: "Settings",
       path: "/barista/settings",
-      icon: <Settings size={14} />,
+      icon: <Settings size={13} />,
+    },
+    {
+      name: "Logout",
+      path: "/barista/logout",
+      icon: <LogOutIcon size={13} />,
     },
   ];
 
+  // Close when clicking outside of the dropdown container area
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        // Delay slightly if clicking the main trigger button to prevent instant retoggle
+        if (!e.target.closest(".hamburger-trigger")) {
+          setSidebarOpen(false);
+        }
+      }
+    };
+    if (sidebarOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [sidebarOpen, setSidebarOpen]);
+
+  if (!sidebarOpen) return null;
+
   return (
-    <>
-      {/* Mobile hamburger toggle (top-left, outside sidebar) */}
-      <button
-        className="fixed top-2 left-3 z-50 md:hidden p-2 rounded bg-gray-600 text-white"
-        onClick={() => setSidebarOpen(true)}
-      >
-        <Menu size={20} />
-      </button>
-
-      {/* Mobile overlay */}
-      <div
-        className={`fixed inset-0 bg-black/50 bg-opacity-10 bg-opacity-50 z-40 md:hidden transition-opacity ${
-          sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={() => setSidebarOpen(false)}
-      />
-
-      {/* Sidebar */}
-      <div
-        className={`fixed top-0 left-0 h-full w-64 bg-white text-white shadow-xl transform transition-transform z-50
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:w-40`}
-      >
-        {/* Close button (absolute top-right inside sidebar) */}
-        <button
-          className="absolute top-3 right-3 md:hidden p-2 rounded bg-secondary-600 text-white"
-          onClick={() => setSidebarOpen(false)}
-        >
-          <X size={20} />
-        </button>
-
-        {/* Logo */}
-        <div className="p-3 border-b shadow-sm border-secondary-600">
-          <div className="flex items-center space-x-3">
-            <div className="w-25 h-20 bg-gray-300 rounded-lg flex items-center justify-center">
-              <ShoppingCart className="w-8 h-8 text-[#E50619]" />
-            </div>
-            <div>
-              <h3 className="text-lg text-gray-700 font-bold">POS System</h3>
-              <p className="text-xs text-red-400">Cashier Panel</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Menu */}
-        <nav className="pb-3 py-2">
-          <ul className="space-y-0">
-            {menuItems.map((item) => (
-              <li key={item.path}>
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `flex items-center space-x-2 px-2 py-3 text-xs rounded-lg transition-all duration-200 ${
-                      isActive
-                        ? "bg-gray-100 text-white transform scale-105"
-                        : "text-secondary-100 hover:bg-secondary-600 hover:text-white"
-                    }`
-                  }
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  {item.icon}
-                  <span className="font-medium">{item.name}</span>
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        {/* Bottom Section */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-600">
-          <div className="text-xs text-gray-500 text-center">
-            <p>© 2024 POS System</p>
-            <p className="mt-1">Version 1.2.0</p>
-          </div>
-        </div>
+    <div
+      ref={dropdownRef}
+      className="absolute top-9 left-0 w-52 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+    >
+      {/* Mini Brand Label */}
+      <div className="px-3 pt-3 pb-1 flex items-center justify-between border-b border-gray-50">
+        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+          POS Navigation
+        </p>
+        <span className="text-[8px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-md">
+          Barista Panel
+        </span>
       </div>
-    </>
-  );
-};
 
-export default BaristaSidebar;
+      {/* Pop-up Navigation Menu */}
+      <nav className="p-1.5 max-h-[70vh] overflow-y-auto space-y-0.5">
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            onClick={() => setSidebarOpen(false)}
+            className={({ isActive }) =>
+              `w-full flex items-center gap-2.5 px-3 py-2 rounded-xl font-semibold transition-colors text-[11px] ${
+                isActive
+                  ? "bg-black text-white"
+                  : "text-gray-700 hover:bg-gray-50"
+              }`
+            }
+          >
+            <span className="shrink-0">{item.icon}</span>
+            <span className="truncate">{item.name}</span>
+          </NavLink>
+        ))}
+      </nav>
+
+      {/* Pop-up Metadata Footer */}
+      <div className="p-2 border-t border-gray-100 bg-gray-50/50 flex justify-between items-center text-[9px] text-gray-400 px-3">
+        <span>© POS System</span>
+        <span>v1.2.0</span>
+      </div>
+    </div>
+  );
+}

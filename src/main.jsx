@@ -6,6 +6,11 @@ import { ShiftProvider } from "./context/ShiftContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import "react-toastify/dist/ReactToastify.css";
 
+// Virtual import managed automatically by the vite-plugin-pwa framework bundle
+import { registerSW } from "virtual:pwa-register";
+// Automatically sets up the service worker pipeline
+registerSW({ immediate: true });
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
