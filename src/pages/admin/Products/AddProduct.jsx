@@ -12,12 +12,12 @@ const AddProduct = () => {
     barcode: "",
     buying_price: "",
     selling_price: "",
-    stock_quantity: "", //initial_stock
-    //vat_category: '',
+    stock_quantity: "",
     expire_date: "",
     min_stock: "",
     description: "",
     isConsumable: false,
+    isBaristaItem: false,
     supplier: "",
   });
   const [categories, setCategories] = useState([]);
@@ -27,11 +27,11 @@ const AddProduct = () => {
   const [barcode_error, setBarcode_error] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Getting All Categories
+  const isBaristaItem = formData.isBaristaItem;
+
   useEffect(() => {
     const fetchCategories = async () => {
       const res = await getAllCategories();
-      // assuming backend returns { success: true, data: [...] }
       setCategories(Array.isArray(res?.data) ? res.data : []);
     };
     fetchCategories();
@@ -39,8 +39,6 @@ const AddProduct = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
-    // If it's a checkbox, use the boolean 'checked' value
     const finalValue = type === "checkbox" ? checked : value;
 
     setFormData((prev) => ({
@@ -48,13 +46,29 @@ const AddProduct = () => {
       [name]: finalValue,
     }));
 
-    // Real-time validation
+    // Clear barista-only fields when switching to barista mode
+    if (name === "isBaristaItem" && checked) {
+      setFormData((prev) => ({
+        ...prev,
+        isBaristaItem: true,
+        sku: "",
+        buying_price: "",
+        expire_date: "",
+        stock_quantity: "",
+        min_stock: "",
+        supplier: "",
+      }));
+      setExpire_errors(null);
+      setPricing_errors(null);
+      setStock_error(null);
+      return;
+    }
+
     if (name === "selling_price" || name === "buying_price") {
       const sellingPrice =
         name === "selling_price" ? value : formData.selling_price;
       const buyingPrice =
         name === "buying_price" ? value : formData.buying_price;
-
       if (
         sellingPrice &&
         buyingPrice &&
@@ -70,9 +84,8 @@ const AddProduct = () => {
 
     if (name === "expire_date") {
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Reset time to start of day
+      today.setHours(0, 0, 0, 0);
       const selectedDate = new Date(value);
-
       if (selectedDate <= today) {
         setExpire_errors("Expire date must be in the future.");
       } else {
@@ -88,7 +101,6 @@ const AddProduct = () => {
       }
     }
 
-    // Clear barcode error when user starts typing
     if (name === "barcode") {
       setBarcode_error(null);
     }
@@ -104,34 +116,36 @@ const AddProduct = () => {
 
     let hasError = false;
 
-    // Validation rules
-    if (Number(formData.selling_price) < Number(formData.buying_price)) {
-      setPricing_errors(
-        "Selling price must be equal to or greater than buying price.",
-      );
-      hasError = true;
+    // Only validate barista-hidden fields when NOT a barista item
+    if (!isBaristaItem) {
+      if (Number(formData.selling_price) < Number(formData.buying_price)) {
+        setPricing_errors(
+          "Selling price must be equal to or greater than buying price.",
+        );
+        hasError = true;
+      }
+
+      if (Number(formData.stock_quantity) <= 0) {
+        setStock_error("Stock quantity must be greater than 0.");
+        hasError = true;
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const selectedDate = new Date(formData.expire_date);
+      if (selectedDate <= today) {
+        setExpire_errors("Expire date must be in the future.");
+        hasError = true;
+      }
     }
 
-    if (Number(formData.stock_quantity) <= 0) {
-      setStock_error("Stock quantity must be greater than 0.");
-      hasError = true;
+    if (hasError) {
+      setIsLoading(false);
+      return;
     }
-
-    // Use expire_date (matching your state key)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const selectedDate = new Date(formData.expire_date);
-    if (selectedDate <= today) {
-      setExpire_errors("Expire date must be in the future.");
-      hasError = true;
-    }
-
-    // Stop submission if there are errors
-    if (hasError) return;
 
     try {
-      console.log("this is data to send on bakcedn", formData);
-      const res = await createProduct(formData);
+      const res = await createProduct(formData, categories);
 
       if (res?.success) {
         toast.success("Product added successfully");
@@ -147,9 +161,9 @@ const AddProduct = () => {
           expire_date: "",
           description: "",
           isConsumable: false,
+          isBaristaItem: false,
           supplier: "",
         });
-        // Clear all errors
         setExpire_errors(null);
         setPricing_errors(null);
         setStock_error(null);
@@ -157,7 +171,6 @@ const AddProduct = () => {
         setIsLoading(false);
       } else {
         console.error("Error response from backend:", res);
-        // Check if the error is related to duplicate barcode
         if (
           res?.message?.toLowerCase().includes("barcode") ||
           res?.error?.toLowerCase().includes("barcode") ||
@@ -168,7 +181,6 @@ const AddProduct = () => {
             "This barcode already exists. Please use a different barcode.",
           );
         }
-
         toast.error(
           <Link
             to="/admin/products"
@@ -178,14 +190,11 @@ const AddProduct = () => {
             <i className="text-red-500">{formData.barcode} </i> exists. Click
             here to adjust its stock{" "}
           </Link>,
-          {
-            autoClose: 10000,
-          },
+          { autoClose: 10000 },
         );
         setIsLoading(false);
       }
     } catch (error) {
-      // Check if error response contains barcode duplicate message
       if (
         error?.response?.data?.message?.toLowerCase().includes("barcode") ||
         error?.response?.data?.error?.toLowerCase().includes("barcode")
@@ -195,7 +204,6 @@ const AddProduct = () => {
         );
         setIsLoading(false);
       }
-
       toast.error("Failed to add product");
       console.error("Error adding product:", error);
       setIsLoading(false);
@@ -218,11 +226,41 @@ const AddProduct = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* BASIC INFORMATION */}
           <div className="bg-white h-full rounded-lg shadow-md p-6">
-            <h2 className="text-sm font-semibold text-gray-900 mb-4">
+            <h2 className="text-sm font-semibold text-gray-900 mb-1">
               Basic Information
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex items-center text-xs text-gray-600 mt-1 space-x-1">
+                <input
+                  type="checkbox"
+                  id="consumable"
+                  name="isConsumable"
+                  checked={formData.isConsumable}
+                  onChange={handleChange}
+                  className="h-3 w-3 bg-transparent appearance-white accent-blue-500 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="consumable" className="cursor-pointer text-sm">
+                  Consumable
+                </label>
+              </div>
+              <div className="flex items-center text-xs text-gray-600 mt-1 space-x-1">
+                <input
+                  type="checkbox"
+                  id="isBaristaItem"
+                  name="isBaristaItem"
+                  checked={formData.isBaristaItem}
+                  onChange={handleChange}
+                  className="h-3 w-3 bg-transparent appearance-white accent-blue-500 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label
+                  htmlFor="isBaristaItem"
+                  className="cursor-pointer text-sm"
+                >
+                  Barista Item
+                </label>
+              </div>
+
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-2">
                   Product Name <span className="text-red-300">*</span>
@@ -238,20 +276,23 @@ const AddProduct = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  SKU <span className="text-red-300">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="sku"
-                  value={formData.sku}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 text-gray-600 text-xs border rounded-lg border-gray-300 focus:ring-2 focus:ring-primary-500 outline-none"
-                  placeholder="Product Stock keeping unit (SKU)"
-                />
-              </div>
+              {/* SKU — hidden for barista items */}
+              {!isBaristaItem && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    SKU <span className="text-red-300">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="sku"
+                    value={formData.sku}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 text-gray-600 text-xs border rounded-lg border-gray-300 focus:ring-2 focus:ring-primary-500 outline-none"
+                    placeholder="Product Stock keeping unit (SKU)"
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-2">
@@ -273,61 +314,50 @@ const AddProduct = () => {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  Barcode <span className="text-red-300">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="barcode"
-                  value={formData.barcode}
-                  required
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2 text-gray-600 text-xs border rounded-lg ${
-                    barcode_error ? "border-red-500" : "border-gray-300"
-                  } focus:ring-2 focus:ring-primary-500 outline-none`}
-                  placeholder="Product barcode..."
-                />
-                {barcode_error && (
-                  <p className="text-red-500 text-xs mt-1">{barcode_error}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  Expire Date <span className="text-red-300">*</span>
-                </label>
-                <input
-                  type="date"
-                  name="expire_date"
-                  value={formData.expire_date}
-                  onChange={handleChange}
-                  required
-                  className={`w-full px-4 py-2 text-gray-600 text-xs border rounded-lg ${
-                    Expire_error ? "border-red-500" : "border-gray-300"
-                  } focus:ring-2 focus:ring-primary-500 outline-none`}
-                  placeholder="Expire Date"
-                />
-                {Expire_error && (
-                  <p className="text-red-500 text-xs mt-1">{Expire_error}</p>
-                )}
-                <div className="flex items-center text-xs text-gray-600 mt-6 space-x-2">
-                  <input
-                    type="checkbox"
-                    id="consumable"
-                    name="isConsumable" // Add this!
-                    checked={formData.isConsumable} // Use 'checked', not 'value'
-                    onChange={handleChange}
-                    className="h-4 w-4 bg-transparent appearance-white accent-blue-500 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label
-                    htmlFor="consumable"
-                    className="cursor-pointer text-lg "
-                  >
-                    Consumable
+              {!isBaristaItem && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Barcode <span className="text-red-300">*</span>
                   </label>
+                  <input
+                    type="text"
+                    name="barcode"
+                    value={formData.barcode}
+                    required
+                    onChange={handleChange}
+                    className={`w-full px-4 py-2 text-gray-600 text-xs border rounded-lg ${
+                      barcode_error ? "border-red-500" : "border-gray-300"
+                    } focus:ring-2 focus:ring-primary-500 outline-none`}
+                    placeholder="Product barcode..."
+                  />
+                  {barcode_error && (
+                    <p className="text-red-500 text-xs mt-1">{barcode_error}</p>
+                  )}
                 </div>
-              </div>
+              )}
+
+              {/* Expire Date — hidden for barista items */}
+              {!isBaristaItem && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Expire Date <span className="text-red-300">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="expire_date"
+                    value={formData.expire_date}
+                    onChange={handleChange}
+                    required
+                    className={`w-full px-4 py-2 text-gray-600 text-xs border rounded-lg ${
+                      Expire_error ? "border-red-500" : "border-gray-300"
+                    } focus:ring-2 focus:ring-primary-500 outline-none`}
+                    placeholder="Expire Date"
+                  />
+                  {Expire_error && (
+                    <p className="text-red-500 text-xs mt-1">{Expire_error}</p>
+                  )}
+                </div>
+              )}
 
               <div className="md:col-span-1">
                 <label className="block text-xs font-medium text-gray-700 mb-2">
@@ -352,29 +382,34 @@ const AddProduct = () => {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  Cost Price <span className="text-red-300">*</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1 text-gray-500">$</span>
-                  <input
-                    type="number"
-                    min={0}
-                    name="buying_price"
-                    value={formData.buying_price}
-                    placeholder="Cost price..."
-                    onChange={handleChange}
-                    required
-                    className={`w-full pl-8 px-4 text-gray-600 py-2 text-xs border rounded-lg ${
-                      Pricing_error ? "border-red-500" : "border-gray-300"
-                    } focus:ring-2 focus:ring-primary-500 outline-none`}
-                  />
+              {/* Cost Price — hidden for barista items */}
+              {!isBaristaItem && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Cost Price <span className="text-red-300">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1 text-gray-500">
+                      $
+                    </span>
+                    <input
+                      type="number"
+                      min={0}
+                      name="buying_price"
+                      value={formData.buying_price}
+                      placeholder="Cost price..."
+                      onChange={handleChange}
+                      required
+                      className={`w-full pl-8 px-4 text-gray-600 py-2 text-xs border rounded-lg ${
+                        Pricing_error ? "border-red-500" : "border-gray-300"
+                      } focus:ring-2 focus:ring-primary-500 outline-none`}
+                    />
+                  </div>
+                  {Pricing_error && (
+                    <p className="text-red-500 text-xs mt-1">{Pricing_error}</p>
+                  )}
                 </div>
-                {Pricing_error && (
-                  <p className="text-red-500 text-xs mt-1">{Pricing_error}</p>
-                )}
-              </div>
+              )}
 
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-2">
@@ -400,58 +435,66 @@ const AddProduct = () => {
                 )}
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  Initial Stock <span className="text-red-300">*</span>
-                </label>
-                <input
-                  type="number"
-                  name="stock_quantity"
-                  value={formData.stock_quantity}
-                  onChange={handleChange}
-                  required
-                  min={0}
-                  placeholder="Initial stock..."
-                  className={`w-full px-4 py-2 text-gray-600 text-xs border rounded-lg ${
-                    stock_error ? "border-red-500" : "border-gray-300"
-                  } focus:ring-2 focus:ring-primary-500 outline-none`}
-                />
-                {stock_error && (
-                  <p className="text-red-500 text-xs mt-1">{stock_error}</p>
-                )}
-              </div>
+              {/* Initial Stock — hidden for barista items */}
+              {!isBaristaItem && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Initial Stock <span className="text-red-300">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="stock_quantity"
+                    value={formData.stock_quantity}
+                    onChange={handleChange}
+                    required
+                    min={0}
+                    placeholder="Initial stock..."
+                    className={`w-full px-4 py-2 text-gray-600 text-xs border rounded-lg ${
+                      stock_error ? "border-red-500" : "border-gray-300"
+                    } focus:ring-2 focus:ring-primary-500 outline-none`}
+                  />
+                  {stock_error && (
+                    <p className="text-red-500 text-xs mt-1">{stock_error}</p>
+                  )}
+                </div>
+              )}
 
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  Minimum Stock <span className="text-red-300">*</span>
-                </label>
+              {/* Minimum Stock — hidden for barista items */}
+              {!isBaristaItem && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Minimum Stock <span className="text-red-300">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    name="min_stock"
+                    value={formData.min_stock}
+                    onChange={handleChange}
+                    required
+                    placeholder="Minimum stock..."
+                    className="w-full px-4 py-2 text-gray-600 text-xs border rounded-lg border-gray-300 focus:ring-2 focus:ring-primary-500 outline-none"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* SUPPLIER — hidden for barista items */}
+            {!isBaristaItem && (
+              <div className="bg-gray-100 mt-2 rounded-lg shadow-md p-6">
+                <h2 className="text-sm font-semibold text-gray-900 mb-4">
+                  Supplier Information
+                </h2>
                 <input
-                  type="number"
-                  min={0}
-                  name="min_stock"
-                  value={formData.min_stock}
+                  type="text"
+                  name="supplier"
+                  value={formData.supplier}
                   onChange={handleChange}
-                  required
-                  placeholder="Minimum stock..."
                   className="w-full px-4 py-2 text-gray-600 text-xs border rounded-lg border-gray-300 focus:ring-2 focus:ring-primary-500 outline-none"
+                  placeholder="Supplier name..."
                 />
               </div>
-            </div>
-
-            {/* SUPPLIER */}
-            <div className="bg-gray-100 mt-2 rounded-lg shadow-md p-6">
-              <h2 className="text-sm font-semibold text-gray-900 mb-4">
-                Supplier Information
-              </h2>
-              <input
-                type="text"
-                name="supplier"
-                value={formData.supplier}
-                onChange={handleChange}
-                className="w-full px-4 py-2 text-gray-600 text-xs border rounded-lg border-gray-300 focus:ring-2 focus:ring-primary-500 outline-none"
-                placeholder="Supplier name..."
-              />
-            </div>
+            )}
           </div>
         </div>
 
@@ -471,6 +514,8 @@ const AddProduct = () => {
                 min_stock: "",
                 expire_date: "",
                 description: "",
+                isConsumable: false,
+                isBaristaItem: false,
                 supplier: "",
               });
               setExpire_errors(null);
@@ -486,12 +531,12 @@ const AddProduct = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="px-2 py-1 lg:bg-gray-700 bg:text-white sm:bg-gray-700 sm:text-white  bg-gray-600 text-sm text-white rounded-lg hover:bg-gray-900"
+            className="px-2 py-1 lg:bg-gray-700 bg:text-white sm:bg-gray-700 sm:text-white bg-gray-600 text-sm text-white rounded-lg hover:bg-gray-900"
           >
             {isLoading ? (
               <div className="flex items-center justify-center space-x-2">
                 <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                <span>Adding Prodcut...</span>
+                <span>Adding Product...</span>
               </div>
             ) : (
               "Add Product"

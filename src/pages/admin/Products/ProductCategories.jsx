@@ -95,6 +95,10 @@ const ProductCategories = () => {
         if (created) {
           setCategories((prev) => [...prev, created]);
           toast.success(`Category ${created.name} created!`);
+        } else {
+          toast.error(
+            `${"The same Category Name already exists. Please choose a different name."}`,
+          );
         }
       }
       setShowModal(false);
