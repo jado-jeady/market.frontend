@@ -1,297 +1,638 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { toast } from "react-toastify";
 import BaristaSidebar from "../../components/BaristaSidebar";
+import { getBaristaCategoriesWithProducts } from "../../utils/category.util";
+import { getRandomOpenShift } from "../../utils/shift.util";
+import ConfirmModal from "../../components/reusables/ConfirmModal";
+
+import {
+  Loader2,
+  Coffee,
+  Plus,
+  Minus,
+  Printer,
+  X,
+  Search,
+  ReceiptText,
+  ShoppingCart,
+  ChevronLeft,
+  Menu,
+} from "lucide-react";
+import { createSale, printInvoice } from "../../utils/sales.util";
 
 export default function Sell() {
-  // State logic that drives the popup visibility
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  /* --- Keeping your exact original state logic down below --- */
-  const [selectedCategory, setSelectedCategory] = useState("Hot Coffee");
+  const [categoriesData, setCategoriesData] = useState([]);
+  const [selectedCategoryName, setSelectedCategoryName] = useState("");
   const [cart, setCart] = useState([]);
-  const [tableNumber, setTableNumber] = useState("");
   const [loading, setLoading] = useState(false);
+  const [tableNumber, setTableNumber] = useState("");
+  const [fetchingMenu, setFetchingMenu] = useState(true);
+  const [paymentMethod, setPaymentMethod] = useState("cash");
   const [search, setSearch] = useState("");
+  const [randomOpenShiftId, setRandomOpenShiftId] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const categories = [
-    "Hot Coffee",
-    "Cold Coffee",
-    "Tea",
-    "Juices",
-    "Smoothies",
-    "Milkshakes",
-    "Mojito",
-    "Fruits",
-  ];
-  const products = [
-    { id: 1, name: "Cappuccino", category: "Hot Coffee", price: 2000 },
-    { id: 2, name: "Cafe Latte", category: "Hot Coffee", price: 2000 },
-    { id: 3, name: "Espresso", category: "Hot Coffee", price: 1500 },
-    { id: 4, name: "Cappuccino", category: "Tea", price: 2000 },
-    { id: 5, name: "Cafe Latte", category: "Tea", price: 2000 },
-    { id: 6, name: "Espresso", category: "Tea", price: 1500 },
-    { id: 7, name: "Cappuccino", category: "Juices", price: 2000 },
-    { id: 8, name: "Cafe Latte", category: "Juices", price: 2000 },
-    { id: 9, name: "Espresso", category: "Juices", price: 1500 },
-    { id: 10, name: "Cappuccino", category: "Mojito", price: 2000 },
-    { id: 11, name: "Cafe Latte", category: "Mojito", price: 2000 },
-    { id: 12, name: "Espresso", category: "Hot Coffee", price: 1500 },
-  ];
+  // Mobile panel state: "menu" | "products" | "cart"
+  const [mobileView, setMobileView] = useState("products");
+  // Whether the category sidebar is shown on tablet
+  const [showMobileCategories, setShowMobileCategories] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setFetchingMenu(true);
+        const res = await getBaristaCategoriesWithProducts();
+        if (res?.success && Array.isArray(res.data)) {
+          setCategoriesData(res.data);
+          if (res.data.length > 0) setSelectedCategoryName(res.data[0].name);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load barista menus");
+      } finally {
+        setFetchingMenu(false);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const shift = await getRandomOpenShift();
+        if (shift.data && shift.data.id) {
+          setRandomOpenShiftId(shift.data.id);
+          console.log("Using open shift ID for sales:", shift.data.id);
+        } else {
+          console.warn("No open shifts available for barista sales");
+        }
+      } catch (err) {
+        console.error("Error fetching open shift:", err);
+      }
+    })();
+  }, []);
 
   const filteredProducts = useMemo(() => {
-    return products.filter(
-      (p) =>
-        p.category === selectedCategory &&
-        p.name.toLowerCase().includes(search.toLowerCase()),
+    const cat = categoriesData.find((c) => c.name === selectedCategoryName);
+    if (!cat || !Array.isArray(cat.products)) return [];
+    return cat.products.filter((p) =>
+      p.name?.toLowerCase().includes(search.toLowerCase()),
     );
-  }, [selectedCategory, search]);
+  }, [categoriesData, selectedCategoryName, search]);
 
-  const addToCart = (product) => {
-    const existing = cart.find((item) => item.id === product.id);
-    if (existing) {
-      setCart((prev) =>
-        prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        ),
-      );
-    } else {
-      setCart((prev) => [...prev, { ...product, quantity: 1 }]);
-    }
-  };
-  const increaseQty = (id) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
-      ),
-    );
-  };
+  const addToCart = useCallback(
+    (product) => {
+      const price = Number(product.selling_price || 0);
+      setCart((prev) => {
+        const exists = prev.find((i) => i.id === product.id);
+        if (exists)
+          return prev.map((i) =>
+            i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i,
+          );
+        return [
+          ...prev,
+          {
+            id: product.id,
+            name: product.name,
+            category: selectedCategoryName,
+            price,
+            barcode: product.barcode,
+            quantity: 1,
+          },
+        ];
+      });
+    },
+    [selectedCategoryName],
+  );
 
-  const decreaseQty = (id) => {
-    setCart((prev) =>
-      prev
-        .map((item) =>
-          item.id === id ? { ...item, quantity: item.quantity - 1 } : item,
-        )
-        .filter((item) => item.quantity > 0),
+  const increaseQty = (id) =>
+    setCart((p) =>
+      p.map((i) => (i.id === id ? { ...i, quantity: i.quantity + 1 } : i)),
     );
-  };
+  const decreaseQty = (id) =>
+    setCart((p) =>
+      p
+        .map((i) => (i.id === id ? { ...i, quantity: i.quantity - 1 } : i))
+        .filter((i) => i.quantity > 0),
+    );
   const clearCart = () => {
     setCart([]);
-    setTableNumber("");
   };
 
-  const submitOrder = async () => {
-    if (cart.length === 0) {
-      alert("Add items first");
+  const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+  const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
+
+  const handlePlaceOrder = async () => {
+    if (!cart.length) {
+      toast.warning("Add items first");
       return;
     }
     try {
       setLoading(true);
+      console.log("Placing order with cart:", cart);
       const payload = {
-        tableNumber,
-        items: cart.map((item) => ({
-          productId: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          total: item.price * item.quantity,
+        customer_id: null,
+        customer_name: tableNumber || "Walk-in",
+        payment_method: paymentMethod,
+        unit_price: total,
+        items: cart.map((i) => ({
+          product_id: i.id,
+          name: i.name,
+          barcode: i.barcode,
+          category: i.category,
+          price: i.price,
+          quantity: i.quantity,
         })),
+        shift_id: randomOpenShiftId,
         total,
-        status: "pending",
+        saleType: "baristaSales",
       };
+      console.log("Order payload:", payload);
 
-      const orderResponse = await fetch(`${API_URL}/api/orders`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const saleResponse = await createSale(payload);
+      console.log("Sale response:", saleResponse);
 
-      const orderData = await orderResponse.json();
-      if (!orderData.success) throw new Error(orderData.message);
+      if (!saleResponse?.success) {
+        throw new Error(saleResponse?.message || "Failed to record sale");
+      }
 
-      await fetch("http://192.168.1.10:4000/print", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderNumber: orderData.data.orderNumber,
-          tableNumber,
-          items: payload.items,
-          total,
-        }),
-      });
+      const receipt = await printInvoice(
+        saleResponse,
+        import.meta.env.VITE_CLIENT_PRINTER_SERVER_IP_ADDRESS,
+      );
 
-      alert("Order sent successfully");
+      console.log("Receipt:", receipt);
+
+      toast.success("Order placed & receipt printed!");
       clearCart();
-    } catch (error) {
-      console.error(error);
-      alert(error.message || "Failed to submit order");
+      // After placing order on mobile, go back to products view
+      setMobileView("products");
+    } catch (e) {
+      console.error(e);
+      toast.error(e.message || "Failed to place order");
     } finally {
       setLoading(false);
     }
   };
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-  return (
-    <div className="h-screen w-full bg-gray-100 flex overflow-hidden text-gray-800 text-xs relative">
-      {/* ── ANCHORED FLOATING HAMBURGER DROPDOWN CONTAINER ── */}
-      {/* Placed inside an absolute wrapper to maintain consistent popup coordinate metrics */}
-
-      {/* ── LEFT SIDEBAR: CATEGORIES ── */}
-      <div className="w-44 bg-white border-r border-gray-200 pt-14 pb-3 px-2 flex flex-col shrink-0">
-        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">
-          Categories
-        </p>
-        <div className="space-y-1 overflow-y-auto flex-1">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`w-full text-left px-3 py-2 rounded-xl font-semibold transition-all text-[11px] ${
-                selectedCategory === cat
-                  ? "bg-black text-white shadow"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── PRODUCTS VIEW AREA ── */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Topbar Search panel (indents content padding to make space for the floating hamburger) */}
-        <div className="bg-white border-b border-gray-200 pl-14 pr-4 py-3 flex items-center justify-between gap-4 shrink-0">
-          <div>
-            <h2 className="text-base font-black">{selectedCategory}</h2>
-            <p className="text-[9px] text-gray-400 uppercase font-semibold tracking-wide">
-              Select customer items
-            </p>
-          </div>
-          <input
-            type="text"
-            placeholder="Search menu..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-60 px-3 py-2 rounded-xl border border-gray-300 bg-gray-50 outline-none focus:border-black text-[11px]"
-          />
-        </div>
-
-        {/* Product Cards Content Scroller */}
-        <div className="flex-1 p-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 bg-gray-50 content-start overflow-y-auto">
-          {filteredProducts.map((product) => (
-            <button
-              key={product.id}
-              onClick={() => addToCart(product)}
-              className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-black hover:shadow-md transition-all active:scale-95 h-fit flex flex-col text-left"
-            >
-              <div className="p-3 flex flex-col justify-between min-h-[85px]">
-                <div>
-                  <h3 className="font-bold text-[11px] mb-0.5 text-gray-900 truncate">
-                    {product.name}
-                  </h3>
-                  <p className="text-[9px] text-gray-400 uppercase truncate">
-                    {product.category}
-                  </p>
-                </div>
-                <div className="flex items-center justify-between pt-2 mt-auto">
-                  <span className="font-black text-[10px] text-gray-900">
-                    {product.price.toLocaleString()} Frw
-                  </span>
-                  <span className="bg-black text-white text-[9px] px-2 py-0.5 rounded-full font-bold">
-                    + Add
-                  </span>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── PERMANENTLY STICKY FOOTER CART PANEL ── */}
-      <div className="w-52 bg-white border-l border-gray-200 flex flex-col h-full overflow-hidden shrink-0">
-        <div className="px-3 py-3 border-b border-gray-100 shrink-0">
-          <h2 className="text-[11px] font-black">Current Order</h2>
-          <p className="text-[9px] text-gray-400 font-semibold">
-            Customer Selection
+  // ─── Cart panel (shared between desktop right aside and mobile cart view) ───
+  const CartPanel = ({ isMobile = false }) => (
+    <div
+      className={[
+        "flex flex-col bg-[#120b06]",
+        isMobile
+          ? "h-full w-full"
+          : "w-[228px] shrink-0 h-full overflow-hidden border-l border-[#2c1a10]",
+      ].join(" ")}
+    >
+      {/* Cart header */}
+      <div className="shrink-0 flex items-center justify-between px-2 py-3 border-b border-[#2c1a10]">
+        {isMobile && (
+          <button
+            onClick={() => setMobileView("products")}
+            className="p-1 rounded-lg text-[#6b5444] hover:text-[#c8924a] transition-colors mr-1"
+          >
+            <ChevronLeft size={16} />
+          </button>
+        )}
+        <div className="flex-1">
+          <h2 className="text-[13px] font-black text-[#f5ede2] tracking-tight">
+            Order
+          </h2>
+          <p className="text-[8px] text-[#6b5444] mt-0.5">
+            {totalItems === 0
+              ? "Empty"
+              : `${totalItems} item${totalItems !== 1 ? "s" : ""}`}
           </p>
         </div>
+        {cart.length > 0 && (
+          <button
+            onClick={clearCart}
+            className="p-1 rounded-lg text-[#6b5444] hover:text-red-400 transition-colors"
+            title="Clear order"
+          >
+            <X size={14} />
+          </button>
+        )}
+      </div>
 
-        {/* Items List scroll view container */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-2 min-h-0">
-          {cart.map((item) => (
+      {/* Items list */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 py-2 flex flex-col gap-2">
+        {cart.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full gap-3 pb-8">
+            <Coffee size={30} className="text-[#3a2418] animate-pulse" />
+            <p className="text-[9px] text-[#6b5444] text-center leading-relaxed">
+              Tap a product
+              <br />
+              to add it here
+            </p>
+          </div>
+        ) : (
+          cart.map((item) => (
             <div
               key={item.id}
-              className="bg-gray-50 rounded-xl p-2 border border-gray-200"
+              className="bg-[#1e1008] border border-[#3a2418] rounded-xl p-2.5 animate-[slideIn_0.15s_ease]"
+              style={{ ["--tw-animate-duration"]: "0.15s" }}
             >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1 min-w-0 pr-1">
-                  <h3 className="font-black text-[10px] truncate">
+              <div className="flex items-start justify-between gap-1.5 mb-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-bold text-[#f5ede2] truncate leading-tight">
                     {item.name}
-                  </h3>
-                  <p className="text-[9px] text-gray-400">
-                    {item.price.toLocaleString()} × {item.quantity}
+                  </p>
+                  <p className="text-[8px] text-[#6b5444] mt-0.5">
+                    {item.category}
                   </p>
                 </div>
-                <p className="font-black text-[10px]">
+                <span className="text-[10px] font-black text-[#c8924a] whitespace-nowrap shrink-0">
                   {(item.price * item.quantity).toLocaleString()}
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => decreaseQty(item.id)}
-                  className="w-6 h-5 rounded-lg bg-white border border-gray-300 font-black text-sm text-gray-600 leading-none"
-                >
-                  −
-                </button>
-                <span className="flex-1 text-center font-black text-[10px]">
-                  {item.quantity}
+                  <span className="text-[7px] font-normal text-[#6b5444] ml-0.5">
+                    Frw
+                  </span>
                 </span>
-                <button
-                  onClick={() => increaseQty(item.id)}
-                  className="w-6 h-5 bg-black text-white rounded-lg font-black text-sm leading-none"
-                >
-                  +
-                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[8px] text-[#6b5444]">
+                  {item.price.toLocaleString()} × {item.quantity}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => decreaseQty(item.id)}
+                    className="w-[22px] h-[22px] rounded-full bg-[#3a2418] border border-[#4a3020] flex items-center justify-center text-[#e8d5be] hover:bg-[#c8924a] hover:text-[#1a100a] transition-colors"
+                  >
+                    <Minus size={9} />
+                  </button>
+                  <span className="text-[12px] font-black text-[#f5ede2] w-4 text-center">
+                    {item.quantity}
+                  </span>
+                  <button
+                    onClick={() => increaseQty(item.id)}
+                    className="w-[22px] h-[22px] rounded-full bg-[#3a2418] border border-[#4a3020] flex items-center justify-center text-[#e8d5be] hover:bg-[#c8924a] hover:text-[#1a100a] transition-colors"
+                  >
+                    <Plus size={9} />
+                  </button>
+                </div>
               </div>
             </div>
-          ))}
+          ))
+        )}
+      </div>
+
+      {/* Pinned footer */}
+      <div className="shrink-0 border-t border-[#2c1a10] bg-[#120b06] px-3 pt-3 pb-4 flex flex-col gap-2.5">
+        <div className="flex items-baseline justify-between">
+          <span className="text-[8px] font-semibold uppercase tracking-[0.1em] text-[#6b5444]">
+            Total
+          </span>
+          <span className="text-[18px] font-black text-[#f5ede2] leading-none">
+            {total.toLocaleString()}
+            <span className="text-[9px] font-normal text-[#6b5444] ml-1">
+              Frw
+            </span>
+          </span>
         </div>
 
-        {/* Sticky Action Footer panel */}
-        <div className="shrink-0 mt-auto border-t border-gray-200 px-3 py-3 bg-white space-y-2">
-          <input
-            type="text"
-            placeholder="Table number..."
-            value={tableNumber}
-            onChange={(e) => setTableNumber(e.target.value)}
-            className="w-full px-2 py-1.5 rounded-lg border border-gray-200 text-[10px] outline-none focus:border-black bg-gray-50"
-          />
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-gray-500 font-bold">Total</span>
-            <span className="text-[11px] font-black">
-              {total.toLocaleString()} RWF
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
+        <div className="h-px bg-[#2c1a10]" />
+
+        <input
+          type="text"
+          placeholder="Table / customer name"
+          value={tableNumber}
+          onChange={(e) => setTableNumber(e.target.value)}
+          className="w-full px-3 py-2 rounded-xl bg-[#231510] border border-[#3a2418] text-[#f5ede2] text-[10px] placeholder-[#6b5444] outline-none focus:border-[#c8924a] transition-colors"
+        />
+
+        {/* Payment Method */}
+        <div className="p-2 border-t border-gray-200">
+          <label className="block text-xs font-medium text-gray-700 mb-2">
+            Payment Method
+          </label>
+          <div className="grid grid-cols-3 gap-1">
             <button
-              onClick={clearCart}
-              className="py-1.5 rounded-xl bg-gray-200 font-black text-[9px] text-gray-600"
+              onClick={() => setPaymentMethod("cash")}
+              className={`py-1 px-3 text-xs text-gray-700 rounded-lg border-2 transition ${
+                paymentMethod === "cash"
+                  ? "border-gray-500 lg:bg-red-400 hover:bg-red-500 bg-red-300 text-white"
+                  : "border-gray-300 hover:border-gray-400"
+              }`}
             >
-              Clear
+              Cash
             </button>
             <button
-              onClick={submitOrder}
-              disabled={loading}
-              className="py-1.5 rounded-xl bg-black text-white font-black text-[9px]"
+              onClick={() => setPaymentMethod("momo")}
+              className={`py-2 px-3 text-xs lg:text-gray-700 text-gray-700 rounded-lg border-2 transition ${
+                paymentMethod === "momo"
+                  ? "border-gray-500 bg-yellow-500 text-white"
+                  : "border-gray-300 hover:border-gray-400"
+              }`}
             >
-              {loading ? "Sending…" : "Print & Submit"}
+              Momo
+            </button>
+            <button
+              onClick={() => setPaymentMethod("card")}
+              className={`py-2 px-3 text-xs text-white-300 text-gray-700 rounded-lg border-2 transition ${
+                paymentMethod === "card"
+                  ? "border-gray-500 text-white lg:bg-red-600 bg-red-300 text-gray-700"
+                  : "border-gray-300 hover:border-gray-400"
+              }`}
+            >
+              Card
             </button>
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setShowConfirm(true)}
+          disabled={loading || cart.length === 0}
+          className={[
+            "w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-[12px] font-black tracking-wide transition-all duration-150",
+            cart.length === 0 || loading
+              ? "bg-[#3a2418] text-[#6b5444] cursor-not-allowed opacity-60"
+              : "bg-[#c8924a] text-[#1a100a] hover:bg-[#e0a855] active:scale-[0.97] shadow-lg shadow-[#c8924a]/25",
+          ].join(" ")}
+        >
+          <ReceiptText size={14} />
+          Place Order & Print
+        </button>
+
+        <ConfirmModal
+          isOpen={showConfirm}
+          title="Confirm Order Placement?"
+          message="Double check the items below before processing."
+          cart={cart}
+          total={total}
+          isLoading={loading}
+          onCancel={() => setShowConfirm(false)}
+          onConfirm={async () => {
+            await handlePlaceOrder();
+            setShowConfirm(false);
+          }}
+        />
+
+        <p className="text-center text-[8px] text-[#4a3020] leading-relaxed">
+          Prints receipt · Records sale · Flags as barista order
+        </p>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {/* ════════════════════════════════════════════
+          DESKTOP LAYOUT  (md and above)
+          Three-column: categories | products | cart
+      ════════════════════════════════════════════ */}
+      <div className="hidden md:flex h-screen w-full overflow-hidden bg-[#150e08] text-[#f5ede2] text-xs">
+        {/* LEFT — CATEGORIES */}
+        <aside className="w-[148px] shrink-0 flex flex-col border-r border-[#2c1a10] pt-0 pb-3">
+          <p className="px-4 mb-3 text-[8px] font-bold tracking-[0.16em] uppercase text-[#6b5444]">
+            Menu
+          </p>
+          <div className="flex-1 overflow-y-auto px-2 flex flex-col gap-1">
+            {fetchingMenu ? (
+              <div className="flex justify-center pt-6">
+                <Loader2 size={14} className="animate-spin text-[#6b5444]" />
+              </div>
+            ) : categoriesData.length === 0 ? (
+              <p className="px-2 text-[10px] italic text-[#6b5444]">No menus</p>
+            ) : (
+              categoriesData.map((cat) => {
+                const active = selectedCategoryName === cat.name;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategoryName(cat.name)}
+                    className={[
+                      "w-full text-left px-3 py-2 rounded-xl text-[11px] font-semibold transition-all duration-150",
+                      active
+                        ? "bg-[#c8924a] text-[#1a100a] shadow-md shadow-[#c8924a]/20"
+                        : "text-[#e8d5be] hover:bg-[#2c1a10]",
+                    ].join(" ")}
+                  >
+                    {cat.name}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </aside>
+
+        {/* CENTER — PRODUCTS */}
+        <main className="flex-1 flex flex-col overflow-hidden">
+          <div className="shrink-0 flex items-center justify-between gap-4 border-b border-[#2c1a10] bg-[#150e08] pl-14 pr-5 py-3">
+            <div>
+              <h2 className="text-lg font-black tracking-tight text-[#f5ede2]">
+                {selectedCategoryName || "Barista Menu"}
+              </h2>
+              <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-[#6b5444]">
+                Tap to add to order
+              </p>
+            </div>
+            <div className="relative">
+              <Search
+                size={11}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#6b5444] pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder="Search…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-52 pl-8 pr-3 py-2 rounded-xl bg-[#231510] border border-[#3a2418] text-[#f5ede2] text-[11px] placeholder-[#6b5444] outline-none focus:border-[#c8924a] transition-colors"
+              />
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-3 grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-3 content-start">
+            {fetchingMenu ? (
+              <div className="col-span-full flex flex-col items-center justify-center py-20 gap-3">
+                <Loader2 size={28} className="animate-spin text-[#c8924a]" />
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#6b5444]">
+                  Loading…
+                </p>
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="col-span-full py-16 text-center text-[#6b5444] text-[11px] font-medium">
+                Nothing here
+              </div>
+            ) : (
+              filteredProducts.map((product) => (
+                <button
+                  key={product.id}
+                  onClick={() => addToCart(product)}
+                  className="group bg-[#2c1a10] border border-[#3a2418] rounded-2xl p-3 text-left flex flex-col justify-between min-h-[90px] transition-all duration-150 hover:-translate-y-0.5 hover:border-[#c8924a] hover:shadow-lg hover:shadow-[#c8924a]/10 active:scale-[0.97]"
+                >
+                  <div>
+                    <Coffee size={13} className="text-[#c8924a] mb-1.5" />
+                    <h3 className="text-[11px] font-bold text-[#f5ede2] leading-snug line-clamp-2">
+                      {product.name}
+                    </h3>
+                  </div>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-[10px] font-black text-[#c8924a]">
+                      {Number(product.selling_price || 0).toLocaleString()}
+                      <span className="text-[8px] font-normal text-[#6b5444] ml-0.5">
+                        Frw
+                      </span>
+                    </span>
+                    <span className="bg-[#c8924a] text-[#1a100a] text-[9px] font-bold px-2 py-0.5 rounded-full group-hover:bg-[#e0a855] transition-colors">
+                      +
+                    </span>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </main>
+
+        {/* RIGHT — CART */}
+        <CartPanel isMobile={false} />
+      </div>
+
+      {/* ════════════════════════════════════════════
+          MOBILE LAYOUT  (below md)
+          Single view at a time: products | cart
+          Bottom nav to switch between views
+      ════════════════════════════════════════════ */}
+      <div className="flex md:hidden h-screen w-full flex-col overflow-hidden bg-[#150e08] text-[#f5ede2] text-xs">
+        {/* ── PRODUCTS VIEW ── */}
+        {mobileView === "products" && (
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {/* Topbar */}
+            <div className="shrink-0 flex items-center gap-2 border-b border-[#2c1a10] bg-[#150e08] px-3 py-3">
+              {/* Category toggle button */}
+              <button
+                onClick={() => setShowMobileCategories((v) => !v)}
+                className="p-2 rounded-xl bg-[#2c1a10] border border-[#3a2418] text-[#c8924a] shrink-0"
+              >
+                <Menu size={14} />
+              </button>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-[13px] font-black tracking-tight text-[#f5ede2] truncate">
+                  {selectedCategoryName || "Barista Menu"}
+                </h2>
+              </div>
+              <div className="relative shrink-0">
+                <Search
+                  size={11}
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#6b5444] pointer-events-none"
+                />
+                <input
+                  type="text"
+                  placeholder="Search…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-36 pl-8 pr-3 py-2 rounded-xl bg-[#231510] border border-[#3a2418] text-[#f5ede2] text-[11px] placeholder-[#6b5444] outline-none focus:border-[#c8924a] transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* Slide-down category strip */}
+            {showMobileCategories && (
+              <div className="shrink-0 border-b border-[#2c1a10] bg-[#120b06] px-3 py-2 flex gap-2 overflow-x-auto no-scrollbar">
+                {fetchingMenu ? (
+                  <Loader2
+                    size={12}
+                    className="animate-spin text-[#6b5444] my-1"
+                  />
+                ) : (
+                  categoriesData.map((cat) => {
+                    const active = selectedCategoryName === cat.name;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => {
+                          setSelectedCategoryName(cat.name);
+                          setShowMobileCategories(false);
+                        }}
+                        className={[
+                          "shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-semibold transition-all duration-150 whitespace-nowrap",
+                          active
+                            ? "bg-[#c8924a] text-[#1a100a] shadow-md shadow-[#c8924a]/20"
+                            : "text-[#e8d5be] bg-[#2c1a10] hover:bg-[#3a2418]",
+                        ].join(" ")}
+                      >
+                        {cat.name}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            )}
+
+            {/* Product grid */}
+            <div className="flex-1 overflow-y-auto p-3 grid grid-cols-2 gap-3 content-start">
+              {fetchingMenu ? (
+                <div className="col-span-full flex flex-col items-center justify-center py-20 gap-3">
+                  <Loader2 size={28} className="animate-spin text-[#c8924a]" />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#6b5444]">
+                    Loading…
+                  </p>
+                </div>
+              ) : filteredProducts.length === 0 ? (
+                <div className="col-span-full py-16 text-center text-[#6b5444] text-[11px] font-medium">
+                  Nothing here
+                </div>
+              ) : (
+                filteredProducts.map((product) => (
+                  <button
+                    key={product.id}
+                    onClick={() => addToCart(product)}
+                    className="group bg-[#2c1a10] border border-[#3a2418] rounded-2xl p-3 text-left flex flex-col justify-between min-h-[90px] transition-all duration-150 active:scale-[0.97] hover:border-[#c8924a]"
+                  >
+                    <div>
+                      <Coffee size={13} className="text-[#c8924a] mb-1.5" />
+                      <h3 className="text-[11px] font-bold text-[#f5ede2] leading-snug line-clamp-2">
+                        {product.name}
+                      </h3>
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-[10px] font-black text-[#c8924a]">
+                        {Number(product.selling_price || 0).toLocaleString()}
+                        <span className="text-[8px] font-normal text-[#6b5444] ml-0.5">
+                          Frw
+                        </span>
+                      </span>
+                      <span className="bg-[#c8924a] text-[#1a100a] text-[9px] font-bold px-2 py-0.5 rounded-full group-hover:bg-[#e0a855] transition-colors">
+                        +
+                      </span>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+
+            {/* Bottom cart FAB — only visible when cart has items */}
+            {cart.length > 0 && (
+              <div className="shrink-0 px-4 pb-4 pt-2 border-t border-[#2c1a10] bg-[#150e08]">
+                <button
+                  onClick={() => setMobileView("cart")}
+                  className="w-full flex items-center justify-between py-3 px-4 rounded-2xl bg-[#c8924a] text-[#1a100a] text-[12px] font-black shadow-lg shadow-[#c8924a]/30 active:scale-[0.97] transition-all"
+                >
+                  <div className="flex items-center gap-2">
+                    <ShoppingCart size={15} />
+                    <span>View Order</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-[#1a100a] text-[#c8924a] text-[10px] font-black px-2 py-0.5 rounded-full">
+                      {totalItems}
+                    </span>
+                    <span className="font-black">
+                      {total.toLocaleString()} Frw
+                    </span>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── CART VIEW ── */}
+        {mobileView === "cart" && (
+          <div className="flex-1 overflow-hidden flex flex-col">
+            <CartPanel isMobile={true} />
+          </div>
+        )}
+      </div>
+    </>
   );
 }

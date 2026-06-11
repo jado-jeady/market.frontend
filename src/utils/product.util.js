@@ -302,3 +302,35 @@ export const getLowStockItems = async () => {
     console.log(`error Fetching the lowstockItems : ${error}`);
   }
 };
+
+/**
+ * Fetches all active barista items from the backend.
+ * @returns {Promise<Array>} A promise that resolves to the array of items.
+ */
+
+export const fetchBaristaItems = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/products/barista-items`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+
+    // fetch does not throw on 4xx/5xx errors, so we must check response.ok
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result && result.success) {
+      return result.data;
+    }
+
+    throw new Error(result?.message || "Failed to fetch items");
+  } catch (error) {
+    console.error("Error in fetchBaristaItems utility:", error.message);
+    throw error;
+  }
+};
+
+// getting barista items by barista categories

@@ -18,6 +18,7 @@ const ProductCategories = () => {
     id: null,
     name: "",
     description: "",
+    isBarista: false,
   });
   const [loading, setLoading] = useState(false);
 
@@ -63,7 +64,12 @@ const ProductCategories = () => {
 
   const openAddModal = () => {
     setIsEditing(false);
-    setCurrentCategory({ id: null, name: "", description: "" });
+    setCurrentCategory({
+      id: null,
+      name: "",
+      description: "",
+      isBarista: false,
+    });
     setShowModal(true);
   };
 
@@ -74,8 +80,11 @@ const ProductCategories = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCurrentCategory((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setCurrentCategory((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -91,6 +100,8 @@ const ProductCategories = () => {
           toast.success(`Category ${updated?.name} updated`);
         }
       } else {
+        // Create a new category
+        console.log("Creating category with data:", currentCategory);
         const created = await createCategory(currentCategory);
         if (created) {
           setCategories((prev) => [...prev, created]);
@@ -102,7 +113,12 @@ const ProductCategories = () => {
         }
       }
       setShowModal(false);
-      setCurrentCategory({ id: null, name: "", description: "" });
+      setCurrentCategory({
+        id: null,
+        name: "",
+        description: "",
+        isBarista: false,
+      });
     } catch (err) {
       console.error("There was an error", err);
       toast.error("Failed to save category");
@@ -165,8 +181,6 @@ const ProductCategories = () => {
         </button>
       </div>
 
-      {/* CATEGORY LIST */}
-
       {/* TABLE for desktop */}
       <div className="hidden md:block overflow-x-auto bg-white">
         <table className="min-w-full divide-y divide-gray-200">
@@ -175,6 +189,7 @@ const ProductCategories = () => {
               <th className="text-left px-6 py-3">ID</th>
               <th className="text-left px-6 py-3">Name</th>
               <th className="text-left px-6 py-3">Description</th>
+              <th className="text-left px-6 py-3">Barista</th>
               <th className="text-right px-6 py-3">Actions</th>
             </tr>
           </thead>
@@ -188,6 +203,17 @@ const ProductCategories = () => {
                   </td>
                   <td className="px-6 py-4 text-gray-600">
                     {category.description}
+                  </td>
+                  <td className="px-6 py-4">
+                    {category.is_barista ? (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                        Barista
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+                        No
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-right space-x-3">
                     <button
@@ -207,7 +233,7 @@ const ProductCategories = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="4" className="px-6 py-6 text-center text-gray-500">
+                <td colSpan="5" className="px-6 py-6 text-center text-gray-500">
                   No categories available
                 </td>
               </tr>
@@ -224,8 +250,15 @@ const ProductCategories = () => {
               key={category.id}
               className="p-3 border rounded-lg shadow-sm bg-white flex flex-col justify-between"
             >
-              <div className="text-sm font-semibold text-gray-800">
-                {category.name}
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-sm font-semibold text-gray-800">
+                  {category.name}
+                </div>
+                {category.isBarista && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                    Barista
+                  </span>
+                )}
               </div>
               <div className="text-xs text-gray-600 mb-2">
                 {category.description}
@@ -289,6 +322,28 @@ const ProductCategories = () => {
                   placeholder="Category Description"
                   className="w-full px-4 py-2 text-xs text-gray-500 border rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
                 />
+              </div>
+
+              {/* BARISTA TOGGLE */}
+              <div className="flex items-center justify-between px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <div>
+                  <p className="text-xs font-medium text-gray-700">
+                    Barista Category
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Mark if this is a barista-related category
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="isBarista"
+                    checked={currentCategory.isBarista ?? false}
+                    onChange={handleChange}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-400 rounded-full peer peer-checked:bg-amber-500 transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4" />
+                </label>
               </div>
 
               <div className="flex justify-end gap-3 pt-4">

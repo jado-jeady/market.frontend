@@ -210,3 +210,53 @@ export async function withdrawMoney(shiftId, amount) {
     throw err;
   }
 }
+
+// getting a random open shift to go with barista sell
+export const getRandomOpenShift = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/shift/random-open`, {
+      headers: getAuthHeaders(),
+    });
+
+    const data = res.ok ? await res.json() : null;
+
+    if (data && data.data) {
+      return { success: true, data: data.data };
+    } else {
+      return { success: false, message: "No open shifts available" };
+    }
+
+    throw new Error("No open shifts available");
+  } catch (error) {
+    console.error("Error fetching open shifts:", error);
+    return null;
+  }
+};
+
+/**
+ * Sends shift summary statistics to the local printer network API endpoint.
+ * @param {Object} printPayload - Formatted shift data to be printed.
+ * @returns {Promise<Response>} API response promise.
+ */
+export const sendShiftToPrinter = async (printPayload) => {
+  const endpoint = "http://192.168.1";
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(printPayload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Printer returned HTTP status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Network error connecting to the printer endpoint:", error);
+    throw error;
+  }
+};

@@ -5,6 +5,7 @@ const Products = () => {
   const subMenuItems = [
     { name: "Add Product", path: "/admin/products/add" },
     { name: "Product List", path: "/admin/products/list" },
+    { name: "Barista Product List", path: "/admin/products/barista" },
     { name: "Product Transfer", path: "/admin/products/transfer" },
     { name: "Product Categories", path: "/admin/products/category" },
   ];

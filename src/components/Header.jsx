@@ -107,25 +107,39 @@ const Header = () => {
           {role === "Cashier" && (
             <>
               {!shift ? (
-                <button
-                  onClick={() => setIsOpenShiftModal(true)}
-                  className="px-3 py-2 text-sm ml-10 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                >
-                  Open Shift
-                </button>
+                <div className="flex items-center  text-gray-500 text-xs py-2">
+                  {/* <Link
+                    to="/cashier/shifts"
+                    className="px-3 py-2 text-sm ml-10 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                  >
+                    Shift Summary
+                  </Link> */}
+
+                  <button
+                    onClick={() => setIsOpenShiftModal(true)}
+                    className="px-3 py-2 text-sm ml-10 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                  >
+                    Open Shift
+                  </button>
+                </div>
               ) : (
-                <button
-                  onClick={() => setIsCloseShiftModal(true)}
-                  className="px-3 py-2 text-sm ml-10 text-white bg-red-600 hover:bg-red-700 rounded-lg transition"
-                >
-                  Close Shift
-                </button>
+                // button to show a cashier her last shift financial summary if she has a shift but it's not active
+                <>
+                  <button
+                    onClick={() => setIsCloseShiftModal(true)}
+                    className="px-3 py-2 text-sm ml-10 text-white bg-red-600 hover:bg-red-700 rounded-lg transition"
+                  >
+                    Close Shift
+                  </button>
+                </>
               )}
             </>
           )}
 
           {/* Notifications */}
-          <NotificationBell />
+          <div className="relative pl-15">
+            <NotificationBell />
+          </div>
 
           {/* User Dropdown */}
           <div className="relative">

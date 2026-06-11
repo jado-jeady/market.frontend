@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { closeShift } from "../../utils/shift.util";
 import { toast } from "react-toastify";
+import ShiftSummaryModal from "./ShiftSummaryModel"; // Reusing the same summary modal
 import { Clock, Loader2 } from "lucide-react"; // Imported Loader2 for the spinner
 import { getAllConsumables } from "../../utils/product.util";
 
@@ -12,15 +13,34 @@ const CloseShiftModal = ({ isOpen, onClose, shift, onShiftClosed }) => {
   const [consumablesLoading, setConsumablesLoading] = useState(false); // New loading state
   const [consumables, setConsumables] = useState([]);
   const [consumableData, setConsumableData] = useState({});
+  const [shiftSummaryModelOpen, setShiftSummaryModelOpen] = useState(false);
+  const [shiftSummaryData, setShiftSummaryData] = useState(null);
+  const [error, setError] = useState("");
 
+  const opening_balance = shift?.opening_balance || 0; // Get opening balance from shift data for validation
   const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser)?.data?.user : null;
+  const user = storedUser ? JSON.parse(storedUser)?.data?.user : null; // Debug log to check the shift data structure
 
   const handleQtyChange = (name, value) => {
     setConsumableData((prev) => ({
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleClosingBalanceChange = (val) => {
+    setClosingBalance(val);
+
+    // Parse values to float for precise numeric comparison
+    const numericVal = parseFloat(val);
+
+    if (!isNaN(numericVal) && numericVal < opening_balance) {
+      setError(
+        `Warning: Closing balance cannot be lower than the opening balance (${opening_balance} RWF)`,
+      );
+    } else {
+      setError("");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -42,9 +62,11 @@ const CloseShiftModal = ({ isOpen, onClose, shift, onShiftClosed }) => {
       });
 
       if (response.success) {
+        //set summary data and open summary modal
+        setShiftSummaryModelOpen(true);
+        setShiftSummaryData(response.data);
         toast.success("Shift closed successfully!");
         onShiftClosed();
-        onClose();
         setClosingBalance("");
         setClosingNote("");
         setConsumableData({});
@@ -85,24 +107,26 @@ const CloseShiftModal = ({ isOpen, onClose, shift, onShiftClosed }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl">
+    <div className="fixed inset-0 flex items-center ml-30 justify-center bg-black/50 z-50 p-2">
+      <div className="bg-white rounded-xl shadow-xl w-[90%] max-full-lg">
         <div className="p-6">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-">
             <div className="p-2 bg-red-100 rounded-lg">
               <Clock className="w-5 h-5 text-red-600" />
             </div>
-            <h2 className="text-sm font-bold text-gray-800">Close Shift</h2>
+            <h2 className="text-base font-bold text-gray-800">Close Shift</h2>
           </div>
 
           {shift && (
-            <div className="mb-2 p-3 bg-gray-50 rounded-lg">
+            <div className="mb-2 p-3 bg-gray-50 rounded-lg grid grid-cols-4 space-y-2 justify-items-left">
               <p className="text-xs text-gray-600">
-                <span className="font-medium">Opened at:</span>{" "}
+                <span className="font-medium ">Opened at:</span>
+                {"  "}
+                {"  "}
                 {new Date(shift.opened_at).toLocaleString()}
               </p>
               <p className="text-xs text-gray-600">
-                <span className="font-medium ">Opening Balance:</span>{" "}
+                <span className="font-medium">Opening Balance:</span>{" "}
                 {Number(shift.opening_balance).toLocaleString()} RWF
               </p>
             </div>
@@ -113,7 +137,7 @@ const CloseShiftModal = ({ isOpen, onClose, shift, onShiftClosed }) => {
               Current Consumables
             </h4>
             <div className="space-y-4">
-              <div className="flex flex-wrap gap-4 min-h-[40px] items-center">
+              <div className="flex flex-wrap gap-4 min-h-[40px] h-[30vh] items-center mb-10 justify-center overflow-y-scroll">
                 {consumablesLoading ? (
                   <div className="flex items-center gap-2 text-gray-500 text-xs py-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -142,35 +166,47 @@ const CloseShiftModal = ({ isOpen, onClose, shift, onShiftClosed }) => {
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Momo Closing Balance (RWF)
-                </label>
-                <input
-                  type="number"
-                  value={closingBalance}
-                  onChange={(e) => setClosingBalance(e.target.value)}
-                  className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0.00"
-                  required
-                  min="0"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cash in-Hand (RWF)
-                </label>
-                <input
-                  type="number"
-                  value={cashInHand}
-                  onChange={(e) => setCashInHand(e.target.value)}
-                  className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0.00"
-                  required
-                  min="0"
-                />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    MOMO Closing Balance (RWF){" "}
+                    <span className="text-red-300 ">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={closingBalance}
+                    onChange={(e) => handleClosingBalanceChange(e.target.value)}
+                    className={`w-full text-sm text-gray-900 border rounded-lg px-3 py-2 focus:ring-2 focus:outline-none ${
+                      error
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500 focus:border-transparent"
+                    }`}
+                    placeholder="0.00"
+                    required
+                    min={opening_balance} // Set minimum to opening balance for validation
+                  />
 
+                  {error && (
+                    <p className="text-xs text-red-600 mt-1 font-medium">
+                      {error}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cash in-Hand (RWF) <span className="text-red-300 ">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={cashInHand}
+                    onChange={(e) => setCashInHand(e.target.value)}
+                    className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0.00"
+                    required
+                    min="0"
+                  />
+                </div>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Closing Note (Optional)
@@ -212,6 +248,17 @@ const CloseShiftModal = ({ isOpen, onClose, shift, onShiftClosed }) => {
           </form>
         </div>
       </div>
+
+      {shiftSummaryModelOpen && (
+        <ShiftSummaryModal
+          isOpen={shiftSummaryModelOpen}
+          onClose={() => {
+            setShiftSummaryModelOpen(false);
+            onClose();
+          }}
+          shiftData={shiftSummaryData}
+        />
+      )}
     </div>
   );
 };

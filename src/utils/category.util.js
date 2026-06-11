@@ -23,6 +23,50 @@ export async function getAllCategories() {
   }
 }
 
+// get all barista categories (for POS)
+export async function getBaristaCategories() {
+  try {
+    const response = await fetch(`${API_URL}/api/categories/barista`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token})}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (err) {
+    console.error("There was an error fetching the data", err);
+    return null;
+  }
+}
+
+// get all barista categories (for POS)
+// export async function getBaristaCategoriesWithProducts() {
+//   try {
+//     const response = await fetch(`${API_URL}/api/categories/barista-menu`, {
+//       method: "GET",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token})}`,
+//       },
+//     });
+
+//     if (!response.ok) {
+//       throw new Error(`Error: ${response.status} ${response.statusText}`);
+//     }
+
+//     return await response.json();
+//   } catch (err) {
+//     console.error("There was an error fetching the data", err);
+//     return null;
+//   }
+// }
+
 // creating the Category
 
 export async function createCategory(category) {
@@ -38,6 +82,7 @@ export async function createCategory(category) {
       body: JSON.stringify({
         name: category.name,
         description: category.description,
+        isBarista: category.isBarista,
       }),
     });
 
@@ -91,6 +136,7 @@ export async function updateCategory(category) {
       body: JSON.stringify({
         name: category.name,
         description: category.description,
+        isBarista: category.isBarista,
       }),
     });
 
@@ -126,6 +172,28 @@ export async function getCategoryById(id) {
     return categoryList.find((cat) => cat.id === id) || null;
   } catch (err) {
     console.error("Error fetching category by id:", err);
+    return null;
+  }
+}
+
+// getting all barista categories with their products
+export async function getBaristaCategoriesWithProducts() {
+  try {
+    const response = await fetch(`${API_URL}/api/products/barista-menu`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token})}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (err) {
+    console.error("There was an error fetching the data", err);
     return null;
   }
 }
