@@ -20,7 +20,7 @@ export default defineConfig({
         theme_color: "#6e2929", // Matches your layout's strong dark accent buttons
         background_color: "#cfd8e9", // Matches your global bg-gray-100 color tone
         display: "standalone", // Hides browser bars completely to feel like a real native app
-        orientation: "landscape", // Forces layout flat horizontally on tablet mount displays
+        orientation: "any", // Forces layout flat horizontally on tablet mount displays
         start_url: "/login", // Directs users to the login page on app launch for quick access
         id: "market-pos-app", // Unique app ID (avoid using /login directly)
 
