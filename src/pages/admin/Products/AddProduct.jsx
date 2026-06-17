@@ -370,6 +370,7 @@ const AddProduct = () => {
             {showModalExelPreviewModel && (
               <ProductsPreviewModal
                 data={excelData}
+                categories={categories}
                 isFileEmpty={isFileEmpty}
                 onClose={() => {
                   setshowModalExelPreviewModel(false);
