@@ -39,6 +39,7 @@ export default defineConfig({
       workbox: {
         // Caches all static framework code bundles and images automatically for instant offline operations
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
       },
     }),
   ],
