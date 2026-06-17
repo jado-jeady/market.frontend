@@ -97,11 +97,17 @@ body {
 
 /* Lock viewports strictly to full-screen constraints */
 :fullscreen,
-::-webkit-full-screen,
-:root {
+::-webkit-full-screen {
   overflow: hidden !important;
-  background-color: #f3f4f6; /* bg-gray-100 */
-  user-select: none; /* Prevents text highlighting on quick rapid touch inputs */
+  background-color: #f3f4f6;
+  user-select: none;
+}
+
+/* Restore normal scrolling for :root (html) */
+:root {
+  overflow: auto; /* or scroll */
+  background-color: #f3f4f6;
+  user-select: none;
 }
 
 /* Allow text fields to keep selection capabilities intact */
