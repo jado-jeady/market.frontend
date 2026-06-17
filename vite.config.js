@@ -14,7 +14,7 @@ export default defineConfig({
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
       manifest: {
         name: "Market POS App",
-        short_name: "POS App",
+        short_name: "POS Mobile App",
         description:
           "Native landscape terminal web client layout for Barista POS operations.",
         theme_color: "#000000", // Matches your layout's strong dark accent buttons
@@ -24,12 +24,12 @@ export default defineConfig({
         start_url: "/login", // Directs users to the login page on app launch for quick access
         icons: [
           {
-            src: "Tyga-market-logo.png",
+            src: "Tyga-market-logo.jpeg",
             sizes: "192x192",
             type: "image/jpeg",
           },
           {
-            src: "Tyga-market-logo.png",
+            src: "Tyga-market-logo.jpeg",
             sizes: "512x512",
             type: "image/jpeg",
             purpose: "any maskable", // Essential for Android scaling circular app grids
