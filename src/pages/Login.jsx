@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import avatar from "../assets/user-female-icon.webp";
 import { EyeOff, Eye } from "lucide-react";
-
+import { usePWAInstall } from "../components/reusables/usePWAInstall";
 const Login = () => {
   const [credentials, setCredentials] = useState({
     username: "",
@@ -13,6 +13,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const infoMessage = location.state?.message;
+
+  const { isInstallable, promptInstall } = usePWAInstall();
 
   const handleChange = (e) => {
     setCredentials({
@@ -177,10 +179,21 @@ const Login = () => {
           </form>
 
           <div className=" text-center text-sm">
-            <Link to={"#"}>Forgot Password</Link>
+            <Link to={"#"}>Forgot Password...</Link>
           </div>
         </div>
       </div>
+      {/* popup install app button fixxed at the bottom */}
+      {isInstallable && (
+        <div className="fixed bottom-4 right-4">
+          <button
+            onClick={promptInstall}
+            className="px-4 py-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-lg hover:from-primary-700 hover:to-secondary-700"
+          >
+            Install App
+          </button>
+        </div>
+      )}
     </div>
   );
 };

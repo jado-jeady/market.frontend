@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { usePWAInstall } from "./../../components/reusables/usePWAInstall.js";
 import {
   AreaChart,
   Area,
@@ -41,6 +42,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [timeRange, setTimeRange] = useState("week"); // day, week, month, year
+  const { isInstallable, promptInstall } = usePWAInstall();
 
   const [stats, setStats] = useState({
     totalSales: 0,
@@ -619,6 +621,17 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      {/* popup install app button fixxed at the bottom */}
+      {isInstallable && (
+        <div className="fixed bottom-4 right-4">
+          <button
+            onClick={promptInstall}
+            className="px-4 py-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-lg hover:from-primary-700 hover:to-secondary-700"
+          >
+            Install App
+          </button>
+        </div>
+      )}
 
       {/* Recent Activities */}
       <div className="bg-white rounded-lg shadow-md p-6">
