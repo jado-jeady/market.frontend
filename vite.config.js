@@ -13,8 +13,8 @@ export default defineConfig({
       registerType: "autoUpdate", // Automatically patches layout files in background
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
       manifest: {
-        name: "POS Terminal Web App",
-        short_name: "POS Terminal",
+        name: "Market POS App",
+        short_name: "POS App",
         description:
           "Native landscape terminal web client layout for Barista POS operations.",
         theme_color: "#000000", // Matches your layout's strong dark accent buttons
@@ -24,21 +24,21 @@ export default defineConfig({
         start_url: "/login", // Directs users to the login page on app launch for quick access
         icons: [
           {
-            src: "tyga_market_logo.png",
+            src: "Tyga-market-logo.png",
             sizes: "192x192",
-            type: "image/png",
+            type: "image/jpeg",
           },
           {
-            src: "tyga_market_logo.png",
+            src: "Tyga-market-logo.png",
             sizes: "512x512",
-            type: "image/png",
+            type: "image/jpeg",
             purpose: "any maskable", // Essential for Android scaling circular app grids
           },
         ],
       },
       workbox: {
         // Caches all static framework code bundles and images automatically for instant offline operations
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,woff2}"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
       },
     }),
