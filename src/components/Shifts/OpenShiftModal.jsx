@@ -76,7 +76,7 @@ const OpenShiftModal = ({ isOpen, onClose, onShiftOpened }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -88,13 +88,14 @@ const OpenShiftModal = ({ isOpen, onClose, onShiftOpened }) => {
           <p className="text-gray-600 mb-4">
             Here is a list of consumables available for sale{" "}
             <span className="text-red-600">
-              make sure you have them counted
+              {" "}
+              Make sure you have them counted
             </span>
             :
           </p>
 
           {consumables.length > 0 ? (
-            <ul className="list-disc text-xs mb-4 text-gray-600 pl-4">
+            <ul className="list-disc text-xs mb-4 text-gray-600 grid grid-cols-4 gap-1">
               {consumables.map((consumable) => (
                 <li key={consumable.id} className="flex items-center">
                   <span className="mr-2">{consumable.name} -</span>
@@ -110,34 +111,36 @@ const OpenShiftModal = ({ isOpen, onClose, onShiftOpened }) => {
 
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Opening Momo Balance (RWF){" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  value={openingBalance}
-                  onChange={(e) => setOpeningBalance(e.target.value)}
-                  className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0.00"
-                  required
-                  min="0"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Petty Cash (RWF) <span className="text-red-500"> *</span>
-                </label>
-                <input
-                  type="number"
-                  value={pettyCash}
-                  onChange={(e) => setPettyCash(e.target.value)}
-                  className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0.00"
-                  required
-                  min="0"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Opening Momo Balance (RWF){" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={openingBalance}
+                    onChange={(e) => setOpeningBalance(e.target.value)}
+                    className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0.00"
+                    required
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Petty Cash (RWF) <span className="text-red-500"> *</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={pettyCash}
+                    onChange={(e) => setPettyCash(e.target.value)}
+                    className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0.00"
+                    required
+                    min="0"
+                  />
+                </div>
               </div>
 
               <div>

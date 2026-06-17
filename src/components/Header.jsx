@@ -81,10 +81,14 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm max-h-16 fixed top-0 right-0 left-0 md:left-40 z-10">
+    <header
+      className={`bg-white border-b border-gray-200 shadow-sm max-h-16 fixed top-0 right-0 left-0 ${role === "Barista" ? "md:left-0" : "md:left-40"} z-10`}
+    >
       <div className="flex items-center justify-between px-6 py-1">
         {/* Search Bar */}
-        <div className="flex-1 md:block hidden max-w-xl pl-8">
+        <div
+          className={`flex-1 md:block hidden max-w-xl  ${role === "Barista" ? "ml-50" : "ml-10"}`}
+        >
           <form onSubmit={handleSearch} className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -92,7 +96,7 @@ const Header = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search products, orders, customers..."
-              className="w-full pl-10 pr-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+              className={`w-full pl-10 pr-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none`}
             />
           </form>
         </div>
@@ -103,25 +107,39 @@ const Header = () => {
           {role === "Cashier" && (
             <>
               {!shift ? (
-                <button
-                  onClick={() => setIsOpenShiftModal(true)}
-                  className="px-3 py-2 text-sm ml-10 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                >
-                  Open Shift
-                </button>
+                <div className="flex items-center  text-gray-500 text-xs py-2">
+                  {/* <Link
+                    to="/cashier/shifts"
+                    className="px-3 py-2 text-sm ml-10 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                  >
+                    Shift Summary
+                  </Link> */}
+
+                  <button
+                    onClick={() => setIsOpenShiftModal(true)}
+                    className="px-3 py-2 text-sm ml-10 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                  >
+                    Open Shift
+                  </button>
+                </div>
               ) : (
-                <button
-                  onClick={() => setIsCloseShiftModal(true)}
-                  className="px-3 py-2 text-sm ml-10 text-white bg-red-600 hover:bg-red-700 rounded-lg transition"
-                >
-                  Close Shift
-                </button>
+                // button to show a cashier her last shift financial summary if she has a shift but it's not active
+                <>
+                  <button
+                    onClick={() => setIsCloseShiftModal(true)}
+                    className="px-3 py-2 text-sm ml-10 text-white bg-red-600 hover:bg-red-700 rounded-lg transition"
+                  >
+                    Close Shift
+                  </button>
+                </>
               )}
             </>
           )}
 
           {/* Notifications */}
-          <NotificationBell />
+          <div className="relative pl-15">
+            <NotificationBell />
+          </div>
 
           {/* User Dropdown */}
           <div className="relative">

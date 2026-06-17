@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { getAllProducts } from "../../../utils/product.util";
-import { createSale } from "../../../utils/sales.util";
+import { createSale, printInvoice } from "../../../utils/sales.util";
 import { getCurrentShift } from "../../../utils/shift.util";
 import { useShift } from "../../../context/ShiftContext";
 import {
@@ -29,6 +29,8 @@ const NewSale = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [invoiceSnapshot, setInvoiceSnapshot] = useState(null);
+  const [dataToPrint, setDataToPrint] = useState(null);
+  const [loadingPrint, setLoadingPrint] = useState(false);
 
   const MOCK_CUSTOMERS = [
     { id: 1, name: "John Doe", phone: "0788123456" },
@@ -213,19 +215,43 @@ const NewSale = () => {
   };
   // HANDLE PRINT
   // ====================
-  const handlePrint = () => {
-    if (!isConfirmed) {
-      toast.warning("Please confirm payment first");
-      return;
+  const handlePrint = async () => {
+    try {
+      setLoadingPrint(true);
+
+      // ✅ Check if the sale is confirmed before allowing printing
+      if (!isConfirmed) {
+        toast.warning("Please confirm the sale before printing");
+        return;
+      }
+
+      // ✅ Print the confirmed sale
+      console.log("Data to print:", dataToPrint); // Debug log to check the data being sent to print
+
+      const response = await printInvoice(
+        dataToPrint,
+        import.meta.env.VITE_CLIENT_PRINTER_SERVER_IP_ADDRESS,
+      );
+
+      if (!response.success) {
+        toast.error(
+          response.message +
+            import.meta.env.VITE_CLIENT_PRINTER_SERVER_IP_ADDRESS,
+        );
+        setLoadingPrint(false);
+        return;
+      }
+
+      setIsConfirmed(true);
+      setProcessingSale("Confirmed ✓");
+      setCart([]);
+      toast.success("Payment Printed Successfully!");
+      setLoadingPrint(false);
+    } catch (error) {
+      console.error("Error printing invoice:", error);
+      toast.error("Failed to print invoice");
+      setLoadingPrint(false);
     }
-
-    window.print();
-
-    // Clear everything AFTER printing
-    setCart([]);
-    setInvoiceSnapshot(null);
-    setShowInvoiceModal(false);
-    setProcessingSale("Confirm Payment");
   };
 
   // confirm print sale
@@ -256,6 +282,8 @@ const NewSale = () => {
         })),
       };
 
+      console.log("Sale payload:", payload);
+
       if (!invoiceSnapshot || invoiceSnapshot.items.length === 0) {
         toast.error("Invalid sale data");
         return;
@@ -265,11 +293,15 @@ const NewSale = () => {
 
       const response = await createSale(payload);
 
+      console.log("Sale response:", response);
+      setDataToPrint(response.data); // Store response for printing
+
       if (!response.success) {
         throw new Error(response.message || "Sale failed");
       }
 
       // Clear cart
+
       setIsConfirmed(true);
       setProcessingSale("Confirmed ✓");
       setCart([]);
@@ -785,7 +817,33 @@ const NewSale = () => {
                 disabled={!isConfirmed}
                 className="flex-1 py-2 text-sm lg:hover:bg-green-700 lg:bg-green-500 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
               >
-                Print Invoice
+                {loadingPrint ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <svg
+                      className="animate-spin h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"
+                      ></path>
+                    </svg>
+                    <span>Printing...</span>
+                  </div>
+                ) : (
+                  <span>Print Invoice</span>
+                )}
               </button>
             </div>
           </div>

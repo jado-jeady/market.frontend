@@ -92,3 +92,20 @@ h1 {
 body {
   background-color: white;
 }
+
+/* disabling the exit of full-screen with form fill or tab */
+
+/* Lock viewports strictly to full-screen constraints */
+:fullscreen,
+::-webkit-full-screen,
+:root {
+  overflow: hidden !important;
+  background-color: #f3f4f6; /* bg-gray-100 */
+  user-select: none; /* Prevents text highlighting on quick rapid touch inputs */
+}
+
+/* Allow text fields to keep selection capabilities intact */
+input,
+textarea {
+  user-select: text !important;
+}

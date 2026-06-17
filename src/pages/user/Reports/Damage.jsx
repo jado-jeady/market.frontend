@@ -947,9 +947,9 @@ const Damage = () => {
             </div>
             <button
               onClick={() => setShowModal(true)}
-              className="self-start sm:self-auto flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600
-                hover:from-violet-700 hover:to-purple-700 text-white text-sm font-bold rounded-xl
-                shadow-lg shadow-violet-200 hover:shadow-violet-300 transition-all hover:scale-[1.02]"
+              className="self-start sm:self-auto flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-600
+                hover:from-blue-700 hover:to-blue-700 text-white text-sm font-bold rounded-xl
+                shadow-lg shadow-violet-200 hover:shadow-blue-300 transition-all hover:scale-[1.02]"
             >
               <Plus size={16} />
               New Report
@@ -973,7 +973,7 @@ const Damage = () => {
               </div>
             ))}
             <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm col-span-2 sm:col-span-1 hidden sm:block">
-              <div className="text-2xl font-black text-violet-600">
+              <div className="text-2xl font-black text-blue-600">
                 {pagination?.total ?? reports.length}
               </div>
               <div className="text-xs text-slate-400 font-medium mt-0.5">
@@ -993,7 +993,7 @@ const Damage = () => {
                 placeholder="Search by item, barcode, or reporter…"
                 onChange={(e) => debouncedSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl outline-none
-                  focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all placeholder:text-slate-400"
+                  focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-400"
               />
             </div>
             <div className="flex gap-2 flex-wrap">
@@ -1007,7 +1007,7 @@ const Damage = () => {
                   className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all
                     ${
                       filterSev === s
-                        ? "border-violet-400 bg-violet-50 text-violet-700 ring-2 ring-violet-100"
+                        ? "border-blue-400 bg-blue-50 text-blue-700 ring-2 ring-blue-100"
                         : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
                     }`}
                 >

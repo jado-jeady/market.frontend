@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx";
 const API_URL = import.meta.env.VITE_API_URL;
+
 // Get token safely
 const getAuthHeaders = () => {
   const authData = JSON.parse(localStorage.getItem("user"));
@@ -10,6 +11,7 @@ const getAuthHeaders = () => {
     Authorization: token ? `Bearer ${token}` : "",
   };
 };
+// Query params builder for flexible filtering in getAllProducts
 
 const buildQueryParams = (filters = {}) =>
   new URLSearchParams(
@@ -18,29 +20,52 @@ const buildQueryParams = (filters = {}) =>
     ),
   ).toString();
 
+// generate the baristas barcode from a category name and it's name
+const generateBaristaBarcode = (categoryName) => {
+  const categoryPrefix = (categoryName || "UNKNW")
+    .toUpperCase()
+    .replace(/\s+/g, "")
+    .slice(0, 5)
+    .padEnd(5, "X"); // pad to 5 chars if category name is shorter
+
+  const randomNumbers = Math.floor(100 + Math.random() * 900); // always 3 digits (100–999)
+
+  return `BAR${categoryPrefix}${randomNumbers}`;
+};
+
 /* ============================
    CREATE PRODUCT
 ============================ */
-export async function createProduct(product) {
+export async function createProduct(product, categories = []) {
   try {
+    let finalProduct = { ...product };
+
+    // Auto-generate barcode for barista items BEFORE sending
+    if (finalProduct.isBaristaItem) {
+      const category = categories.find(
+        (cat) => String(cat.id) === String(finalProduct.category_id),
+      );
+      const categoryName = category?.name || "UNKNWN";
+      finalProduct.barcode = generateBaristaBarcode(categoryName);
+    }
+
     const response = await fetch(`${API_URL}/api/products/`, {
       method: "POST",
       headers: getAuthHeaders(),
-      body: JSON.stringify(product),
+      body: JSON.stringify(finalProduct),
     });
 
     const result = await response.json();
 
     if (!response.ok) {
-      return result.message || "Failed to create product";
+      return result; // return full result object, not just message
     }
-    return result; // { success, data }
+    return result;
   } catch (err) {
     console.error("Error creating product:", err);
     return null;
   }
 }
-
 /* ============================
    GET ALL PRODUCTS
 ============================ */
@@ -277,3 +302,35 @@ export const getLowStockItems = async () => {
     console.log(`error Fetching the lowstockItems : ${error}`);
   }
 };
+
+/**
+ * Fetches all active barista items from the backend.
+ * @returns {Promise<Array>} A promise that resolves to the array of items.
+ */
+
+export const fetchBaristaItems = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/products/barista-items`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+
+    // fetch does not throw on 4xx/5xx errors, so we must check response.ok
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result && result.success) {
+      return result.data;
+    }
+
+    throw new Error(result?.message || "Failed to fetch items");
+  } catch (error) {
+    console.error("Error in fetchBaristaItems utility:", error.message);
+    throw error;
+  }
+};
+
+// getting barista items by barista categories
