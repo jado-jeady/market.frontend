@@ -14,10 +14,10 @@ export default defineConfig({
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
       manifest: {
         name: "Market POS Desktop App v3.2.0",
-        short_name: "POS Mobile App",
+        short_name: "Mobile POS",
         description:
           "Native landscape terminal web client layout for Barista POS operations.",
-        theme_color: "#6e2929", // Matches your layout's strong dark accent buttons
+        theme_color: "#0f0e0e", // Matches your layout's strong dark accent buttons
         background_color: "#cfd8e9", // Matches your global bg-gray-100 color tone
         display: "standalone", // Hides browser bars completely to feel like a real native app
         orientation: "any", // Forces layout flat horizontally on tablet mount displays
