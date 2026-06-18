@@ -29,8 +29,8 @@ h1 {
   line-height: 1.1;
 }
 
-@theme {
-  /* Define 'font-times' utility */
+:root {
+  /* Define 'font-times' custom property */
   --font-times: "Times New Roman", serif;
 }
 
