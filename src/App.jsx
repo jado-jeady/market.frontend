@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import OfflineToast from "./components/reusables/OfflineToast";
 
 import Login from "./pages/Login";
 import { AdminRoutes } from "./routes/AdminRoutes";
@@ -17,6 +18,7 @@ function App() {
   return (
     <Router>
       <ToastContainer position="top-right" autoClose={4000} />
+      <OfflineToast />
       <Routes>
         <Route path="/" element={<Login />} />
         {AdminRoutes}

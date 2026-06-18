@@ -23,7 +23,6 @@ export default defineConfig({
         orientation: "any", // Forces layout flat horizontally on tablet mount displays
         start_url: "/login", // Directs users to the login page on app launch for quick access
         id: "market-pos-app", // Unique app ID (avoid using /login directly)
-
         icons: [
           { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "/icon-256.png", sizes: "256x256", type: "image/png" },
