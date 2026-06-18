@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { BellDot } from "lucide-react";
+import { initSocket } from "../utils/socket";
 
 const NotificationBell = () => {
   const [open, setOpen] = useState(false);
@@ -7,11 +8,15 @@ const NotificationBell = () => {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    // Example fetch (replace with backend or polling)
-    setNotifications([
-      { id: 1, message: "Storekeeper submitted consumables", read: false },
-      { id: 2, message: "Cashier flagged low stock", read: true },
-    ]);
+    const socket = initSocket("https://your-backend-url");
+
+    socket.on("notification", (notif) => {
+      setNotifications((prev) => [notif, ...prev]);
+    });
+
+    return () => {
+      socket.off("notification"); // clean up listener
+    };
   }, []);
 
   // Close dropdown when clicking outside
@@ -37,7 +42,6 @@ const NotificationBell = () => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Bell Icon */}
       <button
         onClick={() => setOpen(!open)}
         className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
@@ -50,10 +54,9 @@ const NotificationBell = () => {
         )}
       </button>
 
-      {/* Dropdown */}
       {open && (
         <div className="absolute w-80 -right-34 mt-3 max-w-500 bg-gray-100 shadow-lg rounded-lg overflow-hidden z-50">
-          <div className="p-3 border-b bg-red-600  text-center font-semibold text-white">
+          <div className="p-3 border-b bg-red-600 text-center font-semibold text-white">
             Notifications
           </div>
           <ul className="max-h-64 text-gray-600 text-sm text-center overflow-y-auto">

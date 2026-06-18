@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   DollarSign,
   Clock,
@@ -9,123 +9,124 @@ import {
   AlertCircle,
   Timer,
 } from "lucide-react";
+import { getBaristaSales } from "../../utils/sales.util";
+import { getShiftSummary } from "../../utils/shift.util";
+import { toast } from "react-toastify";
 
 export default function BaristaDashboard() {
-  // Live mutable state for active dashboard order cards queue
-  const [liveOrders, setLiveOrders] = useState([
-    {
-      id: "ORD-9284",
-      table: "Table 4",
-      time: "3 mins ago",
-      items: ["2x Cappuccino", "1x Fruit Salad"],
-      status: "Preparing",
-      critical: false,
-    },
-    {
-      id: "ORD-9285",
-      table: "Table 1",
-      time: "8 mins ago",
-      items: ["1x Espresso", "1x Frappuccino"],
-      status: "Pending",
-      critical: true,
-    },
-    {
-      id: "ORD-9286",
-      table: "Takeaway",
-      time: "Just now",
-      items: ["1x Cafe Latte (Oat Milk)"],
-      status: "Pending",
-      critical: false,
-    },
-  ]);
+  const [liveOrders, setLiveOrders] = useState([]);
+  const [stats, setStats] = useState({
+    revenue: 0,
+    ordersCount: 0,
+    avgWaitTime: "—",
+    shiftTarget: 0,
+  });
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Daily system stats markers
-  const stats = useMemo(
-    () => ({
-      revenue: 142500,
-      ordersCount: 64,
-      avgWaitTime: "4.5 min",
-      shiftTarget: 75, // Percentage metrics indicator
-    }),
-    [],
-  );
+  // Fetch stats
+  const fetchStats = async () => {
+    setLoading(true);
+    try {
+      const salesRes = await getBaristaSales();
+      const shiftRes = await getShiftSummary();
 
-  // Handler to clear/complete orders on a quick click layout trigger
+      if (salesRes?.success) {
+        const orders = salesRes.data;
+        setStats((prev) => ({
+          ...prev,
+          revenue: orders.reduce(
+            (sum, o) => sum + Number(o.total_amount || 0),
+            0,
+          ),
+          ordersCount: orders.length,
+        }));
+      }
+
+      if (shiftRes?.success) {
+        const summary = shiftRes.data;
+        setStats((prev) => ({
+          ...prev,
+          avgWaitTime: summary.avg_wait_time || "—",
+          shiftTarget: summary.shift_progress || 0,
+        }));
+      }
+    } catch (err) {
+      toast.error("Failed to load dashboard stats");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch live orders
+  const fetchLiveOrders = async () => {
+    try {
+      const res = await fetch("/api/live-orders");
+      const data = await res.json();
+      setLiveOrders(data.orders || []);
+    } catch (err) {
+      console.error("Error fetching live orders:", err);
+    }
+  };
+
+  // Fetch logs
+  const fetchLogs = async () => {
+    try {
+      const res = await fetch("/api/event-stream");
+      const data = await res.json();
+      setLogs(data.logs || []);
+    } catch (err) {
+      console.error("Error fetching logs:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+    fetchLiveOrders();
+    fetchLogs();
+
+    const intervalOrders = setInterval(fetchLiveOrders, 10000);
+    const intervalLogs = setInterval(fetchLogs, 15000);
+    return () => {
+      clearInterval(intervalOrders);
+      clearInterval(intervalLogs);
+    };
+  }, []);
+
   const handleCompleteOrder = (id) => {
     setLiveOrders((prev) => prev.filter((order) => order.id !== id));
+    // TODO: backend call to mark order complete
   };
 
   return (
     <div className="h-screen w-full bg-gray-100 pt-12 flex flex-col overflow-hidden text-gray-800 text-xs p-3">
       {/* ── HEADER TELEMETRY ROW ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0 mb-3">
-        {/* Stat 1: Revenue */}
-        <div className="bg-white border border-gray-200 p-3 rounded-2xl flex items-center justify-between shadow-sm">
-          <div>
-            <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wide">
-              Shift Revenue
-            </span>
-            <span className="text-sm font-black text-gray-900">
-              {stats.revenue.toLocaleString()} Frw
-            </span>
-          </div>
-          <div className="w-8 h-8 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-100">
-            <DollarSign className="w-4 h-4 text-gray-900" />
-          </div>
-        </div>
-
-        {/* Stat 2: Orders Count */}
-        <div className="bg-white border border-gray-200 p-3 rounded-2xl flex items-center justify-between shadow-sm">
-          <div>
-            <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wide">
-              Tickets Closed
-            </span>
-            <span className="text-sm font-black text-gray-900">
-              {stats.ordersCount} Invoices
-            </span>
-          </div>
-          <div className="w-8 h-8 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-100">
-            <Coffee className="w-4 h-4 text-gray-900" />
-          </div>
-        </div>
-
-        {/* Stat 3: Processing Speed */}
-        <div className="bg-white border border-gray-200 p-3 rounded-2xl flex items-center justify-between shadow-sm">
-          <div>
-            <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wide">
-              Avg Velocity
-            </span>
-            <span className="text-sm font-black text-gray-900">
-              {stats.avgWaitTime}
-            </span>
-          </div>
-          <div className="w-8 h-8 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-100">
-            <Clock className="w-4 h-4 text-gray-900" />
-          </div>
-        </div>
-
-        {/* Stat 4: Shift Progress Indicator */}
-        <div className="bg-white border border-gray-200 p-3 rounded-2xl flex flex-col justify-between shadow-sm">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wide">
-              Quota Performance
-            </span>
-            <span className="font-black text-gray-900 text-[10px]">
-              {stats.shiftTarget}%
-            </span>
-          </div>
-          <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-            <div
-              className="bg-black h-full rounded-full"
-              style={{ width: `${stats.shiftTarget}%` }}
-            />
-          </div>
-        </div>
+        {/* Revenue */}
+        <StatCard
+          label="Shift Revenue"
+          value={`${stats.revenue.toLocaleString()} Frw`}
+          icon={<DollarSign className="w-4 h-4 text-gray-900" />}
+        />
+        {/* Orders */}
+        <StatCard
+          label="Tickets Closed"
+          value={`${stats.ordersCount} Invoices`}
+          icon={<Coffee className="w-4 h-4 text-gray-900" />}
+        />
+        {/* Avg Wait */}
+        <StatCard
+          label="Avg Velocity"
+          value={stats.avgWaitTime}
+          icon={<Clock className="w-4 h-4 text-gray-900" />}
+        />
+        {/* Quota */}
+        <QuotaCard progress={stats.shiftTarget} />
       </div>
 
-      {/* ── DUAL COLUMN CORE CONTENT FIELD ── */}
+      {/* ── CORE CONTENT ── */}
       <div className="flex-1 flex flex-col lg:flex-row gap-3 overflow-hidden min-h-0">
-        {/* LEFT COMPONENT: LIVE ACTIVE BAR TICKETS QUEUE */}
+        {/* LEFT: Live Orders */}
         <div className="flex-1 bg-white border border-gray-200 rounded-2xl p-4 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between border-b border-gray-100 pb-2.5 shrink-0">
             <div>
@@ -139,7 +140,6 @@ export default function BaristaDashboard() {
             </span>
           </div>
 
-          {/* Grid Layout of active dynamic task blocks */}
           <div className="flex-1 overflow-y-auto mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 content-start min-h-0 pr-1">
             {liveOrders.map((order) => (
               <div
@@ -171,18 +171,21 @@ export default function BaristaDashboard() {
                     </div>
                   </div>
 
-                  {/* Recipe / Order specifics lists array */}
+                  {/* Items */}
                   <ul className="space-y-1 pl-1 mb-4 font-semibold text-[11px] text-gray-700">
-                    {order.items.map((item, idx) => (
-                      <li key={idx} className="flex items-center gap-1.5">
-                        <span className="inline-block w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0" />
-                        {item}
-                      </li>
-                    ))}
+                    {Array.isArray(order.items) &&
+                      order.items.map((item, idx) => (
+                        <li key={idx} className="flex items-center gap-1.5">
+                          <span className="inline-block w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0" />
+                          {item.product_name
+                            ? `${item.quantity}x ${item.product_name}`
+                            : item}
+                        </li>
+                      ))}
                   </ul>
                 </div>
 
-                {/* Interactive State Mutation Actions Trigger button element */}
+                {/* Actions */}
                 <button
                   onClick={() => handleCompleteOrder(order.id)}
                   className="w-full py-1.5 bg-white border border-gray-200 hover:border-black text-gray-900 font-black rounded-lg transition-all active:scale-95 text-center flex items-center justify-center gap-1"
@@ -202,46 +205,25 @@ export default function BaristaDashboard() {
           </div>
         </div>
 
-        {/* RIGHT COMPONENT: TELEMETRY ACTIVITY AUDIT LOG TICKER */}
+        {/* RIGHT: Event Stream */}
         <div className="w-full lg:w-64 bg-white border border-gray-200 rounded-2xl p-4 flex flex-col overflow-hidden shrink-0">
           <div className="flex items-center gap-1.5 border-b border-gray-100 pb-2.5 shrink-0">
             <Activity size={13} className="text-gray-400" />
-            <div>
-              <h3 className="font-bold text-[10px] text-gray-400 uppercase tracking-widest">
-                Real-Time Event Stream
-              </h3>
-            </div>
+            <h3 className="font-bold text-[10px] text-gray-400 uppercase tracking-widest">
+              Real-Time Event Stream
+            </h3>
           </div>
-
           <div className="flex-1 overflow-y-auto mt-3 space-y-3 min-h-0 pr-1">
-            {[
-              {
-                time: "16:44",
-                text: "Stock alert: 'Full Cream Milk' fell below minimum safe balance threshold.",
-                type: "warning",
-              },
-              {
-                time: "16:32",
-                text: "Z-Report diagnostic simulation script triggered via BARISTA-STATION-01.",
-                type: "info",
-              },
-              {
-                time: "16:21",
-                text: "Account registration request initialized for client David Mugisha.",
-                type: "info",
-              },
-              {
-                time: "16:15",
-                text: "Invoice entry ORD-9281 cleared with print receipt verification successfully completed.",
-                type: "success",
-              },
-            ].map((log, i) => (
+            {logs.map((log, i) => (
               <div
                 key={i}
                 className="flex gap-2 items-start text-[10px] font-semibold border-b border-gray-50 pb-2 last:border-none"
               >
                 <span className="text-[9px] text-gray-400 bg-gray-100 px-1 py-0.5 rounded font-mono shrink-0">
-                  {log.time}
+                  {new Date(log.time).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </span>
                 <p className="text-gray-600 leading-snug flex-1">
                   {log.type === "warning" && (
@@ -254,6 +236,12 @@ export default function BaristaDashboard() {
                 </p>
               </div>
             ))}
+
+            {logs.length === 0 && (
+              <p className="text-center text-gray-400 text-[10px]">
+                No recent events
+              </p>
+            )}
           </div>
 
           {/* Quick Route Shortcut Button panel link */}
@@ -270,6 +258,44 @@ export default function BaristaDashboard() {
             </a>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Small helper components for cleaner JSX ── */
+function StatCard({ label, value, icon }) {
+  return (
+    <div className="bg-white border border-gray-200 p-3 rounded-2xl flex items-center justify-between shadow-sm">
+      <div>
+        <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wide">
+          {label}
+        </span>
+        <span className="text-sm font-black text-gray-900">{value}</span>
+      </div>
+      <div className="w-8 h-8 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-100">
+        {icon}
+      </div>
+    </div>
+  );
+}
+
+function QuotaCard({ progress }) {
+  return (
+    <div className="bg-white border border-gray-200 p-3 rounded-2xl flex flex-col justify-between shadow-sm">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wide">
+          Quota Performance
+        </span>
+        <span className="font-black text-gray-900 text-[10px]">
+          {progress}%
+        </span>
+      </div>
+      <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+        <div
+          className="bg-black h-full rounded-full"
+          style={{ width: `${progress}%` }}
+        />
       </div>
     </div>
   );

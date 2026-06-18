@@ -356,3 +356,21 @@ export async function printInvoice(saleResponse, ipAddress) {
     return { success: false, message: err.message };
   }
 }
+
+// getting all barista sales
+export const getBaristaSales = async () => {
+  try {
+    const res = await fetch(`${SALES_BASE}/barista-sales`, {
+      headers: getAuthHeaders(),
+    });
+    const data = res.ok ? await res.json() : null;
+    if (data && data.data) {
+      return { success: true, data: data.data };
+    } else {
+      return { success: false, message: "No barista sales available" };
+    }
+  } catch (error) {
+    console.error("Error fetching barista sales:", error);
+    return null;
+  }
+};

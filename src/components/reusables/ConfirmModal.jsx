@@ -18,9 +18,9 @@ export default function ConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute inset-0 bg-[#0c0704]/85 backdrop-blur-[2px] rounded-2xl flex items-center justify-center p-3 z-50 animate-fadeIn">
+    <div className="absolute inset-0 bg-[#0c0704]/85 backdrop-blur-[2px] flex items-center justify-center p-3 z-50 animate-fadeIn">
       {/* Modal Dialog Card */}
-      <div className="w-full max-w-[260px] bg-[#1a100a] border border-[#2c1a10] rounded-xl p-4 shadow-2xl flex flex-col gap-3 transform scale-100 transition-transform">
+      <div className="w-full max-w-[300px] bg-[#1a100a] border border-[#2c1a10] rounded-xl p-4 shadow-2xl flex flex-col gap-3 transform scale-100 transition-transform">
         {/* Text Content Area */}
         <div className="text-center">
           <p className="text-[#f5ede2] text-[12px] font-black tracking-wide leading-snug">
@@ -35,7 +35,7 @@ export default function ConfirmModal({
 
         {/* Dynamic Items List */}
         {cart.length > 0 && (
-          <div className="bg-[#120b06] border border-[#2c1a10] rounded-lg p-2 max-h-[100px] overflow-y-auto flex flex-col gap-1.5 custom-scrollbar">
+          <div className="bg-[#120b06] border border-[#2c1a10] rounded-lg p-2 max-h-full overflow-y-auto flex flex-col gap-1.5 custom-scrollbar">
             {cart.map((item, index) => (
               <div
                 key={index}

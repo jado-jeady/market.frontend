@@ -62,8 +62,6 @@ export default function Sell() {
         if (shift.data && shift.data.id) {
           setRandomOpenShiftId(shift.data.id);
           console.log("Using open shift ID for sales:", shift.data.id);
-        } else {
-          console.warn("No open shifts available for barista sales");
         }
       } catch (err) {
         console.error("Error fetching open shift:", err);
@@ -126,6 +124,22 @@ export default function Sell() {
       toast.warning("Add items first");
       return;
     }
+    // validate the open shift before submiting
+    if (!randomOpenShiftId) {
+      toast.error(
+        "Told you! You need to open a shift before you can place an order",
+        {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        },
+      );
+      return;
+    }
     try {
       setLoading(true);
       console.log("Placing order with cart:", cart);
@@ -181,7 +195,7 @@ export default function Sell() {
         "flex flex-col bg-[#120b06]",
         isMobile
           ? "h-full w-full"
-          : "w-[228px] shrink-0 h-full overflow-hidden border-l border-[#2c1a10]",
+          : "w-[228px] shrink-0 h-160 overflow-y-auto border-l border-[#2c1a10]",
       ].join(" ")}
     >
       {/* Cart header */}
@@ -216,7 +230,7 @@ export default function Sell() {
       </div>
 
       {/* Items list */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-3 py-2 flex flex-col gap-2">
+      <div className="flex-1 h-full overflow-y-auto  px-3 py-2 flex flex-col gap-2">
         {cart.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 pb-8">
             <Coffee size={30} className="text-[#3a2418] animate-pulse" />
@@ -277,7 +291,11 @@ export default function Sell() {
       </div>
 
       {/* Pinned footer */}
-      <div className="shrink-0 border-t border-[#2c1a10] bg-[#120b06] px-3 pt-3 pb-4 flex flex-col gap-2.5">
+      <div
+        className={
+          "shrink-0 border-t fixed bottom-0 left-0 md:relative right-0 border-[#2c1a10] bg-[#120b06] px-3 pt-3 pb-4 flex flex-col gap-2.5"
+        }
+      >
         <div className="flex items-baseline justify-between">
           <span className="text-[8px] font-semibold uppercase tracking-[0.1em] text-[#6b5444]">
             Total
@@ -341,7 +359,26 @@ export default function Sell() {
 
         <button
           type="button"
-          onClick={() => setShowConfirm(true)}
+          onClick={() => {
+            setShowConfirm(true);
+            if (!randomOpenShiftId) {
+              toast.error(
+                "No open shift found. please contact Support Team on +250782228575",
+                {
+                  position: "top-center",
+                  theme: "dark",
+                  autoClose: 9000,
+                  toastId: "no-open-shift",
+                  size: "sm",
+                  icon: true,
+                  closeButton: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                },
+              );
+            }
+          }}
           disabled={loading || cart.length === 0}
           className={[
             "w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-[12px] font-black tracking-wide transition-all duration-150",
@@ -354,24 +391,23 @@ export default function Sell() {
           Place Order & Print
         </button>
 
-        <ConfirmModal
-          isOpen={showConfirm}
-          title="Confirm Order Placement?"
-          message="Double check the items below before processing."
-          cart={cart}
-          total={total}
-          isLoading={loading}
-          onCancel={() => setShowConfirm(false)}
-          onConfirm={async () => {
-            await handlePlaceOrder();
-            setShowConfirm(false);
-          }}
-        />
-
         <p className="text-center text-[8px] text-[#4a3020] leading-relaxed">
           Prints receipt · Records sale · Flags as barista order
         </p>
       </div>
+      <ConfirmModal
+        isOpen={showConfirm}
+        title="Confirm Order Placement?"
+        message="Double check the items below before processing."
+        cart={cart}
+        total={total}
+        isLoading={loading}
+        onCancel={() => setShowConfirm(false)}
+        onConfirm={async () => {
+          await handlePlaceOrder();
+          setShowConfirm(false);
+        }}
+      />
     </div>
   );
 
@@ -381,9 +417,9 @@ export default function Sell() {
           DESKTOP LAYOUT  (md and above)
           Three-column: categories | products | cart
       ════════════════════════════════════════════ */}
-      <div className="hidden md:flex h-screen w-full overflow-hidden bg-[#150e08] text-[#f5ede2] text-xs">
+      <div className="hidden md:flex max-h-[1000px] min-h-[95vh]   h-full flex w-full overflow-y-hidden bg-[#150e08] text-[#f5ede2] text-xs">
         {/* LEFT — CATEGORIES */}
-        <aside className="w-[148px] shrink-0 flex flex-col border-r border-[#2c1a10] pt-0 pb-3">
+        <aside className="w-[148px] shrink-0 flex flex-col border-r border-[#2c1a10] pt-5 pb-3">
           <p className="px-4 mb-3 text-[8px] font-bold tracking-[0.16em] uppercase text-[#6b5444]">
             Menu
           </p>
@@ -493,7 +529,7 @@ export default function Sell() {
           Single view at a time: products | cart
           Bottom nav to switch between views
       ════════════════════════════════════════════ */}
-      <div className="flex md:hidden h-screen w-full flex-col overflow-hidden bg-[#150e08] text-[#f5ede2] text-xs">
+      <div className="flex md:hidden h-screen w-screen max-w-screen overflow-hidden flex-col overflow-y-scroll  text-[#f5ede2] text-xs">
         {/* ── PRODUCTS VIEW ── */}
         {mobileView === "products" && (
           <div className="flex flex-col flex-1 overflow-hidden">
@@ -603,7 +639,7 @@ export default function Sell() {
 
             {/* Bottom cart FAB — only visible when cart has items */}
             {cart.length > 0 && (
-              <div className="shrink-0 px-4 pb-4 pt-2 border-t border-[#2c1a10] bg-[#150e08]">
+              <div className="shrink-0 px-4 pb-4 pt-2 fixed bottom-0 left-0 right-0 border-t border-[#2c1a10] bg-[#150e08]">
                 <button
                   onClick={() => setMobileView("cart")}
                   className="w-full flex items-center justify-between py-3 px-4 rounded-2xl bg-[#c8924a] text-[#1a100a] text-[12px] font-black shadow-lg shadow-[#c8924a]/30 active:scale-[0.97] transition-all"
