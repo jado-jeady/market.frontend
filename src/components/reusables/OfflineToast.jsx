@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 
 function OfflineToast() {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [visible, setVisible] = useState(false);
+  const [showOnlineMsg, setShowOnlineMsg] = useState(false);
 
   useEffect(() => {
     const handleOffline = () => {
       setIsOffline(true);
-      setVisible(true);
-      setTimeout(() => setVisible(false), 4000); // auto-hide after 4s
+      setShowOnlineMsg(false); // hide online message if offline again
     };
+
     const handleOnline = () => {
       setIsOffline(false);
-      setVisible(true);
-      setTimeout(() => setVisible(false), 4000);
+      setShowOnlineMsg(true);
+      setTimeout(() => setShowOnlineMsg(false), 10000); // hide after 10s
     };
 
     window.addEventListener("offline", handleOffline);
@@ -25,18 +25,19 @@ function OfflineToast() {
     };
   }, []);
 
-  if (!visible) return null;
-
   return (
-    <div
-      className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded shadow-lg text-white transition-opacity duration-300 ${
-        isOffline ? "bg-red-600" : "bg-green-600"
-      }`}
-    >
-      {isOffline
-        ? "You are offline — some features may not be available."
-        : "Back online — all features restored."}
-    </div>
+    <>
+      {isOffline && (
+        <div className="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-2 z-50">
+          You are offline — some features may not be available.
+        </div>
+      )}
+      {showOnlineMsg && (
+        <div className="fixed top-0 left-0 w-full bg-green-600 text-white text-center py-2 z-50">
+          Restored connection, You are back online — All features available.
+        </div>
+      )}
+    </>
   );
 }
 
