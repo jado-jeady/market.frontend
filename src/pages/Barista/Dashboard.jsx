@@ -10,7 +10,7 @@ import {
   Timer,
 } from "lucide-react";
 import { getBaristaSales } from "../../utils/sales.util";
-import { getShiftSummary } from "../../utils/shift.util";
+//import { getShiftSummary } from "../../utils/shift.util";
 import { toast } from "react-toastify";
 
 export default function BaristaDashboard() {
@@ -29,7 +29,6 @@ export default function BaristaDashboard() {
     setLoading(true);
     try {
       const salesRes = await getBaristaSales();
-      const shiftRes = await getShiftSummary();
 
       if (salesRes?.success) {
         const orders = salesRes.data;

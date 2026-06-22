@@ -101,11 +101,11 @@ const Dashboard = () => {
       // Fetch all required data in parallel
       const [salesRes, productsRes, usersRes, categoriesRes, shiftsRes] =
         await Promise.all([
-          getAllSales({ limit: 10000 }),
-          getAllProducts({ limit: 10000 }),
+          getAllSales({ limit: 1000000 }),
+          getAllProducts({ limit: 1000000 }),
           getUsers(),
           getCategories(),
-          getShifts({ limit: 100 }),
+          getShifts({ limit: 1000000 }),
         ]);
 
       const allSales = salesRes?.data || [];
