@@ -11,6 +11,7 @@ import {
   X,
   SettingsIcon,
   Settings,
+  CoffeeIcon,
 } from "lucide-react";
 
 const AdminSidebar = () => {
@@ -21,6 +22,9 @@ const AdminSidebar = () => {
     { name: "Sales", path: "/admin/sales", icon: ShoppingCart },
     { name: "Products", path: "/admin/products", icon: Package },
     { name: "Stock", path: "/admin/stock", icon: Boxes },
+    { name: "Barista", path: "/admin/barista", icon: CoffeeIcon },
+    { name: "Consumables", path: "/admin/consumables", icon: Boxes },
+
     { name: "Report", path: "/admin/report", icon: BarChart3 },
     { name: "Shifts", path: "/admin/shifts", icon: CalendarCheck },
     { name: "Management", path: "/admin/management", icon: SettingsIcon },

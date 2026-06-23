@@ -32,6 +32,10 @@ import DailySales from "../pages/admin/Sales/DailySales";
 import GetShifts from "../pages/admin/Shifts/GetShifts";
 import BaristaDashboard from "../pages/Barista/Dashboard";
 import BaristaProductList from "../pages/admin/Products/BaristaProductList";
+import BaristaAdminDashboard from "../pages/admin/BaristaManagement/BaristaDashboard";
+import Barista from "../pages/admin/BaristaManagement/Barista";
+import BaristaSales from "../pages/admin/BaristaManagement/BaristaSales";
+import MenusManagement from "../pages/admin/BaristaManagement/MenusManagement";
 
 export const AdminRoutes = (
   <Route
@@ -62,9 +66,16 @@ export const AdminRoutes = (
     </Route>
     <Route path="stock" element={<Stock />}>
       <Route index element={<AllStock />} />
+      <Route path="all" element={<AllStock />} />
       <Route path="in" element={<StockIn />} />
       <Route path="damages" element={<Damages />} />
       <Route path="adjustment" element={<StockAdjustment />} />
+    </Route>
+    <Route path="barista" element={<Barista />}>
+      <Route index element={<BaristaAdminDashboard />} />
+      <Route path="dashboard" index element={<BaristaAdminDashboard />} />
+      <Route path="sales" element={<BaristaSales />} />
+      <Route path="menus" element={<MenusManagement />} />
     </Route>
     <Route path="management" element={<Management />}>
       <Route index element={<ManageRoles />} />
