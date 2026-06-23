@@ -138,7 +138,7 @@ const Header = () => {
 
           {/* Notifications */}
           <div className="relative pl-15">
-            <NotificationBell />
+            <NotificationBell role={role} />
           </div>
 
           {/* User Dropdown */}

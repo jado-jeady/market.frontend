@@ -548,7 +548,7 @@ const AddProduct = () => {
               {!isBaristaItem && (
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-2">
-                    Cost Price <span className="text-red-300">*</span>
+                    Purchase Price <span className="text-red-300">*</span>
                   </label>
                   <div className={showModalExelPreviewModel ? "" : "relative"}>
                     <span className="absolute left-3 top-1 text-gray-500">
