@@ -36,6 +36,10 @@ import BaristaAdminDashboard from "../pages/admin/BaristaManagement/BaristaDashb
 import Barista from "../pages/admin/BaristaManagement/Barista";
 import BaristaSales from "../pages/admin/BaristaManagement/BaristaSales";
 import MenusManagement from "../pages/admin/BaristaManagement/MenusManagement";
+import Consumables from "../pages/admin/Consumables/Consumables";
+import ProductionLog from "../pages/admin/Consumables/ProductionLog";
+import AdminAddProduction from "../pages/admin/Consumables/AdminAddProduction";
+import ConsumableDashboard from "../pages/admin/Consumables/ConsumableDashboard";
 
 export const AdminRoutes = (
   <Route
@@ -77,6 +81,13 @@ export const AdminRoutes = (
       <Route path="sales" element={<BaristaSales />} />
       <Route path="menus" element={<MenusManagement />} />
     </Route>
+    <Route path="consumables" element={<Consumables />}>
+      <Route index element={<ConsumableDashboard />} />
+      <Route path="dashboard" element={<ConsumableDashboard />} />
+      <Route path="add" element={<AdminAddProduction />} />
+      <Route path="log" element={<ProductionLog />} />
+    </Route>
+
     <Route path="management" element={<Management />}>
       <Route index element={<ManageRoles />} />
       <Route path="roles" element={<ManageRoles />} />
