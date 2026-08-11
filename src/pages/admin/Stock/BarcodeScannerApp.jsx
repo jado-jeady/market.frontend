@@ -77,28 +77,12 @@ export default function BarcodeScannerInput() {
           () => {},
         );
 
-        // Allow stream to fully initialize before checking track settings for torch support
-        setTimeout(() => {
-          try {
-            const settings = html5Qrcode.getRunningTrackSettings();
-            // Check if torch property is present in the active track settings
-            if (settings && "torch" in settings) {
-              setHasFlash(true);
-            } else {
-              // Fallback: If on Android Chrome, allow user to attempt toggling anyway
-              setHasFlash(true);
-            }
-          } catch (e) {
-            console.warn(
-              "Could not retrieve track settings, enabling flash button as fallback.",
-            );
-            setHasFlash(true);
-          }
-        }, 800);
+        // For Android, enable the flashlight button by default since most rear cameras support it
+        setHasFlash(true);
       } catch (err) {
         console.error("Scanner startup failed:", err);
         setScanError(
-          `Camera startup failed: ${err.message || err}. Ensure permissions are granted.`,
+          `Camera startup failed: ${err.message || err}. Ensure HTTPS and permissions are active.`,
         );
         setIsScanning(false);
       }
@@ -170,9 +154,10 @@ export default function BarcodeScannerInput() {
       setFlashOn(nextFlashState);
     } catch (err) {
       console.error("Torch adjustment failed:", err);
-      alert(
-        "Flash activation failed. Note: Apple iOS (Safari/Chrome) completely blocks torch control at the WebKit hardware level.",
+      setScanError(
+        "Flashlight could not be turned on. Your specific Android device hardware or browser might be restricting torch access.",
       );
+      setHasFlash(false); // Hide button if hardware rejects it
     }
   };
 
@@ -218,6 +203,7 @@ export default function BarcodeScannerInput() {
         <div className="relative border border-gray-300 rounded-lg overflow-hidden bg-black flex flex-col justify-between items-center">
           <div id={regionId} className="w-full aspect-video" />
 
+          {/* Flash Button enabled by default for Android rear camera */}
           {hasFlash && (
             <button
               onClick={toggleFlash}
