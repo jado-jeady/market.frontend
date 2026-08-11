@@ -9,6 +9,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+
     VitePWA({
       registerType: "autoUpdate", // Automatically patches layout files in background
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
@@ -61,6 +62,8 @@ export default defineConfig({
   ],
 
   server: {
-    port: 3000,
+    port: 3000, // Default port for Vite development server
+    host: true, // Natively exposes your server to the local network
+    allowedHosts: [".ngrok-free.dev"], // 👈 Add this line to allow your ngrok link
   },
 });

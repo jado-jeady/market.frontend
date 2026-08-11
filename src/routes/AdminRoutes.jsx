@@ -17,6 +17,7 @@ import ProductTransfer from "../pages/admin/Products/ProdcutTransfer";
 import Stock from "../pages/admin/Stock/Stock";
 import AllStock from "../pages/admin/Stock/AllStock";
 import StockIn from "../pages/admin/Stock/StockIn";
+import BarcodeScannerApp from "../pages/admin/Stock/BarcodeScannerApp";
 import Damages from "../pages/admin/Stock/Damages";
 import StockAdjustment from "../pages/admin/Stock/Stock.Adjsutment";
 import Management from "../pages/admin/Management/Management";
@@ -71,7 +72,7 @@ export const AdminRoutes = (
     <Route path="stock" element={<Stock />}>
       <Route index element={<AllStock />} />
       <Route path="all" element={<AllStock />} />
-      <Route path="in" element={<StockIn />} />
+      <Route path="in" element={<BarcodeScannerApp />} />
       <Route path="damages" element={<Damages />} />
       <Route path="adjustment" element={<StockAdjustment />} />
     </Route>
