@@ -4,7 +4,7 @@ import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 export default function BarcodeScannerInput() {
   const [barcodeValue, setBarcodeValue] = useState("");
   const [isScanning, setIsScanning] = useState(false);
-  const [hasFlash, setHasFlash] = useState(true); // Default to true so button is available as a fallback
+  const [hasFlash, setHasFlash] = useState(false);
   const [flashOn, setFlashOn] = useState(false);
   const [scanError, setScanError] = useState("");
 
@@ -29,19 +29,16 @@ export default function BarcodeScannerInput() {
         const html5Qrcode = new Html5Qrcode(regionId);
         scannerRef.current = html5Qrcode;
 
-        // 1. Fetch all available cameras on the device
         const cameras = await Html5Qrcode.getCameras();
         let targetCameraId = null;
 
         if (cameras && cameras.length > 0) {
-          // Look for labels containing "back", "rear", or "environment"
           const backCamera = cameras.find(
             (cam) =>
               cam.label.toLowerCase().includes("back") ||
               cam.label.toLowerCase().includes("rear") ||
               cam.label.toLowerCase().includes("environment"),
           );
-          // Fallback to the last camera in the list (usually the primary back camera on Android)
           targetCameraId = backCamera
             ? backCamera.id
             : cameras[cameras.length - 1].id;
@@ -50,7 +47,7 @@ export default function BarcodeScannerInput() {
         const config = {
           fps: 20,
           qrbox: { width: 320, height: 160 },
-          disableFlip: true, // Prevents mirroring text/bars backwards
+          disableFlip: true,
           videoConstraints: targetCameraId
             ? {
                 deviceId: { exact: targetCameraId },
@@ -58,7 +55,7 @@ export default function BarcodeScannerInput() {
                 height: { min: 480, ideal: 720, max: 1080 },
               }
             : {
-                facingMode: { exact: "environment" }, // Strict keyword enforcement fallback
+                facingMode: { exact: "environment" },
                 width: { min: 640, ideal: 1280, max: 1920 },
                 height: { min: 480, ideal: 720, max: 1080 },
               },
@@ -71,7 +68,6 @@ export default function BarcodeScannerInput() {
           ],
         };
 
-        // 2. Start the camera with the specific device ID or constraint
         await html5Qrcode.start(
           targetCameraId ? targetCameraId : { facingMode: "environment" },
           config,
@@ -81,24 +77,24 @@ export default function BarcodeScannerInput() {
           () => {},
         );
 
-        // Try to check capabilities, but don't hide the button if it returns empty due to HTTP limits
+        // Check if torch/flash is actually supported by the active media track
         try {
           const capabilities = html5Qrcode.getRunningTrackCapabilities();
-          if (
-            capabilities &&
-            (capabilities.torch || capabilities.fillLightMode)
-          ) {
+          if (capabilities && capabilities.torch) {
             setHasFlash(true);
+          } else {
+            setHasFlash(false);
           }
         } catch (capError) {
           console.log(
-            "Capabilities detection restricted by browser security policies.",
+            "Torch capability detection not supported on this browser/device.",
           );
+          setHasFlash(false);
         }
       } catch (err) {
         console.error("Scanner startup failed:", err);
         setScanError(
-          `Camera startup failed: ${err.message || err}. Please ensure you are using HTTPS.`,
+          `Camera startup failed: ${err.message || err}. Ensure permissions are granted.`,
         );
         setIsScanning(false);
       }
@@ -157,6 +153,7 @@ export default function BarcodeScannerInput() {
     }
     setIsScanning(false);
     setFlashOn(false);
+    setHasFlash(false);
   };
 
   const toggleFlash = async () => {
@@ -170,7 +167,7 @@ export default function BarcodeScannerInput() {
     } catch (err) {
       console.error("Torch adjustment failed:", err);
       alert(
-        "Flash activation rejected. This browser restricts camera hardware modifications over insecure HTTP connections.",
+        "Flash activation is not supported or was rejected by your current mobile browser/hardware combination (Note: iOS Safari does not support web torch control).",
       );
     }
   };
@@ -215,10 +212,8 @@ export default function BarcodeScannerInput() {
 
       {isScanning && (
         <div className="relative border border-gray-300 rounded-lg overflow-hidden bg-black flex flex-col justify-between items-center">
-          {/* Main Viewfinder Frame Container */}
           <div id={regionId} className="w-full aspect-video" />
 
-          {/* Floating Lighting Button Controls */}
           {hasFlash && (
             <button
               onClick={toggleFlash}
@@ -229,12 +224,11 @@ export default function BarcodeScannerInput() {
               }`}
             >
               <span>
-                {flashOn ? "☀️ Turn Light Off" : "👑 Force Flash Light"}
+                {flashOn ? "☀️ Turn Light Off" : "⚡ Force Flash Light"}
               </span>
             </button>
           )}
 
-          {/* Capture Snapshot Action Row */}
           <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
             <button
               onClick={captureFrameManually}
