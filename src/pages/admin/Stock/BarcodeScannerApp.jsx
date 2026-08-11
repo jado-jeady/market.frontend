@@ -77,20 +77,24 @@ export default function BarcodeScannerInput() {
           () => {},
         );
 
-        // Check if torch/flash is actually supported by the active media track
-        try {
-          const capabilities = html5Qrcode.getRunningTrackCapabilities();
-          if (capabilities && capabilities.torch) {
+        // Allow stream to fully initialize before checking track settings for torch support
+        setTimeout(() => {
+          try {
+            const settings = html5Qrcode.getRunningTrackSettings();
+            // Check if torch property is present in the active track settings
+            if (settings && "torch" in settings) {
+              setHasFlash(true);
+            } else {
+              // Fallback: If on Android Chrome, allow user to attempt toggling anyway
+              setHasFlash(true);
+            }
+          } catch (e) {
+            console.warn(
+              "Could not retrieve track settings, enabling flash button as fallback.",
+            );
             setHasFlash(true);
-          } else {
-            setHasFlash(false);
           }
-        } catch (capError) {
-          console.log(
-            "Torch capability detection not supported on this browser/device.",
-          );
-          setHasFlash(false);
-        }
+        }, 800);
       } catch (err) {
         console.error("Scanner startup failed:", err);
         setScanError(
@@ -167,7 +171,7 @@ export default function BarcodeScannerInput() {
     } catch (err) {
       console.error("Torch adjustment failed:", err);
       alert(
-        "Flash activation is not supported or was rejected by your current mobile browser/hardware combination (Note: iOS Safari does not support web torch control).",
+        "Flash activation failed. Note: Apple iOS (Safari/Chrome) completely blocks torch control at the WebKit hardware level.",
       );
     }
   };
