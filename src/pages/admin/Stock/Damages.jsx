@@ -25,14 +25,16 @@ import {
   Trash,
   Verified,
   CheckLine,
+  File,
 } from "lucide-react";
 import { getAllProducts } from "../../../utils/product.util";
 import {
   createDamageReport,
   getAllDamageReports,
 } from "../../../utils/damage.util.js";
+import DisplayDamages from "../../../components/DisplayDamage.jsx";
+import { updateReportStatus } from "../../../utils/damage.util.js";
 import { getUserNameById } from "../../../utils/user.util.js";
-import DisplayDamages from "../../../components/ImportantModels.jsx";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 const DAMAGE_TYPES = [
@@ -75,6 +77,8 @@ const STATUS_CONFIG = {
   Pending: { color: "text-blue-700", bg: "bg-blue-50" },
   "In Review": { color: "text-amber-700", bg: "bg-amber-50" },
   Resolved: { color: "text-green-700", bg: "bg-green-50" },
+  Rejected: { color: "text-red-700", bg: "bg-red-50" },
+  inReview: { color: "text-amber-700", bg: "bg-amber-50" },
 };
 
 function debounce(fn, ms) {
@@ -84,6 +88,18 @@ function debounce(fn, ms) {
     t = setTimeout(() => fn(...a), ms);
   };
 }
+
+// Handle status update from the modal
+const handleStatusUpdate = async (reportId, newStatus) => {
+  // Update the report in the local state
+  setReports((prevReports) =>
+    prevReports.map((report) =>
+      report.id === reportId ? { ...report, status: newStatus } : report,
+    ),
+  );
+  // Optionally refresh the list
+  await fetchReports(Search, filterSev, page);
+};
 
 // ─── auth helper ─────────────────────────────────────────────────────────────
 function getCurrentUser() {
@@ -213,6 +229,8 @@ function Lightbox({ images, startIndex, onClose }) {
 function ReportedByCell({ userId }) {
   const [username, setUsername] = useState(null);
 
+  if (!userId) return <span className="text-slate-300 text-xs">—</span>;
+
   useEffect(() => {
     let mounted = true;
     getUserNameById(userId).then((res) => {
@@ -240,6 +258,7 @@ function ImageThumbs({ report }) {
   return (
     <>
       <div className="flex gap-1.5">
+        hhhhh
         {images.map((url, i) => (
           <button
             key={i}
@@ -276,6 +295,26 @@ function ItemSearch({ selected, onSelect }) {
   const [hi, setHi] = useState(0);
   const inputRef = useRef();
   const boxRef = useRef();
+
+  const fetch = useCallback(
+    debounce(async (q) => {
+      if (!q.trim()) {
+        setItems([]);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        const res = await getAllProducts({ search: q, limit: 20 });
+        setItems(res?.data ?? []);
+      } catch {
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 350),
+    [],
+  );
 
   const fetchItems = useCallback(
     debounce(async (q) => {
@@ -543,6 +582,7 @@ function ReportModal({ onClose, onSubmit }) {
   const [form, setForm] = useState({
     selectedItem: null,
     damageType: "",
+    quantity: 0,
     severity: "",
     location: "",
     description: "",
@@ -566,6 +606,7 @@ function ReportModal({ onClose, onSubmit }) {
     if (!form.damageType) e.damageType = "Please select a damage type";
     if (!form.severity) e.severity = "Please select severity";
     if (!form.description.trim()) e.description = "Description is required";
+    if (form.quantity <= 0) e.quantity = "Quantity must be a positive number";
     setErrors(e);
     return !Object.keys(e).length;
   };
@@ -591,6 +632,7 @@ function ReportModal({ onClose, onSubmit }) {
         estimated_cost: form.estimatedCost,
         witnesses: form.witnesses,
         incident_date: form.date,
+        quantity: form.quantity,
         image_1: img1?.file ?? null,
         image_2: img2?.file ?? null,
       });
@@ -698,6 +740,27 @@ function ReportModal({ onClose, onSubmit }) {
                 ))}
               </select>
               {errors.damageType && <FieldError msg={errors.damageType} />}
+            </div>
+
+            <div>
+              <FieldLabel required>Quantity</FieldLabel>
+              <input
+                type="number"
+                value={form.quantity ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  set("quantity", val === "" ? null : parseInt(val, 10));
+                }}
+                onFocus={(e) => {
+                  e.target.select(); // Highlights the text
+                  setFocused("qty");
+                }}
+                onBlur={() => setFocused(null)}
+                className={inputCls(focused === "qty")}
+                placeholder="e.g. 1"
+              />
+
+              {errors.quantity && <FieldError msg={errors.quantity} />}
             </div>
 
             <div>
@@ -911,6 +974,7 @@ const Damage = () => {
     try {
       const res = await getAllDamageReports(filters);
       setReports(res?.data ?? []);
+      console.log("Fetched reports:", res?.data);
       setPagination(res?.pagination ?? null);
     } catch {
       fireToast("Failed to load reports", "error");
@@ -956,7 +1020,6 @@ const Damage = () => {
         .animate-fadeIn  { animation: fadeIn  .15s ease; }
         .animate-toastIn { animation: toastIn .3s ease; }
       `}</style>
-
       <div className="min-h-screen bg-slate-50 font-sans p-4 sm:p-6 lg:p-8">
         <div className="max-w-screen mx-auto space-y-5">
           {/* ── header ── */}
@@ -1130,14 +1193,12 @@ const Damage = () => {
                           <ImageThumbs report={r} />
                         </td>
                         <td className="px-4 py-3 text-slate-600 text-xs">
-                          {reportToShow && (
-                            <DisplayDamages
-                              report={reportToShow}
-                              onClose={() => setReportToShow(null)}
-                            />
-                          )}
-                          <button onClick={() => setReportToShow(r)}>
-                            <Eye size={15} className="inline mr-1" />
+                          <button
+                            onClick={() => setReportToShow(r)}
+                            className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors"
+                            title="View Details"
+                          >
+                            <Eye size={15} className="text-slate-500" />
                           </button>
                         </td>
                         <td className="px-4 py-3 text-slate-600 text-xs">
@@ -1151,8 +1212,7 @@ const Damage = () => {
                 </tbody>
               </table>
             </div>
-
-            {/* ── mobile card grid ── */}
+            // In the mobile card grid section - update to show more details
             <div className="md:hidden p-3 space-y-3">
               {loading ? (
                 <CardSkeleton />
@@ -1176,12 +1236,12 @@ const Damage = () => {
                       className="border border-slate-100 rounded-2xl p-4 bg-white shadow-sm space-y-3"
                     >
                       <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-bold text-slate-800 text-sm">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-slate-800 text-sm truncate">
                             {r.product?.name ?? "—"}
                           </p>
                           <p className="font-mono text-[11px] text-slate-400 mt-0.5">
-                            {r.product?.barcode}
+                            #{r.ref_number}
                           </p>
                         </div>
                         <StatusBadge label={r.status} />
@@ -1194,40 +1254,40 @@ const Damage = () => {
                         </span>
                       </div>
 
+                      {/* Description */}
+                      <p className="text-sm text-slate-600 line-clamp-2">
+                        {r.description}
+                      </p>
+
                       {images.length > 0 && (
                         <div className="flex gap-2">
                           {images.map((url, i) => (
-                            <button
+                            <img
                               key={i}
-                              onClick={() => setLb(i)}
-                              className="w-14 h-14 rounded-xl overflow-hidden border border-slate-200 hover:border-violet-400 transition-colors"
-                            >
-                              <img
-                                src={url}
-                                alt=""
-                                className="w-full h-full object-cover"
-                              />
-                            </button>
-                          ))}
-                          {lb !== null && (
-                            <Lightbox
-                              images={images}
-                              startIndex={lb}
-                              onClose={() => setLb(null)}
+                              src={url}
+                              alt={`Damage ${i + 1}`}
+                              className="w-16 h-16 rounded-lg object-cover border border-slate-200"
+                              onClick={() => window.open(url, "_blank")}
                             />
-                          )}
+                          ))}
                         </div>
                       )}
 
-                      <div className="flex justify-between text-xs text-slate-400 pt-0.5">
+                      <div className="flex justify-between text-xs text-slate-400 pt-2 border-t border-slate-100">
                         <span className="flex items-center gap-1">
                           <Calendar size={10} />
                           {r.incident_date}
                         </span>
                         <span className="flex items-center gap-1">
-                          <User size={10} />
-                          {r.description}
+                          <DollarSign size={10} />
+                          {r.estimated_cost || "—"}
                         </span>
+                        <button
+                          onClick={() => setReportToShow(r)}
+                          className="text-violet-600 hover:text-violet-800 font-semibold flex items-center gap-1"
+                        >
+                          <Eye size={12} /> View
+                        </button>
                       </div>
                     </div>
                   );
@@ -1263,14 +1323,24 @@ const Damage = () => {
           )}
         </div>
       </div>
-
       {showModal && (
         <ReportModal
           onClose={() => setShowModal(false)}
           onSubmit={handleSubmit}
         />
       )}
-
+      {/* In the modal render */}
+      {reportToShow && (
+        <DisplayDamages
+          report={reportToShow}
+          onClose={() => {
+            (setReportToShow(null),
+              fetchReports(search, filterSev, page),
+              console.log("Refetching reports after closing modal..."));
+          }}
+          onStatusUpdate={handleStatusUpdate}
+        />
+      )}
       {/* ── toast ── */}
       {toast && (
         <div
