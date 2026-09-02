@@ -128,6 +128,7 @@ export const getSaleById = async (saleId) => {
 /* ===================== Get Sale by shift cashier ===================== */
 export const getCashierSalesByShiftDate = async (businessDate) => {
   try {
+    console.log(`Fetching sales for shift date: ${businessDate}`);
     // Construct the URL to match /api/sales/sales-by-shift/2024-01-01
     const res = await fetch(`${SALES_BASE}/sales-by-shift/${businessDate}`, {
       headers: getAuthHeaders(),

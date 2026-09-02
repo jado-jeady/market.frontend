@@ -31,9 +31,9 @@ import { getAllProducts } from "../../../utils/product.util";
 import {
   createDamageReport,
   getAllDamageReports,
+  updateReportStatus,
 } from "../../../utils/damage.util.js";
 import DisplayDamages from "../../../components/DisplayDamage.jsx";
-import { updateReportStatus } from "../../../utils/damage.util.js";
 import { getUserNameById } from "../../../utils/user.util.js";
 
 // ─── constants ────────────────────────────────────────────────────────────────

@@ -27,7 +27,7 @@ export default function DisplayDamages({ report, onClose, onStatusUpdate }) {
       // Close modal after success
       setTimeout(() => {
         if (onClose) onClose();
-      }, 500);
+      }, 1500);
     } catch (err) {
       setError(err.message || `Failed to ${newStatus.toLowerCase()} report`);
     } finally {
