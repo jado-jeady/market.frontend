@@ -50,6 +50,9 @@ const CashierShiftSales = () => {
     if (!date) return;
     setLoading(true);
     try {
+      console.log(
+        `Fetching sales for cashier ID: ${cashierId} on date: ${date}`,
+      );
       const res = await getCashierSalesByShiftDate(date);
       if (res.success) {
         setSales(res.data || []);
