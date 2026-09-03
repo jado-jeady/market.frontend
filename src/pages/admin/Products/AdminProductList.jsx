@@ -21,7 +21,7 @@ import {
   Plus,
 } from "lucide-react";
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 50;
 
 const AdminiProductList = () => {
   const [products, setProducts] = useState([]);
