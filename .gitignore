@@ -26,3 +26,4 @@ tester
 *.njsproj
 *.sln
 *.sw?
+dist/
