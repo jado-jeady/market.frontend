@@ -67,16 +67,12 @@ export default defineConfig({
   // Build configuration for Vercel
   build: {
     outDir: "dist",
+    sourcemap: true,
     rollupOptions: {
       output: {
         entryFileNames: `assets/[name].[hash].js`,
         chunkFileNames: `assets/[name].[hash].js`,
         assetFileNames: `assets/[name].[hash].[ext]`,
-      },
-    },
-    sourcemap: true,
-    rollupOptions: {
-      output: {
         manualChunks: {
           vendor: ["react", "react-dom", "react-router-dom"],
         },

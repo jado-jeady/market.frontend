@@ -17,7 +17,7 @@
     "lucide-react": "^0.574.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^6.28.0",
+    "react-router-dom": "^6.26.0",
     "react-toastify": "^11.0.5",
     "react-tooltip": "^6.0.3",
     "react-zxing": "^3.0.0",
