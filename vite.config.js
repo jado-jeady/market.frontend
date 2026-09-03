@@ -14,8 +14,9 @@ export default defineConfig({
       registerType: "autoUpdate", // Automatically patches layout files in background
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
       manifest: {
-        name: "Market POS Desktop App v3.2.0",
+        name: "Market POS Desktop App v3.2.1",
         short_name: "Mobile POS",
+        version: "3.2.1",
         description:
           "Native landscape terminal web client layout for Barista POS operations.",
         theme_color: "#0f0e0e", // Matches your layout's strong dark accent buttons
@@ -57,9 +58,31 @@ export default defineConfig({
         // Caches all static framework code bundles and images automatically for instant offline operations
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,woff2}"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB, default is 10 MB
+        clientsClaim: true, // Ensures the service worker takes control of the page immediately
+        skipWaiting: true, // Forces the service worker to activate immediately
       },
     }),
   ],
+
+  // Build configuration for Vercel
+  build: {
+    outDir: "dist",
+    rollupOptions: {
+      output: {
+        entryFileNames: `assets/[name].[hash].js`,
+        chunkFileNames: `assets/[name].[hash].js`,
+        assetFileNames: `assets/[name].[hash].[ext]`,
+      },
+    },
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+        },
+      },
+    },
+  },
 
   server: {
     port: 3000, // Default port for Vite development server
