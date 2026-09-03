@@ -13,7 +13,6 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate", // Automatically patches layout files in background
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
-
       manifest: {
         name: "Market POS Desktop App v3.2.0",
         short_name: "Mobile POS",
@@ -58,8 +57,6 @@ export default defineConfig({
         // Caches all static framework code bundles and images automatically for instant offline operations
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,woff2}"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB, default is 10 MB
-        skipWaiting: true,
-        clientsClaim: true, // Ensures the service worker takes control of the page immediately after installation
       },
     }),
   ],
