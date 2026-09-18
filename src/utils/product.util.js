@@ -333,4 +333,31 @@ export const fetchBaristaItems = async () => {
   }
 };
 
-// getting barista items by barista categories
+//
+
+/* ============================
+   RECEIVE NEW STOCK (creates a new batch)
+============================ */
+export async function receiveStock(payload) {
+  try {
+    const response = await fetch(`${API_URL}/api/products/receive-stock`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result?.message || `Error: ${response.status}`,
+      };
+    }
+
+    return result;
+  } catch (err) {
+    console.error("Error receiving stock:", err);
+    return { success: false, message: err.message };
+  }
+}

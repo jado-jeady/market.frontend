@@ -54,8 +54,9 @@ const CashierShiftSales = () => {
         `Fetching sales for cashier ID: ${cashierId} on date: ${date}`,
       );
       const res = await getCashierSalesByShiftDate(date);
-      if (res.success) {
+      if (res?.success) {
         setSales(res.data || []);
+        console.log(res.data);
       }
     } catch (error) {
       console.error("Fetch error:", error);
@@ -74,7 +75,7 @@ const CashierShiftSales = () => {
   }, [selectedDate]);
 
   const grandTotalSales = sales.reduce(
-    (sum, s) => sum + Number(s.total_amount || 0),
+    (sum, s) => sum + Number(s.subtotal || 0),
     0,
   );
   const totalTransactions = sales.length;
@@ -246,7 +247,7 @@ const CashierShiftSales = () => {
                       </span>
                     </div>
                     <p className="text-base font-black text-gray-900">
-                      {Number(sale.total_amount).toLocaleString()} F
+                      {Number(sale.subtotal).toLocaleString()} F
                     </p>
                   </div>
                 </div>
@@ -314,7 +315,7 @@ const CashierShiftSales = () => {
                       </td>
                       <td className="px-8 py-5 text-right">
                         <span className="font-black text-gray-900 text-base">
-                          {Number(sale.total_amount).toLocaleString()}
+                          {Number(sale.subtotal).toLocaleString()}
                         </span>
                         <span className="text-[10px] font-black text-gray-400 ml-1.5">
                           RWF
