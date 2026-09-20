@@ -25,6 +25,7 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   if (!isOpen || !product) return null;
 
@@ -40,36 +41,43 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
     setAdjReason("");
     setError("");
     setLoading(false);
+    setSubmitting(false);
   };
 
   const handleClose = () => {
     resetAll();
     onClose();
   };
-
   /* ============== SUBMIT: NEW ARRIVAL ============== */
   const handleArrivalSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
+
     setError("");
 
-    // Validation
+    // Validation (return WITHOUT setting submitting)
     if (!arrivalQty || Number(arrivalQty) <= 0) {
-      return setError("Quantity must be greater than 0");
+      setError("Quantity must be greater than 0");
+      return;
     }
     if (!arrivalBuying || Number(arrivalBuying) < 0) {
-      return setError("Buying price is required");
+      setError("Buying price is required");
+      return;
     }
     if (!arrivalSelling || Number(arrivalSelling) <= 0) {
-      return setError("Selling price is required");
+      setError("Selling price is required");
+      return;
     }
     if (Number(arrivalSelling) < Number(arrivalBuying)) {
-      // Not blocking — just a warning, some shops sell at loss intentionally
       toast.warn(
         "Selling price is lower than buying price — you'll sell at a loss",
       );
     }
 
+    // NOW set the flags — after validation passes
+    setSubmitting(true);
     setLoading(true);
+
     try {
       const res = await receiveStock({
         product_id: product.id,
@@ -82,9 +90,9 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
         update_existing_batches: true,
       });
 
-      if (!res?.ok) {
+      if (!res?.success) {
+        // ← FIX: use .success not .ok
         setError(res?.message || "Failed to receive stock");
-        setLoading(false);
         return;
       }
 
@@ -93,10 +101,13 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
           ? `Stock received. ${res.data.synced_batches.length} shelf price(s) synced.`
           : "New stock received successfully",
       );
+
       refresh();
       handleClose();
     } catch (err) {
       setError(err.message || "Error receiving stock");
+    } finally {
+      setSubmitting(false);
       setLoading(false);
     }
   };
@@ -104,19 +115,27 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
   /* ============== SUBMIT: MANUAL ADJUSTMENT ============== */
   const handleAdjustSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
+
     setError("");
 
+    // Validation
     if (!adjQty || Number(adjQty) <= 0) {
-      return setError("Quantity must be greater than 0");
+      setError("Quantity must be greater than 0");
+      return;
     }
     if (adjType === "OUT" && Number(adjQty) > product.stock_quantity) {
-      return setError("You can't remove more stock than you have");
+      setError("You can't remove more stock than you have");
+      return;
     }
     if (!adjReason.trim()) {
-      return setError("Reason is required for manual adjustments");
+      setError("Reason is required for manual adjustments");
+      return;
     }
 
+    setSubmitting(true);
     setLoading(true);
+
     try {
       const res = await adjustStock({
         product_id: product.id,
@@ -126,9 +145,9 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
         reason: adjReason,
       });
 
-      if (!res?.ok) {
+      if (!res?.success) {
+        // ← FIX
         setError(res?.message || "Failed to adjust stock");
-        setLoading(false);
         return;
       }
 
@@ -137,10 +156,11 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
       handleClose();
     } catch (err) {
       setError(err.message || "Error adjusting stock");
+    } finally {
+      setSubmitting(false);
       setLoading(false);
     }
   };
-
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-center items-center p-3">
       <div className="bg-white w-full max-w-[520px] rounded-2xl shadow-2xl overflow-hidden">
@@ -206,6 +226,7 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
                   </label>
                   <input
                     type="number"
+                    disabled={loading}
                     min="1"
                     value={arrivalQty}
                     onChange={(e) => setArrivalQty(e.target.value)}
@@ -222,6 +243,7 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
                   <input
                     type="number"
                     step="0.01"
+                    disabled={loading}
                     min="0"
                     value={arrivalBuying}
                     onChange={(e) => setArrivalBuying(e.target.value)}
@@ -238,6 +260,7 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
                     type="number"
                     step="0.01"
                     min="0"
+                    disabled={loading}
                     value={arrivalSelling}
                     onChange={(e) => setArrivalSelling(e.target.value)}
                     className="w-full border border-gray-200 p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
@@ -252,6 +275,7 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
                   <input
                     type="date"
                     value={arrivalExpiry}
+                    disabled={loading}
                     onChange={(e) => setArrivalExpiry(e.target.value)}
                     className="w-full border border-gray-200 p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                   />
@@ -264,6 +288,7 @@ const StockAdjustmentModal = ({ isOpen, onClose, product, refresh }) => {
                   <input
                     type="text"
                     value={arrivalReason}
+                    disabled={loading}
                     onChange={(e) => setArrivalReason(e.target.value)}
                     placeholder="e.g. Supplier delivery - Inyange"
                     className="w-full border border-gray-200 p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
