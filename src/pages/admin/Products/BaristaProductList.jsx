@@ -97,7 +97,7 @@ const AdminiBaristaList = () => {
   }, [search, category, stockLevel]);
 
   return (
-    <div className="p-2 md:p-2 lg:p-3 max-w-[1000px] mx-auto min-h-screen bg-gray-50/50">
+    <div className="p-2 md:p-2 lg:p-3  max-w-full mx-auto min-h-screen bg-gray-50/50">
       {/* RESPONSIVE HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
@@ -272,7 +272,7 @@ const AdminiBaristaList = () => {
 
       {/* PAGINATION */}
       {filteredProducts.length > ITEMS_PER_PAGE && (
-        <div className="flex justify-center items-center gap-2 mt-6">
+        <div className="flex justify-center align-items items-center w-full max-w-full align-bottom fixed bottom-12 gap-2 ">
           {Array.from(
             { length: Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) },
             (_, i) => (

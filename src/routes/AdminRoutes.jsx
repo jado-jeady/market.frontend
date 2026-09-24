@@ -13,9 +13,9 @@ import Products from "../pages/admin/Products/Products";
 import AdminProductList from "../pages/admin/Products/AdminProductList";
 import AddProduct from "../pages/admin/Products/AddProduct";
 import ProductCategories from "../pages/admin/Products/ProductCategories";
-import ProductTransfer from "../pages/admin/Products/ProdcutTransfer";
+import PriceChanges from "../pages/admin/Products/PriceChanges";
 import Stock from "../pages/admin/Stock/Stock";
-import AllStock from "../pages/admin/Stock/AllStock";
+import ProductBatches from "../pages/admin/Stock/ProductBatches";
 import StockIn from "../pages/admin/Stock/StockIn";
 import BarcodeScannerApp from "../pages/admin/Stock/BarcodeScannerApp";
 import Damages from "../pages/admin/Stock/Damages";
@@ -65,13 +65,13 @@ export const AdminRoutes = (
       <Route index element={<AdminProductList />} />
       <Route path="add" element={<AddProduct />} />
       <Route path="category" element={<ProductCategories />} />
-      <Route path="transfer" element={<ProductTransfer />} />
+      <Route path="price-changes" element={<PriceChanges />} />
       <Route path="list" element={<AdminProductList />} />
       <Route path="barista" element={<BaristaProductList />} />
     </Route>
     <Route path="stock" element={<Stock />}>
-      <Route index element={<AllStock />} />
-      <Route path="all" element={<AllStock />} />
+      <Route index element={<ProductBatches />} />
+      <Route path="batches" element={<ProductBatches />} />
       <Route path="in" element={<BarcodeScannerApp />} />
       <Route path="damages" element={<Damages />} />
       <Route path="adjustment" element={<StockAdjustment />} />

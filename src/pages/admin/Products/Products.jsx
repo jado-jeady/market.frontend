@@ -6,7 +6,7 @@ const Products = () => {
     { name: "Add Product", path: "/admin/products/add" },
     { name: "Product List", path: "/admin/products/list" },
     { name: "Barista Product List", path: "/admin/products/barista" },
-    { name: "Product Transfer", path: "/admin/products/transfer" },
+    { name: "Price Changes", path: "/admin/products/price-changes" },
     { name: "Product Categories", path: "/admin/products/category" },
   ];
   return (

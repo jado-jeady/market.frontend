@@ -333,4 +333,73 @@ export const fetchBaristaItems = async () => {
   }
 };
 
-// getting barista items by barista categories
+/* ============================
+   GET ALL BATCHES (with filters)
+============================ */
+export async function getAllBatches(filters = {}) {
+  try {
+    const params = buildQueryParams(filters);
+    const res = await fetch(`${API_URL}/api/products/batches?${params}`, {
+      headers: getAuthHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw data;
+    return data;
+  } catch (error) {
+    console.error("Get all batches error:", error);
+    return { success: false, data: [], pagination: { total: 0 } };
+  }
+}
+
+/* ============================
+   GET BATCHES FOR ONE PRODUCT
+============================ */
+export async function getProductBatches(productId) {
+  try {
+    const res = await fetch(`${API_URL}/api/products/${productId}/batches`, {
+      headers: getAuthHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw data;
+    return data;
+  } catch (error) {
+    console.error("Get product batches error:", error);
+    return { success: false, data: [] };
+  }
+}
+
+/* ============================
+   GET ALL PRICE CHANGES (with filters)
+============================ */
+export async function getAllPriceChanges(filters = {}) {
+  try {
+    const params = buildQueryParams(filters);
+    const res = await fetch(`${API_URL}/api/products/price-changes?${params}`, {
+      headers: getAuthHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw data;
+    return data;
+  } catch (error) {
+    console.error("Get price changes error:", error);
+    return { success: false, data: [], total: 0 };
+  }
+}
+
+/* ============================
+   GET PRICE CHANGE SUMMARY
+============================ */
+export async function getPriceChangeSummary(days = 30) {
+  try {
+    const res = await fetch(
+      `${API_URL}/api/products/price-changes/summary?days=${days}`,
+      { headers: getAuthHeaders() },
+    );
+    const data = await res.json();
+    if (!res.ok) throw data;
+    return data;
+  } catch (error) {
+    console.error("Get price change summary error:", error);
+    return { success: false, data: null };
+  }
+}
