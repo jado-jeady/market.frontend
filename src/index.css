@@ -100,14 +100,14 @@ body {
 ::-webkit-full-screen {
   overflow: hidden !important;
   background-color: #f3f4f6;
-  user-select: none;
+  user-select: text !important; /* Allow text selection in full-screen */
 }
 
 /* Restore normal scrolling for :root (html) */
 :root {
   overflow: auto; /* or scroll */
   background-color: #f3f4f6;
-  user-select: none;
+  user-select: text !important; /* Allow text selection in full-screen */
 }
 
 /* Allow text fields to keep selection capabilities intact */

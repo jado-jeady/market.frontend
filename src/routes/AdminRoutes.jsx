@@ -16,7 +16,7 @@ import ProductCategories from "../pages/admin/Products/ProductCategories";
 import PriceChanges from "../pages/admin/Products/PriceChanges";
 import Stock from "../pages/admin/Stock/Stock";
 import ProductBatches from "../pages/admin/Stock/ProductBatches";
-import StockIn from "../pages/admin/Stock/StockIn";
+import ExpiryReportPage from "../pages/admin/Stock/ExpiryReportPage";
 import BarcodeScannerApp from "../pages/admin/Stock/BarcodeScannerApp";
 import Damages from "../pages/admin/Stock/Damages";
 import StockAdjustment from "../pages/admin/Stock/Stock.Adjsutment";
@@ -73,6 +73,7 @@ export const AdminRoutes = (
       <Route index element={<ProductBatches />} />
       <Route path="batches" element={<ProductBatches />} />
       <Route path="in" element={<BarcodeScannerApp />} />
+      <Route path="expiry" element={<ExpiryReportPage />} />
       <Route path="damages" element={<Damages />} />
       <Route path="adjustment" element={<StockAdjustment />} />
     </Route>

@@ -408,3 +408,51 @@ export async function getPriceChangeSummary(days = 30) {
     return { success: false, data: null };
   }
 }
+
+/* ============================
+   RECEIVE NEW STOCK (creates a new batch)
+============================ */
+export async function receiveStock(payload) {
+  try {
+    const response = await fetch(`${API_URL}/api/products/receive-stock`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error receiving stock:", error);
+    return { success: false, message: "Failed to receive stock" };
+  }
+}
+
+export async function getProductsWithBatches(filters = {}) {
+  try {
+    const params = buildQueryParams(filters);
+    const res = await fetch(
+      `${API_URL}/api/products/products-with-batches?${params}`,
+      { headers: getAuthHeaders() },
+    );
+    const data = await res.json();
+    if (!res.ok) throw data;
+    return data;
+  } catch (error) {
+    console.error("Get products with batches error:", error);
+    return { success: false, data: [], pagination: { total: 0 } };
+  }
+}
+
+export async function getExpiryReport(filters = {}) {
+  try {
+    const params = buildQueryParams(filters);
+    const res = await fetch(`${API_URL}/api/products/expiry-report?${params}`, {
+      headers: getAuthHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw data;
+    return data;
+  } catch (error) {
+    console.error("Get expiry report error:", error);
+    return { success: false, data: [], summary: {}, pagination: { total: 0 } };
+  }
+}

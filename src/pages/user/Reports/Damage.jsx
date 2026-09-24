@@ -520,6 +520,7 @@ function ReportModal({ onClose, onSubmit }) {
     damageType: "",
     severity: "",
     location: "",
+    quantity: 0,
     description: "",
     date: new Date().toISOString().split("T")[0],
     estimatedCost: "",
@@ -541,6 +542,7 @@ function ReportModal({ onClose, onSubmit }) {
     if (!form.damageType) e.damageType = "Please select a damage type";
     if (!form.severity) e.severity = "Please select severity";
     if (!form.description.trim()) e.description = "Description is required";
+    if (form.quantity <= 0) e.quantity = "Quantity must be a positive number";
     setErrors(e);
     return !Object.keys(e).length;
   };
@@ -563,6 +565,7 @@ function ReportModal({ onClose, onSubmit }) {
         severity: form.severity,
         description: form.description,
         location: form.location,
+        quantity: form.quantity,
         estimated_cost: form.estimatedCost,
         witnesses: form.witnesses,
         incident_date: form.date,
@@ -676,6 +679,27 @@ function ReportModal({ onClose, onSubmit }) {
             </div>
 
             <div>
+              <FieldLabel required>Quantity</FieldLabel>
+              <input
+                type="number"
+                value={form.quantity ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  set("quantity", val === "" ? null : parseInt(val, 10));
+                }}
+                onFocus={(e) => {
+                  e.target.select(); // Highlights the text
+                  setFocused("qty");
+                }}
+                onBlur={() => setFocused(null)}
+                className={inputCls(focused === "qty")}
+                placeholder="e.g. 1"
+              />
+
+              {errors.quantity && <FieldError msg={errors.quantity} />}
+            </div>
+
+            <div>
               <FieldLabel required>Severity</FieldLabel>
               <div className="flex gap-2">
                 {Object.entries(SEVERITY_CONFIG).map(([label, c]) => (
@@ -684,11 +708,11 @@ function ReportModal({ onClose, onSubmit }) {
                     type="button"
                     onClick={() => set("severity", label)}
                     className={`flex-1 py-2.5 rounded-xl border-2 text-xs font-bold transition-all
-                      ${
-                        form.severity === label
-                          ? `${c.border} ${c.bg} ${c.color} ring-2 ${c.ring} scale-[1.02]`
-                          : "border-slate-200 text-slate-500 hover:border-slate-300 bg-white"
-                      }`}
+                           ${
+                             form.severity === label
+                               ? `${c.border} ${c.bg} ${c.color} ring-2 ${c.ring} scale-[1.02]`
+                               : "border-slate-200 text-slate-500 hover:border-slate-300 bg-white"
+                           }`}
                   >
                     <div
                       className={`w-2 h-2 rounded-full ${c.dot} mx-auto mb-1`}
@@ -799,8 +823,8 @@ function ReportModal({ onClose, onSubmit }) {
             onClick={handleSubmit}
             disabled={submitting}
             className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600
-              hover:from-violet-700 hover:to-purple-700 rounded-xl shadow-md shadow-violet-200
-              disabled:opacity-60 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                   hover:from-violet-700 hover:to-purple-700 rounded-xl shadow-md shadow-violet-200
+                   disabled:opacity-60 disabled:cursor-not-allowed transition-all flex items-center gap-2"
           >
             {submitting ? (
               <>

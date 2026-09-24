@@ -4,6 +4,7 @@ import SubMenu from "../../../components/SubMenu";
 const Stock = () => {
   const subMenuItems = [
     { name: "Batches", path: "/admin/stock/batches" },
+    { name: "Expiry Report", path: "/admin/stock/expiry" },
     { name: "Stock In", path: "/admin/stock/in" },
     { name: "Damage Management", path: "/admin/stock/damages" },
     { name: "Stock Adjustment", path: "/admin/stock/adjustment" },

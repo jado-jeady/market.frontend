@@ -3,8 +3,8 @@ import SubMenu from "../../../components/SubMenu";
 
 const Products = () => {
   const subMenuItems = [
-    { name: "Add Product", path: "/admin/products/add" },
     { name: "Product List", path: "/admin/products/list" },
+    { name: "Add Product", path: "/admin/products/add" },
     { name: "Barista Product List", path: "/admin/products/barista" },
     { name: "Price Changes", path: "/admin/products/price-changes" },
     { name: "Product Categories", path: "/admin/products/category" },
