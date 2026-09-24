@@ -170,7 +170,7 @@ export default function Sell() {
       }
 
       const receipt = await printInvoice(
-        saleResponse,
+        saleResponse?.data,
         import.meta.env.VITE_CLIENT_PRINTER_SERVER_IP_ADDRESS,
       );
 

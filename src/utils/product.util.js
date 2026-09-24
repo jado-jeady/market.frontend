@@ -192,15 +192,20 @@ export async function adjustStock(product) {
       headers: getAuthHeaders(),
       body: JSON.stringify(product),
     });
+
+    const result = await response.json();
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message);
+      return {
+        success: false,
+        message: result?.message || `Error: ${response.status}`,
+      };
     }
-    console.log("Stock adjusted successfully:", response);
-    return await response;
+
+    return result; // { success: true, data: {...} }
   } catch (err) {
     console.error("Error adjusting stock:", err);
-    return null;
+    return { success: false, message: err.message };
   }
 }
 

@@ -43,12 +43,13 @@ export const generateStockReport = async (data) => {
 };
 
 // Generate Financial Report
+// The function signatures remain the same, but make sure the payload includes time fields
 export const generateFinancialReport = async (data) => {
   try {
     const response = await fetch(`${API_URL}/api/reports/generate/financial`, {
       method: "POST",
       headers: getAuthHeaders(),
-      body: JSON.stringify(data),
+      body: JSON.stringify(data), // data will include startTime and endTime if provided
     });
     return await response.json();
   } catch (error) {

@@ -34,6 +34,7 @@ const Returns = () => {
 
       // Access 'returns' from the { returns, count } response object
       if (data && data.returns) {
+        console.log("Fetched Returns:", data.returns);
         setReturns(data.returns);
       } else {
         setReturns([]);
@@ -101,7 +102,7 @@ const Returns = () => {
         </div>
         <div className="bg-white rounded-xl shadow-sm p-1 border border-gray-100 text-center">
           <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">
-            Aproved
+            Approved
           </p>
           <p className="text-xl font-black text-yellow-600">{stats.approved}</p>
         </div>

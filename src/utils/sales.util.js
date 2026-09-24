@@ -336,6 +336,7 @@ export const rejectReturn = async (id, adminId, rejectionReason) => {
 // utils/printInvoice.js
 export async function printInvoice(saleResponse, ipAddress) {
   try {
+    console.log("Sending invoice to printer...", saleResponse, ipAddress);
     // Call your print service API
     const res = await fetch(`http://${ipAddress}:4000/print`, {
       method: "POST",

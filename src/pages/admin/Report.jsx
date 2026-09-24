@@ -41,6 +41,12 @@ const Report = () => {
   const [reportName, setReportName] = useState("");
   const [selectedReport, setSelectedReport] = useState(null);
   const [showReportModal, setShowReportModal] = useState(false);
+  // Add time state
+  const [timeRange, setTimeRange] = useState({
+    startTime: "",
+    endTime: "",
+  });
+  const [enableTimeFilter, setEnableTimeFilter] = useState(false);
 
   const reportTypes = [
     { value: "sales", label: "Sales Report", icon: TrendingUp, color: "blue" },
@@ -100,13 +106,33 @@ const Report = () => {
       return;
     }
 
+    // Validate time range if enabled
+    if (enableTimeFilter) {
+      if (!timeRange.startTime || !timeRange.endTime) {
+        toast.error("Please select both start and end times");
+        return;
+      }
+      if (timeRange.startTime >= timeRange.endTime) {
+        toast.error("Start time must be before end time");
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const generateFn = generateFunctions[reportType];
-      const response = await generateFn({
+      const payload = {
         reportName,
         dateRange,
-      });
+      };
+
+      // Add time filter if enabled
+      if (enableTimeFilter) {
+        payload.startTime = timeRange.startTime;
+        payload.endTime = timeRange.endTime;
+      }
+
+      const response = await generateFn(payload);
 
       if (response.success) {
         toast.success(
@@ -121,6 +147,8 @@ const Report = () => {
             .split("T")[0],
           to: new Date().toISOString().split("T")[0],
         });
+        setTimeRange({ startTime: "", endTime: "" });
+        setEnableTimeFilter(false);
       } else {
         toast.error(response.message || "Failed to generate report");
       }
@@ -172,7 +200,7 @@ const Report = () => {
 
   return (
     <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-full mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
@@ -198,7 +226,7 @@ const Report = () => {
             Generate New Report
           </h4>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 text-gray-600 lg:grid-cols-12 gap-6">
             {/* Report Type Selection */}
             <div className="lg:col-span-4">
               <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -239,13 +267,12 @@ const Report = () => {
                 })}
               </div>
             </div>
-
-            {/* Date Range & Name */}
-            <div className="lg:col-span-5 text-sm text-gray-700 space-y-4">
+            {/* Update the date range selection section in the JSX */}
+            <div className="lg:col-span-5">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    From
+                    From Date
                   </label>
                   <input
                     type="date"
@@ -258,7 +285,7 @@ const Report = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    To
+                    To Date
                   </label>
                   <input
                     type="date"
@@ -270,6 +297,67 @@ const Report = () => {
                   />
                 </div>
               </div>
+
+              {/* Time Filter Toggle */}
+              <div className="mt-3 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="enableTimeFilter"
+                  checked={enableTimeFilter}
+                  onChange={(e) => {
+                    setEnableTimeFilter(e.target.checked);
+                    if (!e.target.checked) {
+                      setTimeRange({ startTime: "", endTime: "" });
+                    }
+                  }}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label
+                  htmlFor="enableTimeFilter"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Filter by time range (optional)
+                </label>
+              </div>
+
+              {/* Time Range Inputs */}
+              {enableTimeFilter && (
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">
+                      Start Time
+                    </label>
+                    <input
+                      type="time"
+                      value={timeRange.startTime}
+                      onChange={(e) =>
+                        setTimeRange({
+                          ...timeRange,
+                          startTime: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                      step="60"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">
+                      End Time
+                    </label>
+                    <input
+                      type="time"
+                      value={timeRange.endTime}
+                      onChange={(e) =>
+                        setTimeRange({ ...timeRange, endTime: e.target.value })
+                      }
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                      step="60"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Report Name Input */}
               <div className="mt-3">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Report Name
@@ -283,7 +371,6 @@ const Report = () => {
                 />
               </div>
             </div>
-
             {/* Generate Button */}
             <div className="lg:col-span-3 flex items-end">
               <button
@@ -383,7 +470,7 @@ const Report = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">
-                          {new Date(report.created_at).toLocaleDateString()}
+                          {new Date(report.created_at).toLocaleString()}
                         </td>
                         <td className="px-6 py-4">
                           {getStatusBadge(report.status)}
@@ -453,9 +540,10 @@ const Report = () => {
                   {/* Render different summary types based on report type */}
                   <div className="space-y-6">
                     {/* For Financial Report */}
+                    {/* For Financial Report - Add profit metrics */}
                     {selectedReport.report_type === "financial" && (
                       <>
-                        {/* Key Metrics Grid */}
+                        {/* Key Metrics Grid - Add profit cards */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                           <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
                             <p className="text-xs text-blue-600 uppercase tracking-wider font-semibold">
@@ -494,6 +582,48 @@ const Report = () => {
                           </div>
                         </div>
 
+                        {/* Profit Metrics - NEW */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-100">
+                            <p className="text-xs text-indigo-600 uppercase tracking-wider font-semibold">
+                              Total Buying Price
+                            </p>
+                            <p className="text-lg font-bold text-indigo-900 mt-1">
+                              {selectedReport.summary.total_buying_price?.toLocaleString()}{" "}
+                              RWF
+                            </p>
+                          </div>
+                          <div className="bg-cyan-50 rounded-lg p-4 border border-cyan-100">
+                            <p className="text-xs text-cyan-600 uppercase tracking-wider font-semibold">
+                              Total Selling Price
+                            </p>
+                            <p className="text-lg font-bold text-cyan-900 mt-1">
+                              {selectedReport.summary.total_selling_price?.toLocaleString()}{" "}
+                              RWF
+                            </p>
+                          </div>
+                          <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
+                            <p className="text-xs text-emerald-600 uppercase tracking-wider font-semibold">
+                              Total Profit
+                            </p>
+                            <p
+                              className={`text-lg font-bold mt-1 ${selectedReport.summary.total_profit >= 0 ? "text-emerald-900" : "text-red-900"}`}
+                            >
+                              {selectedReport.summary.total_profit?.toLocaleString()}{" "}
+                              RWF
+                            </p>
+                          </div>
+                          <div className="bg-amber-50 rounded-lg p-4 border border-amber-100">
+                            <p className="text-xs text-amber-600 uppercase tracking-wider font-semibold">
+                              Profit Margin
+                            </p>
+                            <p className="text-lg font-bold text-amber-900 mt-1">
+                              {selectedReport.summary.profit_margin?.toFixed(2)}
+                              %
+                            </p>
+                          </div>
+                        </div>
+
                         {/* Net Revenue & Discounts */}
                         <div className="grid grid-cols-2 gap-3">
                           <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
@@ -516,12 +646,12 @@ const Report = () => {
                           </div>
                         </div>
 
-                        {/* Top Cashiers */}
+                        {/* Top Cashiers with Profit */}
                         {selectedReport.summary.top_cashiers &&
                           selectedReport.summary.top_cashiers.length > 0 && (
                             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                               <h6 className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
-                                Top Cashiers
+                                Top Cashiers Performance
                               </h6>
                               <div className="space-y-2">
                                 {selectedReport.summary.top_cashiers.map(
@@ -537,8 +667,17 @@ const Report = () => {
                                         <span className="text-gray-500">
                                           {cashier.transactions} transactions
                                         </span>
-                                        <span className="font-semibold text-green-600">
+                                        <span className="text-gray-500">
                                           {cashier.revenue?.toLocaleString()}{" "}
+                                          RWF
+                                        </span>
+                                        <span
+                                          className={`font-semibold ${(cashier.profit || 0) >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                                        >
+                                          Profit:{" "}
+                                          {(
+                                            cashier.profit || 0
+                                          ).toLocaleString()}{" "}
                                           RWF
                                         </span>
                                       </div>
@@ -579,6 +718,19 @@ const Report = () => {
                               </div>
                             </div>
                           )}
+
+                        {/* Time Range Display (if filtered by time) */}
+                        {selectedReport.timeRange && (
+                          <div className="bg-blue-50 rounded-lg p-3 border border-blue-200 text-sm">
+                            <span className="font-medium text-blue-700">
+                              Time Filter Applied:
+                            </span>
+                            <span className="text-blue-600 ml-2">
+                              {selectedReport.timeRange.startTime} →{" "}
+                              {selectedReport.timeRange.endTime}
+                            </span>
+                          </div>
+                        )}
                       </>
                     )}
 
@@ -831,6 +983,7 @@ const Report = () => {
               )}
 
               {/* Report Info */}
+              {/* Report Info - Display combined date-time */}
               <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <div>
                   <p className="text-xs text-gray-500 font-medium">Type</p>
@@ -842,11 +995,11 @@ const Report = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 font-medium">
-                    Date Range
+                    Date & Time Range
                   </p>
                   <p className="text-sm font-medium text-gray-900">
-                    {selectedReport.date_range_from} →{" "}
-                    {selectedReport.date_range_to}
+                    {new Date(selectedReport.date_range_from).toLocaleString()}{" "}
+                    → {new Date(selectedReport.date_range_to).toLocaleString()}
                   </p>
                 </div>
                 <div>
@@ -862,6 +1015,19 @@ const Report = () => {
                   </p>
                 </div>
               </div>
+
+              {/* If time filter was applied, show it prominently */}
+              {selectedReport.parameters?.startTime &&
+                selectedReport.parameters?.endTime && (
+                  <div className="bg-blue-50 rounded-lg p-3 border border-blue-200 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm text-blue-700">
+                      <strong>Time Filter Applied:</strong>{" "}
+                      {selectedReport.parameters.startTime} →{" "}
+                      {selectedReport.parameters.endTime}
+                    </span>
+                  </div>
+                )}
 
               {/* Actions */}
               <div className="flex gap-3 pt-4 border-t border-gray-100">
