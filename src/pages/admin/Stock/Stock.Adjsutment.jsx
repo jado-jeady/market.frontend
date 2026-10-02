@@ -15,7 +15,8 @@ const StockAdjustment = () => {
         setLoading(true);
         const data = await getStockAdjustments();
         console.log(data);
-        setAdjustments(Array.isArray(data) ? data : data?.data || []);
+        setAdjustments(Array.isArray(data) ? data : []);
+        console.log("Fetched stock adjustments:", data);
       } catch (error) {
         console.error("Failed to fetch history:", error);
       } finally {
@@ -150,7 +151,7 @@ const StockAdjustment = () => {
                 >
                   <td className="px-3 py-2 whitespace-nowrap">
                     <div className="text-sm font-semibold text-gray-900">
-                      {item?.Product?.name}
+                      {item?.product?.name}
                     </div>
                     <div className="text-[11px] text-gray-400 font-mono">
                       {item.barcode}
@@ -182,7 +183,7 @@ const StockAdjustment = () => {
                     {item.reason || "No reason specified"}
                   </td>
                   <td className="px-6 py-4 text-xs text-gray-600 italic max-w-xs truncate">
-                    {item.User.username || "No User specified"}
+                    {item.user.username || "No User specified"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
                     {new Date(item.createdAt).toLocaleString([], {
