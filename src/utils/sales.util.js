@@ -295,41 +295,36 @@ export const getMyReturns = async (cashierId) => {
 
 // Approve a return
 export const approveReturn = async (return_id, adminId) => {
-  try {
-    console.log(return_id, adminId);
-    const res = await fetch(`${SALES_BASE}/return/${return_id}/approve`, {
-      method: "PUT",
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ approved_by: adminId }),
-    });
-    console.log(res);
+  const res = await fetch(`${SALES_BASE}/return/${return_id}/approve`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ approved_by: adminId }),
+  });
 
-    if (!res.ok) throw new Error("Failed to approve return");
-    return await res.json();
-  } catch (err) {
-    console.error(`Error approving return ${id}:`, err);
-    throw err;
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to approve return");
   }
+  return await res.json();
 };
 
 // Reject a return
+// Reject a return — FIXED
 export const rejectReturn = async (id, adminId, rejectionReason) => {
-  try {
-    const res = await fetch(`/api/returns/${id}/reject`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        approved_by: adminId,
-        rejection_reason: rejectionReason,
-      }),
-    });
+  const res = await fetch(`${SALES_BASE}/return/${id}/reject`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      rejected_by: adminId,
+      rejection_reason: rejectionReason,
+    }),
+  });
 
-    if (!res.ok) throw new Error("Failed to reject return");
-    return await res.json();
-  } catch (err) {
-    console.error(`Error rejecting return ${id}:`, err);
-    throw err;
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to reject return");
   }
+  return await res.json();
 };
 
 //  printing the receipt data in the console after creating a sale in NewSale.jsx

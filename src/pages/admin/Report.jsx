@@ -1,1056 +1,1024 @@
-// components/Reports/Report.jsx
-import { useState, useEffect } from "react";
-import {
-  generateSalesReport,
-  generateStockReport,
-  generateFinancialReport,
-  generateCustomerReport,
-  generateCategoryReport,
-  downloadReportExcel,
-  getAllReports,
-} from "../../utils/report.util";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import {
   Loader2,
   Download,
-  Eye,
   Calendar,
   TrendingUp,
-  Package,
   DollarSign,
+  Receipt,
   Users,
-  PieChart,
-  FileText,
-  Clock,
-  CheckCircle,
-  XCircle,
-  RefreshCcw,
+  ArrowLeftRight,
+  ShoppingBag,
 } from "lucide-react";
+import * as XLSX from "xlsx";
+import {
+  getSalesReport,
+  getProfitReport,
+  getVatReport,
+  getShiftReport,
+  getStockMovementReport,
+  getPurchaseReport,
+} from "../../utils/report.util";
 
-const Report = () => {
-  const [reportType, setReportType] = useState("sales");
-  const [dateRange, setDateRange] = useState({
-    from: new Date(new Date().setDate(new Date().getDate() - 30))
-      .toISOString()
-      .split("T")[0],
-    to: new Date().toISOString().split("T")[0],
-  });
+/* ============================================================
+   DATE HELPERS
+============================================================ */
+const today = () => new Date().toISOString().slice(0, 10);
+const daysAgo = (n) => {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0, 10);
+};
+
+const TABS = [
+  { key: "sales", label: "Sales", icon: TrendingUp },
+  { key: "profit", label: "Profit", icon: DollarSign },
+  { key: "vat", label: "VAT", icon: Receipt },
+  { key: "shifts", label: "Shifts", icon: Users },
+  { key: "movements", label: "Stock Movements", icon: ArrowLeftRight },
+  { key: "purchases", label: "Purchases", icon: ShoppingBag },
+];
+
+const Reports = () => {
+  const [tab, setTab] = useState("sales");
+  const [from, setFrom] = useState(daysAgo(30));
+  const [to, setTo] = useState(today());
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [reports, setReports] = useState([]);
-  const [fetchingReports, setFetchingReports] = useState(false);
-  const [reportName, setReportName] = useState("");
-  const [selectedReport, setSelectedReport] = useState(null);
-  const [showReportModal, setShowReportModal] = useState(false);
-  // Add time state
-  const [timeRange, setTimeRange] = useState({
-    startTime: "",
-    endTime: "",
-  });
-  const [enableTimeFilter, setEnableTimeFilter] = useState(false);
 
-  const reportTypes = [
-    { value: "sales", label: "Sales Report", icon: TrendingUp, color: "blue" },
-    { value: "stock", label: "Stock Report", icon: Package, color: "green" },
-    {
-      value: "financial",
-      label: "Financial Report",
-      icon: DollarSign,
-      color: "violet",
-    },
-    {
-      value: "customer",
-      label: "Customer Report",
-      icon: Users,
-      color: "orange",
-    },
-    {
-      value: "category",
-      label: "Category Report",
-      icon: PieChart,
-      color: "red",
-    },
-  ];
-
-  const generateFunctions = {
-    sales: generateSalesReport,
-    stock: generateStockReport,
-    financial: generateFinancialReport,
-    customer: generateCustomerReport,
-    category: generateCategoryReport,
-  };
-
-  useEffect(() => {
-    fetchReports();
-  }, []);
-
-  const fetchReports = async () => {
-    setFetchingReports(true);
-    try {
-      const response = await getAllReports({ limit: 100 });
-      if (response.success) {
-        setReports(response.data);
-      } else {
-        toast.error("Failed to fetch reports");
-      }
-    } catch (error) {
-      console.error("Error fetching reports:", error);
-      toast.error("Error fetching reports");
-    } finally {
-      setFetchingReports(false);
-    }
-  };
-
-  const handleGenerateReport = async () => {
-    if (!reportName.trim()) {
-      toast.error("Please enter a report name");
-      return;
-    }
-
-    // Validate time range if enabled
-    if (enableTimeFilter) {
-      if (!timeRange.startTime || !timeRange.endTime) {
-        toast.error("Please select both start and end times");
-        return;
-      }
-      if (timeRange.startTime >= timeRange.endTime) {
-        toast.error("Start time must be before end time");
-        return;
-      }
-    }
-
+  const fetchReport = async () => {
     setLoading(true);
+    setData(null);
     try {
-      const generateFn = generateFunctions[reportType];
-      const payload = {
-        reportName,
-        dateRange,
-      };
+      let res;
+      if (tab === "sales")
+        res = await getSalesReport({ from, to, group_by: "day" });
+      else if (tab === "profit") res = await getProfitReport({ from, to });
+      else if (tab === "vat") res = await getVatReport({ from, to });
+      else if (tab === "shifts") res = await getShiftReport({ from, to });
+      else if (tab === "movements")
+        res = await getStockMovementReport({ from, to, limit: 500 });
+      else if (tab === "purchases") res = await getPurchaseReport({ from, to });
 
-      // Add time filter if enabled
-      if (enableTimeFilter) {
-        payload.startTime = timeRange.startTime;
-        payload.endTime = timeRange.endTime;
-      }
-
-      const response = await generateFn(payload);
-
-      if (response.success) {
-        toast.success(
-          `${response.message || "Report generated successfully!"}`,
-        );
-        await fetchReports();
-        // Reset form
-        setReportName("");
-        setDateRange({
-          from: new Date(new Date().setDate(new Date().getDate() - 30))
-            .toISOString()
-            .split("T")[0],
-          to: new Date().toISOString().split("T")[0],
-        });
-        setTimeRange({ startTime: "", endTime: "" });
-        setEnableTimeFilter(false);
+      if (res?.success) {
+        setData(res.data ?? res);
       } else {
-        toast.error(response.message || "Failed to generate report");
+        toast.error("Failed to load report");
       }
-    } catch (error) {
-      console.error("Error generating report:", error);
-      toast.error("Error generating report");
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.message || "Failed to load report");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDownloadReport = async (reportId) => {
-    try {
-      const result = await downloadReportExcel(reportId);
-      if (result.success) {
-        toast.success("Report downloaded successfully!");
-        await fetchReports();
-      } else {
-        toast.error("Failed to download report");
-      }
-    } catch (error) {
-      console.error("Error downloading report:", error);
-      toast.error("Error downloading report");
+  useEffect(() => {
+    fetchReport();
+  }, [tab, from, to]);
+
+  /* Excel export */
+  const handleExport = () => {
+    if (!data) return;
+    const wb = XLSX.utils.book_new();
+    const suffix = `${from}_to_${to}`;
+
+    if (tab === "sales") {
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet([data.summary]),
+        "Summary",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.series),
+        "By Day",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.by_payment),
+        "By Payment",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.by_cashier),
+        "By Cashier",
+      );
+    } else if (tab === "profit") {
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet([data.summary]),
+        "Summary",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.by_product),
+        "By Product",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.by_batch),
+        "By Batch",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.by_day),
+        "By Day",
+      );
+    } else if (tab === "vat") {
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet([data.summary]),
+        "Summary",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.by_category),
+        "By Category",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.by_day),
+        "By Day",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.by_product),
+        "By Product",
+      );
+    } else if (tab === "shifts") {
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet([data.summary]),
+        "Summary",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.shifts),
+        "Shifts",
+      );
+    } else if (tab === "movements") {
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.summary.by_type),
+        "Summary",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.top_movers),
+        "Top Movers",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.data),
+        "Movements",
+      );
+    } else if (tab === "purchases") {
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet([data.summary]),
+        "Summary",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.by_product),
+        "By Product",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.by_supplier),
+        "By Supplier",
+      );
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(data.by_day),
+        "By Day",
+      );
     }
-  };
 
-  const handleViewReport = async (report) => {
-    setSelectedReport(report);
-    console.log("Selected report for viewing summary:", selectedReport.summary);
-    setShowReportModal(true);
-  };
-
-  const getStatusBadge = (status) => {
-    const config = {
-      generated: { color: "bg-green-100 text-green-700", icon: CheckCircle },
-      downloaded: { color: "bg-blue-100 text-blue-700", icon: Download },
-      failed: { color: "bg-red-100 text-red-700", icon: XCircle },
-    };
-    const { color, icon: Icon } = config[status] || config.generated;
-    return (
-      <span
-        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${color}`}
-      >
-        <Icon className="w-3 h-3" />
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </span>
-    );
+    XLSX.writeFile(wb, `${tab}-report-${suffix}.xlsx`);
   };
 
   return (
-    <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-full mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h3 className="text-2xl font-bold text-gray-900">
-              Reports & Analytics
-            </h3>
-            <p className="text-sm text-gray-500">
-              Generate and manage business reports
-            </p>
+    <div className="p-3 md:p-5 text-gray-900 max-w-[1600px] mx-auto min-h-screen bg-gray-50/50">
+      {/* HEADER */}
+      <div className="mb-5 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-black text-gray-900 tracking-tight">
+            Reports
+          </h2>
+          <p className="text-xs text-gray-500 font-medium">
+            Live business reports — always up-to-date
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex text-gray-600 items-center gap-2 bg-white rounded-xl border border-gray-200 px-3 py-2">
+            <Calendar className="w-4 h-4 text-gray-900" />
+            <input
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              className="text-xs border-none text-gray-900 outline-none bg-transparent"
+            />
+            <span className="text-gray-300">→</span>
+            <input
+              type="date"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              className="text-xs border-none text-gray-900 outline-none bg-transparent"
+            />
           </div>
           <button
-            onClick={fetchReports}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition text-sm font-medium text-gray-700"
+            onClick={handleExport}
+            disabled={!data || loading}
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl disabled:opacity-50"
           >
-            <RefreshCcw className="w-4 h-4" />
-            Refresh
+            <Download className="w-4 h-4" /> Excel
           </button>
-        </div>
-
-        {/* Report Generation Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-          <h4 className="text-lg font-semibold text-gray-800 mb-6">
-            Generate New Report
-          </h4>
-
-          <div className="grid grid-cols-1 text-gray-600 lg:grid-cols-12 gap-6">
-            {/* Report Type Selection */}
-            <div className="lg:col-span-4">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Report Type
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                {reportTypes.map((type) => {
-                  const Icon = type.icon;
-                  const isSelected = reportType === type.value;
-                  return (
-                    <button
-                      key={type.value}
-                      onClick={() => setReportType(type.value)}
-                      className={`p-4 rounded-xl border-2 transition-all ${
-                        isSelected
-                          ? `border-${type.color}-500 bg-${type.color}-50 shadow-sm`
-                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                      }`}
-                    >
-                      <Icon
-                        className={`w-6 h-6 mx-auto mb-2 ${
-                          isSelected
-                            ? `text-${type.color}-600`
-                            : "text-gray-400"
-                        }`}
-                      />
-                      <div
-                        className={`text-xs font-medium ${
-                          isSelected
-                            ? `text-${type.color}-700`
-                            : "text-gray-600"
-                        }`}
-                      >
-                        {type.label}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            {/* Update the date range selection section in the JSX */}
-            <div className="lg:col-span-5">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    From Date
-                  </label>
-                  <input
-                    type="date"
-                    value={dateRange.from}
-                    onChange={(e) =>
-                      setDateRange({ ...dateRange, from: e.target.value })
-                    }
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    To Date
-                  </label>
-                  <input
-                    type="date"
-                    value={dateRange.to}
-                    onChange={(e) =>
-                      setDateRange({ ...dateRange, to: e.target.value })
-                    }
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Time Filter Toggle */}
-              <div className="mt-3 flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="enableTimeFilter"
-                  checked={enableTimeFilter}
-                  onChange={(e) => {
-                    setEnableTimeFilter(e.target.checked);
-                    if (!e.target.checked) {
-                      setTimeRange({ startTime: "", endTime: "" });
-                    }
-                  }}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label
-                  htmlFor="enableTimeFilter"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Filter by time range (optional)
-                </label>
-              </div>
-
-              {/* Time Range Inputs */}
-              {enableTimeFilter && (
-                <div className="grid grid-cols-2 gap-4 mt-2">
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">
-                      Start Time
-                    </label>
-                    <input
-                      type="time"
-                      value={timeRange.startTime}
-                      onChange={(e) =>
-                        setTimeRange({
-                          ...timeRange,
-                          startTime: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                      step="60"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">
-                      End Time
-                    </label>
-                    <input
-                      type="time"
-                      value={timeRange.endTime}
-                      onChange={(e) =>
-                        setTimeRange({ ...timeRange, endTime: e.target.value })
-                      }
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                      step="60"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Report Name Input */}
-              <div className="mt-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Report Name
-                </label>
-                <input
-                  type="text"
-                  value={reportName}
-                  onChange={(e) => setReportName(e.target.value)}
-                  placeholder="e.g., Monthly Sales Report - Jan 2026"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                />
-              </div>
-            </div>
-            {/* Generate Button */}
-            <div className="lg:col-span-3 flex items-end">
-              <button
-                onClick={handleGenerateReport}
-                disabled={loading || !reportName.trim()}
-                className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 inline animate-spin mr-2" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <FileText className="w-4 h-4 inline mr-2" />
-                    Generate Report
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Reports List */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-            <h4 className="text-lg font-semibold text-gray-800">
-              Recent Reports
-            </h4>
-            <span className="text-sm text-gray-500">
-              {reports.length} reports
-            </span>
-          </div>
-
-          {fetchingReports ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-            </div>
-          ) : reports.length === 0 ? (
-            <div className="text-center py-12">
-              <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">No reports generated yet</p>
-              <p className="text-sm text-gray-400">
-                Generate your first report above
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Report Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date Generated
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Generated By
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {reports.map((report) => {
-                    const reportTypeInfo = reportTypes.find(
-                      (t) => t.value === report.report_type,
-                    );
-                    const Icon = reportTypeInfo?.icon || FileText;
-
-                    return (
-                      <tr
-                        key={report.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <Icon className="w-4 h-4 text-gray-400" />
-                            <span className="text-sm font-medium text-gray-900">
-                              {report.report_name}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium bg-${reportTypeInfo?.color || "gray"}-100 text-${reportTypeInfo?.color || "gray"}-700`}
-                          >
-                            {reportTypeInfo?.label || report.report_type}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-500">
-                          {new Date(report.created_at).toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4">
-                          {getStatusBadge(report.status)}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-500">
-                          {report.generatedBy?.full_name || "Unknown"}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleViewReport(report)}
-                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                              title="View Details"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDownloadReport(report.id)}
-                              className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                              title="Download"
-                            >
-                              <Download className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Report Details Modal */}
-      {showReportModal && selectedReport && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-              <div>
-                <h5 className="text-lg font-bold text-gray-900">
-                  {selectedReport.report_name}
-                </h5>
-                <p className="text-sm text-gray-500">
-                  Generated on{" "}
-                  {new Date(selectedReport.created_at).toLocaleString()}
-                </p>
-              </div>
+      {/* TABS */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-1 mb-4 overflow-x-auto">
+        <div className="flex gap-1 min-w-max">
+          {TABS.map((t) => {
+            const Icon = t.icon;
+            const active = tab === t.key;
+            return (
               <button
-                onClick={() => setShowReportModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap ${
+                  active
+                    ? "bg-gray-900 text-white shadow"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
-                <XCircle className="w-5 h-5 text-gray-500" />
+                <Icon className="w-4 h-4" />
+                {t.label}
               </button>
-            </div>
-
-            <div className="p-6 space-y-6">
-              {/* Summary Section */}
-              {selectedReport.summary && (
-                <div>
-                  <h6 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-gray-400" />
-                    Summary
-                  </h6>
-
-                  {/* Render different summary types based on report type */}
-                  <div className="space-y-6">
-                    {/* For Financial Report */}
-                    {/* For Financial Report - Add profit metrics */}
-                    {selectedReport.report_type === "financial" && (
-                      <>
-                        {/* Key Metrics Grid - Add profit cards */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                          <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                            <p className="text-xs text-blue-600 uppercase tracking-wider font-semibold">
-                              Total Revenue
-                            </p>
-                            <p className="text-lg font-bold text-blue-900 mt-1">
-                              {selectedReport.summary.total_revenue?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                          <div className="bg-green-50 rounded-lg p-4 border border-green-100">
-                            <p className="text-xs text-green-600 uppercase tracking-wider font-semibold">
-                              Total VAT
-                            </p>
-                            <p className="text-lg font-bold text-green-900 mt-1">
-                              {selectedReport.summary.total_vat?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                          <div className="bg-purple-50 rounded-lg p-4 border border-purple-100">
-                            <p className="text-xs text-purple-600 uppercase tracking-wider font-semibold">
-                              Total Transactions
-                            </p>
-                            <p className="text-lg font-bold text-purple-900 mt-1">
-                              {selectedReport.summary.total_transactions}
-                            </p>
-                          </div>
-                          <div className="bg-orange-50 rounded-lg p-4 border border-orange-100">
-                            <p className="text-xs text-orange-600 uppercase tracking-wider font-semibold">
-                              Average Transaction
-                            </p>
-                            <p className="text-lg font-bold text-orange-900 mt-1">
-                              {selectedReport.summary.average_transaction?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Profit Metrics - NEW */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                          <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-100">
-                            <p className="text-xs text-indigo-600 uppercase tracking-wider font-semibold">
-                              Total Buying Price
-                            </p>
-                            <p className="text-lg font-bold text-indigo-900 mt-1">
-                              {selectedReport.summary.total_buying_price?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                          <div className="bg-cyan-50 rounded-lg p-4 border border-cyan-100">
-                            <p className="text-xs text-cyan-600 uppercase tracking-wider font-semibold">
-                              Total Selling Price
-                            </p>
-                            <p className="text-lg font-bold text-cyan-900 mt-1">
-                              {selectedReport.summary.total_selling_price?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                          <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
-                            <p className="text-xs text-emerald-600 uppercase tracking-wider font-semibold">
-                              Total Profit
-                            </p>
-                            <p
-                              className={`text-lg font-bold mt-1 ${selectedReport.summary.total_profit >= 0 ? "text-emerald-900" : "text-red-900"}`}
-                            >
-                              {selectedReport.summary.total_profit?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                          <div className="bg-amber-50 rounded-lg p-4 border border-amber-100">
-                            <p className="text-xs text-amber-600 uppercase tracking-wider font-semibold">
-                              Profit Margin
-                            </p>
-                            <p className="text-lg font-bold text-amber-900 mt-1">
-                              {selectedReport.summary.profit_margin?.toFixed(2)}
-                              %
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Net Revenue & Discounts */}
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
-                            <p className="text-xs text-emerald-600 uppercase tracking-wider font-semibold">
-                              Net Revenue
-                            </p>
-                            <p className="text-lg font-bold text-emerald-900 mt-1">
-                              {selectedReport.summary.net_revenue?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                          <div className="bg-red-50 rounded-lg p-4 border border-red-100">
-                            <p className="text-xs text-red-600 uppercase tracking-wider font-semibold">
-                              Total Discounts
-                            </p>
-                            <p className="text-lg font-bold text-red-900 mt-1">
-                              {selectedReport.summary.total_discounts?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Top Cashiers with Profit */}
-                        {selectedReport.summary.top_cashiers &&
-                          selectedReport.summary.top_cashiers.length > 0 && (
-                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                              <h6 className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
-                                Top Cashiers Performance
-                              </h6>
-                              <div className="space-y-2">
-                                {selectedReport.summary.top_cashiers.map(
-                                  (cashier, idx) => (
-                                    <div
-                                      key={idx}
-                                      className="flex justify-between items-center p-2 bg-white rounded-lg border border-gray-100"
-                                    >
-                                      <span className="font-medium text-gray-900">
-                                        {cashier.name}
-                                      </span>
-                                      <div className="flex gap-4 text-sm">
-                                        <span className="text-gray-500">
-                                          {cashier.transactions} transactions
-                                        </span>
-                                        <span className="text-gray-500">
-                                          {cashier.revenue?.toLocaleString()}{" "}
-                                          RWF
-                                        </span>
-                                        <span
-                                          className={`font-semibold ${(cashier.profit || 0) >= 0 ? "text-emerald-600" : "text-red-600"}`}
-                                        >
-                                          Profit:{" "}
-                                          {(
-                                            cashier.profit || 0
-                                          ).toLocaleString()}{" "}
-                                          RWF
-                                        </span>
-                                      </div>
-                                    </div>
-                                  ),
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                        {/* Daily Revenue */}
-                        {selectedReport.summary.daily_revenue &&
-                          Object.keys(selectedReport.summary.daily_revenue)
-                            .length > 0 && (
-                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                              <h6 className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
-                                Daily Revenue Breakdown
-                              </h6>
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto">
-                                {Object.entries(
-                                  selectedReport.summary.daily_revenue,
-                                ).map(([date, amount]) => (
-                                  <div
-                                    key={date}
-                                    className="flex justify-between items-center p-2 bg-white rounded-lg border border-gray-100 text-sm"
-                                  >
-                                    <span className="text-gray-600">
-                                      {date}
-                                    </span>
-                                    <span className="font-semibold text-blue-600">
-                                      {typeof amount === "number"
-                                        ? amount.toLocaleString()
-                                        : amount}{" "}
-                                      RWF
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                        {/* Time Range Display (if filtered by time) */}
-                        {selectedReport.timeRange && (
-                          <div className="bg-blue-50 rounded-lg p-3 border border-blue-200 text-sm">
-                            <span className="font-medium text-blue-700">
-                              Time Filter Applied:
-                            </span>
-                            <span className="text-blue-600 ml-2">
-                              {selectedReport.timeRange.startTime} →{" "}
-                              {selectedReport.timeRange.endTime}
-                            </span>
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    {/* For Sales Report */}
-                    {selectedReport.report_type === "sales" && (
-                      <>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                            <p className="text-xs text-blue-600 uppercase tracking-wider font-semibold">
-                              Total Sales
-                            </p>
-                            <p className="text-lg font-bold text-blue-900 mt-1">
-                              {selectedReport.summary.total_sales}
-                            </p>
-                          </div>
-                          <div className="bg-green-50 rounded-lg p-4 border border-green-100">
-                            <p className="text-xs text-green-600 uppercase tracking-wider font-semibold">
-                              Total Revenue
-                            </p>
-                            <p className="text-lg font-bold text-green-900 mt-1">
-                              {selectedReport.summary.total_revenue?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                          <div className="bg-purple-50 rounded-lg p-4 border border-purple-100">
-                            <p className="text-xs text-purple-600 uppercase tracking-wider font-semibold">
-                              Average Order
-                            </p>
-                            <p className="text-lg font-bold text-purple-900 mt-1">
-                              {selectedReport.summary.average_order_value?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Payment Methods */}
-                        {selectedReport.summary.payment_methods && (
-                          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                            <h6 className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
-                              Payment Methods
-                            </h6>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                              {Object.entries(
-                                selectedReport.summary.payment_methods,
-                              ).map(([method, count]) => (
-                                <div
-                                  key={method}
-                                  className="flex justify-between items-center p-2 bg-white rounded-lg border border-gray-100"
-                                >
-                                  <span className="font-medium text-gray-900">
-                                    {method}
-                                  </span>
-                                  <span className="text-sm font-semibold text-blue-600">
-                                    {count}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    {/* For Stock Report */}
-                    {selectedReport.report_type === "stock" && (
-                      <>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                          <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                            <p className="text-xs text-blue-600 uppercase tracking-wider font-semibold">
-                              Total Products
-                            </p>
-                            <p className="text-lg font-bold text-blue-900 mt-1">
-                              {selectedReport.summary.total_products}
-                            </p>
-                          </div>
-                          <div className="bg-green-50 rounded-lg p-4 border border-green-100">
-                            <p className="text-xs text-green-600 uppercase tracking-wider font-semibold">
-                              Stock Value
-                            </p>
-                            <p className="text-lg font-bold text-green-900 mt-1">
-                              {selectedReport.summary.total_stock_value?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                          <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-100">
-                            <p className="text-xs text-yellow-600 uppercase tracking-wider font-semibold">
-                              Low Stock
-                            </p>
-                            <p className="text-lg font-bold text-yellow-900 mt-1">
-                              {selectedReport.summary.low_stock_items}
-                            </p>
-                          </div>
-                          <div className="bg-red-50 rounded-lg p-4 border border-red-100">
-                            <p className="text-xs text-red-600 uppercase tracking-wider font-semibold">
-                              Out of Stock
-                            </p>
-                            <p className="text-lg font-bold text-red-900 mt-1">
-                              {selectedReport.summary.out_of_stock_items}
-                            </p>
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    {/* For Customer Report */}
-                    {selectedReport.report_type === "customer" && (
-                      <>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                            <p className="text-xs text-blue-600 uppercase tracking-wider font-semibold">
-                              Total Customers
-                            </p>
-                            <p className="text-lg font-bold text-blue-900 mt-1">
-                              {selectedReport.summary.total_customers}
-                            </p>
-                          </div>
-                          <div className="bg-green-50 rounded-lg p-4 border border-green-100">
-                            <p className="text-xs text-green-600 uppercase tracking-wider font-semibold">
-                              Total Spent
-                            </p>
-                            <p className="text-lg font-bold text-green-900 mt-1">
-                              {selectedReport.summary.total_customer_spent?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                          <div className="bg-purple-50 rounded-lg p-4 border border-purple-100">
-                            <p className="text-xs text-purple-600 uppercase tracking-wider font-semibold">
-                              Average Spent
-                            </p>
-                            <p className="text-lg font-bold text-purple-900 mt-1">
-                              {selectedReport.summary.average_customer_spent?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Top Customers */}
-                        {selectedReport.summary.top_customers &&
-                          selectedReport.summary.top_customers.length > 0 && (
-                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                              <h6 className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
-                                Top Customers
-                              </h6>
-                              <div className="space-y-2 max-h-48 overflow-y-auto">
-                                {selectedReport.summary.top_customers.map(
-                                  (customer, idx) => (
-                                    <div
-                                      key={idx}
-                                      className="flex justify-between items-center p-2 bg-white rounded-lg border border-gray-100"
-                                    >
-                                      <div>
-                                        <span className="font-medium text-gray-900">
-                                          {customer.name}
-                                        </span>
-                                        <span className="text-xs text-gray-500 ml-2">
-                                          {customer.phone}
-                                        </span>
-                                      </div>
-                                      <div className="flex gap-4 text-sm">
-                                        <span className="text-gray-500">
-                                          {customer.total_transactions}{" "}
-                                          purchases
-                                        </span>
-                                        <span className="font-semibold text-green-600">
-                                          {customer.total_spent?.toLocaleString()}{" "}
-                                          RWF
-                                        </span>
-                                      </div>
-                                    </div>
-                                  ),
-                                )}
-                              </div>
-                            </div>
-                          )}
-                      </>
-                    )}
-
-                    {/* For Category Report */}
-                    {selectedReport.report_type === "category" && (
-                      <>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                            <p className="text-xs text-blue-600 uppercase tracking-wider font-semibold">
-                              Total Categories
-                            </p>
-                            <p className="text-lg font-bold text-blue-900 mt-1">
-                              {selectedReport.summary.total_categories}
-                            </p>
-                          </div>
-                          <div className="bg-green-50 rounded-lg p-4 border border-green-100">
-                            <p className="text-xs text-green-600 uppercase tracking-wider font-semibold">
-                              Total Revenue
-                            </p>
-                            <p className="text-lg font-bold text-green-900 mt-1">
-                              {selectedReport.summary.total_revenue?.toLocaleString()}{" "}
-                              RWF
-                            </p>
-                          </div>
-                          {selectedReport.summary.top_category && (
-                            <div className="bg-purple-50 rounded-lg p-4 border border-purple-100">
-                              <p className="text-xs text-purple-600 uppercase tracking-wider font-semibold">
-                                Top Category
-                              </p>
-                              <p className="text-lg font-bold text-purple-900 mt-1">
-                                {selectedReport.summary.top_category.name}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Category Breakdown */}
-                        {selectedReport.summary.categories &&
-                          selectedReport.summary.categories.length > 0 && (
-                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                              <h6 className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">
-                                Category Breakdown
-                              </h6>
-                              <div className="space-y-2 max-h-48 overflow-y-auto">
-                                {selectedReport.summary.categories.map(
-                                  (category, idx) => (
-                                    <div
-                                      key={idx}
-                                      className="flex justify-between items-center p-2 bg-white rounded-lg border border-gray-100"
-                                    >
-                                      <span className="font-medium text-gray-900">
-                                        {category.name}
-                                      </span>
-                                      <div className="flex gap-4 text-sm">
-                                        <span className="text-gray-500">
-                                          {category.total_items} items
-                                        </span>
-                                        <span className="text-gray-500">
-                                          {category.total_sales} sales
-                                        </span>
-                                        <span className="font-semibold text-green-600">
-                                          {category.total_revenue?.toLocaleString()}{" "}
-                                          RWF
-                                        </span>
-                                      </div>
-                                    </div>
-                                  ),
-                                )}
-                              </div>
-                            </div>
-                          )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Report Info */}
-              {/* Report Info - Display combined date-time */}
-              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div>
-                  <p className="text-xs text-gray-500 font-medium">Type</p>
-                  <p className="text-sm font-medium text-gray-900">
-                    {reportTypes.find(
-                      (t) => t.value === selectedReport.report_type,
-                    )?.label || selectedReport.report_type}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 font-medium">
-                    Date & Time Range
-                  </p>
-                  <p className="text-sm font-medium text-gray-900">
-                    {new Date(selectedReport.date_range_from).toLocaleString()}{" "}
-                    → {new Date(selectedReport.date_range_to).toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 font-medium">Status</p>
-                  {getStatusBadge(selectedReport.status)}
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 font-medium">
-                    Generated By
-                  </p>
-                  <p className="text-sm font-medium text-gray-900">
-                    {selectedReport.generatedBy?.full_name || "Unknown"}
-                  </p>
-                </div>
-              </div>
-
-              {/* If time filter was applied, show it prominently */}
-              {selectedReport.parameters?.startTime &&
-                selectedReport.parameters?.endTime && (
-                  <div className="bg-blue-50 rounded-lg p-3 border border-blue-200 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm text-blue-700">
-                      <strong>Time Filter Applied:</strong>{" "}
-                      {selectedReport.parameters.startTime} →{" "}
-                      {selectedReport.parameters.endTime}
-                    </span>
-                  </div>
-                )}
-
-              {/* Actions */}
-              <div className="flex gap-3 pt-4 border-t border-gray-100">
-                <button
-                  onClick={() => handleDownloadReport(selectedReport.id)}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition font-medium flex items-center justify-center gap-2 shadow-lg shadow-green-500/25"
-                >
-                  <Download className="w-4 h-4" />
-                  Download Excel
-                </button>
-                <button
-                  onClick={() => setShowReportModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
+      </div>
+
+      {/* CONTENT */}
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-24">
+          <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-3" />
+          <p className="text-xs text-gray-400 uppercase font-black tracking-widest">
+            Loading {tab} report...
+          </p>
+        </div>
+      ) : !data ? (
+        <div className="text-center py-20 text-gray-400">
+          No data. Adjust the date range.
+        </div>
+      ) : (
+        <>
+          {tab === "sales" && <SalesReport data={data} />}
+          {tab === "profit" && <ProfitReport data={data} />}
+          {tab === "vat" && <VatReport data={data} />}
+          {tab === "shifts" && <ShiftReport data={data} />}
+          {tab === "movements" && <MovementsReport data={data} />}
+          {tab === "purchases" && <PurchasesReport data={data} />}
+        </>
       )}
     </div>
   );
 };
 
-export default Report;
+/* ============================================================
+   REUSABLE PIECES
+============================================================ */
+const Card = ({
+  label,
+  value,
+  sub,
+  color = "text-gray-900",
+  bg = "bg-white",
+}) => (
+  <div className={`${bg} rounded-2xl shadow-sm border border-gray-100 p-4`}>
+    <p className="text-[10px] text-gray-500 uppercase font-black tracking-wider mb-1">
+      {label}
+    </p>
+    <p className={`text-xl font-black ${color} truncate`}>{value}</p>
+    {sub && <p className="text-[10px] text-gray-400 mt-1">{sub}</p>}
+  </div>
+);
+
+const rwf = (n) => `${Number(n || 0).toLocaleString()} RWF`;
+
+const SimpleTable = ({ columns, rows, emptyText = "No data" }) => {
+  if (!rows || rows.length === 0)
+    return (
+      <div className="text-center py-10 text-gray-400 text-xs italic">
+        {emptyText}
+      </div>
+    );
+  return (
+    <div className="overflow-x-auto bg-white rounded-2xl shadow-sm border border-gray-100">
+      <table className="w-full text-xs">
+        <thead className="bg-gray-50 border-b">
+          <tr className="text-[10px] text-gray-500 uppercase font-black">
+            {columns.map((c) => (
+              <th
+                key={c.key}
+                className={`px-4 py-3 ${
+                  c.align === "right" ? "text-right" : "text-left"
+                }`}
+              >
+                {c.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} className="border-b border-gray-50 hover:bg-blue-50/20">
+              {columns.map((c) => (
+                <td
+                  key={c.key}
+                  className={`px-4 py-2.5 ${
+                    c.align === "right" ? "text-right" : "text-left"
+                  } ${c.className || ""}`}
+                >
+                  {c.render ? c.render(r) : r[c.key]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+/* ============================================================
+   SALES TAB
+============================================================ */
+/* ============================================================
+   SALES TAB
+============================================================ */
+const SalesReport = ({ data }) => {
+  // Extract the underlying report metrics safely from the payload wrapper
+  const reportData = data?.data || data;
+
+  if (!reportData?.summary) return null;
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Card
+          label="Transactions"
+          value={reportData.summary.total_transactions}
+        />
+        <Card
+          label="Revenue"
+          value={rwf(reportData.summary.total_revenue)}
+          color="text-emerald-600"
+        />
+        <Card
+          label="VAT"
+          value={rwf(reportData.summary.total_vat)}
+          color="text-blue-600"
+        />
+        <Card
+          label="Avg Order"
+          value={rwf(reportData.summary.average_order)}
+          color="text-purple-600"
+        />
+      </div>
+
+      <h3 className="text-sm font-black text-gray-700 uppercase tracking-wider pt-2">
+        Daily Breakdown
+      </h3>
+      <SimpleTable
+        columns={[
+          { key: "period", label: "Period" },
+          { key: "count", label: "Txns", align: "right" },
+          {
+            key: "vat",
+            label: "VAT",
+            align: "right",
+            render: (r) => rwf(r.vat),
+          },
+          {
+            key: "revenue",
+            label: "Revenue",
+            align: "right",
+            render: (r) => rwf(r.revenue),
+          },
+        ]}
+        rows={reportData.series || []}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <h3 className="text-sm font-black text-gray-700 uppercase tracking-wider mb-2">
+            By Payment Method
+          </h3>
+          <SimpleTable
+            columns={[
+              {
+                key: "method",
+                label: "Method",
+                render: (r) => r.payment_method || r.method,
+              },
+              { key: "count", label: "Count", align: "right" },
+              {
+                key: "revenue",
+                label: "Revenue",
+                align: "right",
+                render: (r) => rwf(r.revenue),
+              },
+            ]}
+            rows={(reportData.by_payment || []).map((p, i) => ({
+              ...p,
+              id: i,
+            }))}
+          />
+        </div>
+        <div>
+          <h3 className="text-sm font-black text-gray-700 uppercase tracking-wider mb-2">
+            By Cashier
+          </h3>
+          <SimpleTable
+            columns={[
+              { key: "name", label: "Cashier" },
+              { key: "count", label: "Count", align: "right" },
+              {
+                key: "revenue",
+                label: "Revenue",
+                align: "right",
+                render: (r) => rwf(r.revenue),
+              },
+            ]}
+            rows={reportData.by_cashier || []}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ============================================================
+   PROFIT TAB
+============================================================ */
+const ProfitReport = ({ data }) => {
+  const [view, setView] = useState("product");
+
+  // Extract the underlying report metrics safely from the payload wrapper
+  const reportData = data?.data || data;
+
+  // Safe guard clause: prevents crash if state holds structural data from another tab
+  if (!reportData?.summary || !("total_profit" in reportData.summary)) {
+    return (
+      <div className="text-center py-10 text-gray-400">
+        Loading profit metrics...
+      </div>
+    );
+  }
+
+  const rows =
+    view === "product"
+      ? reportData.by_product || []
+      : view === "batch"
+        ? reportData.by_batch || []
+        : reportData.by_day || [];
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <Card
+          label="Revenue"
+          value={rwf(reportData.summary.total_revenue)}
+          color="text-gray-900"
+        />
+        <Card
+          label="Cost"
+          value={rwf(reportData.summary.total_cost)}
+          color="text-orange-600"
+        />
+        <Card
+          label="Profit"
+          value={rwf(reportData.summary.total_profit)}
+          color={
+            reportData.summary.total_profit >= 0
+              ? "text-emerald-600"
+              : "text-red-600"
+          }
+        />
+        <Card
+          label="Margin %"
+          value={`${reportData.summary.profit_margin_pct}%`}
+          color="text-blue-600"
+        />
+        <Card
+          label="Loss Lines"
+          value={reportData.summary.loss_lines}
+          color="text-red-600"
+        />
+      </div>
+
+      <div className="flex gap-2">
+        {[
+          { key: "product", label: "By Product" },
+          { key: "batch", label: "By Batch" },
+          { key: "day", label: "By Day" },
+        ].map((v) => (
+          <button
+            key={v.key}
+            onClick={() => setView(v.key)}
+            className={`px-3 py-1.5 text-xs font-bold rounded-lg ${
+              view === v.key
+                ? "bg-gray-900 text-white"
+                : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+            }`}
+          >
+            {v.label}
+          </button>
+        ))}
+      </div>
+
+      {view === "product" && (
+        <SimpleTable
+          columns={[
+            { key: "name", label: "Product" },
+            { key: "quantity_sold", label: "Qty", align: "right" },
+            {
+              key: "revenue",
+              label: "Revenue",
+              align: "right",
+              render: (r) => rwf(r.revenue),
+            },
+            {
+              key: "cost",
+              label: "Cost",
+              align: "right",
+              render: (r) => rwf(r.cost),
+            },
+            {
+              key: "profit",
+              label: "Profit",
+              align: "right",
+              render: (r) => (
+                <span
+                  className={
+                    r.profit >= 0
+                      ? "text-emerald-600 font-bold"
+                      : "text-red-600 font-bold"
+                  }
+                >
+                  {rwf(r.profit)}
+                </span>
+              ),
+            },
+            {
+              key: "profit_margin_pct",
+              label: "Margin %",
+              align: "right",
+              render: (r) => `${r.profit_margin_pct}%`,
+            },
+          ]}
+          rows={rows}
+        />
+      )}
+
+      {view === "batch" && (
+        <SimpleTable
+          columns={[
+            { key: "product_name", label: "Product" },
+            { key: "batch_code", label: "Batch" },
+            { key: "quantity_sold", label: "Qty", align: "right" },
+            {
+              key: "revenue",
+              label: "Revenue",
+              align: "right",
+              render: (r) => rwf(r.revenue),
+            },
+            {
+              key: "cost",
+              label: "Cost",
+              align: "right",
+              render: (r) => rwf(r.cost),
+            },
+            {
+              key: "profit",
+              label: "Profit",
+              align: "right",
+              render: (r) => (
+                <span
+                  className={
+                    r.profit >= 0
+                      ? "text-emerald-600 font-bold"
+                      : "text-red-600 font-bold"
+                  }
+                >
+                  {rwf(r.profit)}
+                </span>
+              ),
+            },
+          ]}
+          rows={rows}
+        />
+      )}
+
+      {view === "day" && (
+        <SimpleTable
+          columns={[
+            { key: "date", label: "Date" },
+            { key: "quantity_sold", label: "Qty", align: "right" },
+            {
+              key: "revenue",
+              label: "Revenue",
+              align: "right",
+              render: (r) => rwf(r.revenue),
+            },
+            {
+              key: "cost",
+              label: "Cost",
+              align: "right",
+              render: (r) => rwf(r.cost),
+            },
+            {
+              key: "profit",
+              label: "Profit",
+              align: "right",
+              render: (r) => (
+                <span
+                  className={
+                    r.profit >= 0
+                      ? "text-emerald-600 font-bold"
+                      : "text-red-600 font-bold"
+                  }
+                >
+                  {rwf(r.profit)}
+                </span>
+              ),
+            },
+            {
+              key: "profit_margin_pct",
+              label: "Margin %",
+              align: "right",
+              render: (r) => `${r.profit_margin_pct}%`,
+            },
+          ]}
+          rows={rows}
+        />
+      )}
+    </div>
+  );
+};
+
+/* ============================================================
+   VAT TAB
+============================================================ */
+const VatReport = ({ data }) => {
+  const reportData = data?.data || data;
+
+  if (!reportData?.summary || !reportData?.by_category) {
+    return (
+      <div className="text-center py-10 text-gray-400">
+        Loading VAT report...
+      </div>
+    );
+  }
+
+  return (
+    // ← ADD THIS
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <Card
+          label="Gross (incl. VAT)"
+          value={rwf(reportData.summary.total_gross)}
+        />
+        <Card
+          label="VAT Collected"
+          value={rwf(reportData.summary.total_vat)}
+          color="text-blue-600"
+        />
+        <Card
+          label="Net (excl. VAT)"
+          value={rwf(reportData.summary.total_net)}
+          color="text-gray-700"
+        />
+      </div>
+
+      <h3 className="text-sm font-black text-gray-700 uppercase tracking-wider">
+        By VAT Category
+      </h3>
+      <SimpleTable
+        columns={[
+          { key: "category", label: "Category" },
+          {
+            key: "rate",
+            label: "Rate %",
+            align: "right",
+            render: (r) => `${r.rate}%`,
+          },
+          { key: "lines", label: "Lines", align: "right" },
+          {
+            key: "gross",
+            label: "Gross",
+            align: "right",
+            render: (r) => rwf(r.gross),
+          },
+          {
+            key: "vat",
+            label: "VAT",
+            align: "right",
+            render: (r) => rwf(r.vat),
+          },
+          {
+            key: "net",
+            label: "Net",
+            align: "right",
+            render: (r) => rwf(r.net),
+          },
+        ]}
+        rows={reportData.by_category}
+      />
+
+      <h3 className="text-sm font-black text-gray-700 uppercase tracking-wider">
+        Daily VAT
+      </h3>
+      <SimpleTable
+        columns={[
+          { key: "date", label: "Date" },
+          {
+            key: "gross",
+            label: "Gross",
+            align: "right",
+            render: (r) => rwf(r.gross),
+          },
+          {
+            key: "vat",
+            label: "VAT",
+            align: "right",
+            render: (r) => rwf(r.vat),
+          },
+          {
+            key: "net",
+            label: "Net",
+            align: "right",
+            render: (r) => rwf(r.net),
+          },
+        ]}
+        rows={reportData.by_day}
+      />
+    </div>
+  ); // ← closes the return
+};
+/* ============================================================
+   SHIFT TAB
+============================================================ */
+const ShiftReport = ({ data }) => {
+  const reportData = data?.data || data;
+
+  if (!reportData?.summary || !reportData?.shifts) {
+    return (
+      <div className="text-center py-10 text-gray-400">
+        Loading shifts report...
+      </div>
+    );
+  }
+
+  return (
+    // ← ADD THIS
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <Card label="Shifts" value={reportData.summary.total_shifts} />
+        <Card
+          label="Revenue"
+          value={rwf(reportData.summary.total_revenue)}
+          color="text-emerald-600"
+        />
+        <Card
+          label="Balanced"
+          value={reportData.summary.balanced_shifts}
+          color="text-emerald-600"
+        />
+        <Card
+          label="Short"
+          value={reportData.summary.short_shifts}
+          color="text-red-600"
+        />
+        <Card
+          label="Over"
+          value={reportData.summary.over_shifts}
+          color="text-orange-600"
+        />
+      </div>
+
+      <SimpleTable
+        columns={[
+          { key: "cashier", label: "Cashier" },
+          { key: "business_date", label: "Date" },
+          { key: "status", label: "Status", render: (r) => r.status },
+          { key: "transaction_count", label: "Txns", align: "right" },
+          {
+            key: "total_sales",
+            label: "Sales",
+            align: "right",
+            render: (r) => rwf(r.total_sales),
+          },
+          {
+            key: "cash_sales",
+            label: "Cash",
+            align: "right",
+            render: (r) => rwf(r.cash_sales),
+          },
+          {
+            key: "expected_cash",
+            label: "Expected",
+            align: "right",
+            render: (r) => rwf(r.expected_cash),
+          },
+          {
+            key: "actual_cash",
+            label: "Actual",
+            align: "right",
+            render: (r) => rwf(r.actual_cash),
+          },
+          {
+            key: "difference",
+            label: "Diff",
+            align: "right",
+
+            render: (r) => (
+              <span
+                className={
+                  r.is_balanced
+                    ? "text-emerald-600 font-bold"
+                    : r.difference < 0
+                      ? "text-red-600 font-bold"
+                      : "text-orange-600 font-bold"
+                }
+              >
+                {rwf(r.difference)}
+              </span>
+            ),
+          },
+        ]}
+        rows={reportData.shifts}
+      />
+    </div>
+  ); // ← closes the return
+};
+
+/* ============================================================
+   MOVEMENTS TAB
+============================================================ */
+const MovementsReport = ({ data }) => {
+  const reportData = data;
+  console.log("this is the report data", reportData);
+
+  // Guard: if data isn't shaped like a movements report, don't crash
+  if (!reportData?.summary || !reportData?.pagination) {
+    return (
+      <div className="text-center py-10 text-gray-400">
+        Loading stock movements report...
+      </div>
+    );
+  }
+
+  return (
+    // ← ADD THIS
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <Card label="Movements" value={reportData.pagination.total} />
+        <Card
+          label="Total In"
+          value={
+            reportData.summary.by_type?.find((t) => t.type === "IN")
+              ?.total_quantity || 0
+          }
+          color="text-emerald-600"
+        />
+        <Card
+          label="Total Out"
+          value={
+            reportData.summary.by_type?.find((t) => t.type === "OUT")
+              ?.total_quantity || 0
+          }
+          color="text-red-600"
+        />
+      </div>
+
+      <SimpleTable
+        columns={[
+          {
+            key: "created_at",
+            label: "Date",
+            render: (r) => new Date(r.created_at).toLocaleString(),
+          },
+          {
+            key: "product",
+            label: "Product",
+            render: (r) => r.product?.name || "—",
+          },
+          {
+            key: "batch_code",
+            label: "Batch",
+            render: (r) => r.batch?.batch_code || "—",
+          },
+          {
+            key: "type",
+            label: "Type",
+            render: (r) => (
+              <span
+                className={
+                  r.type === "IN"
+                    ? "px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-black"
+                    : "px-2 py-0.5 rounded bg-red-50 text-red-700 text-[10px] font-black"
+                }
+              >
+                {r.type}
+              </span>
+            ),
+          },
+          { key: "quantity", label: "Qty", align: "right" },
+          { key: "user", label: "By", render: (r) => r.user?.full_name || "—" },
+          { key: "reason", label: "Reason" },
+        ]}
+        rows={reportData.data}
+        emptyText="No stock movements in this range"
+      />
+    </div>
+  ); // ← closes the return
+};
+/* ============================================================
+   PURCHASES TAB
+============================================================ */
+const PurchasesReport = ({ data }) => {
+  const reportData = data?.data || data;
+
+  // Add guard
+  if (!reportData?.summary) {
+    return (
+      <div className="text-center py-10 text-gray-400">
+        Loading purchases report...
+      </div>
+    );
+  }
+
+  return (
+    // ← ADD THIS
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <Card label="Events" value={reportData.summary.total_events} />
+        <Card
+          label="Units Received"
+          value={reportData.summary.total_units}
+          color="text-blue-600"
+        />
+        <Card
+          label="Total Cost"
+          value={rwf(reportData.summary.total_cost)}
+          color="text-emerald-600"
+        />
+      </div>
+
+      <h3 className="text-sm font-black text-gray-700 uppercase tracking-wider">
+        By Supplier
+      </h3>
+      <SimpleTable
+        columns={[
+          { key: "supplier", label: "Supplier" },
+          { key: "events", label: "Events", align: "right" },
+          { key: "units", label: "Units", align: "right" },
+          {
+            key: "cost",
+            label: "Cost",
+            align: "right",
+            render: (r) => rwf(r.cost),
+          },
+        ]}
+        rows={reportData.by_supplier || []}
+      />
+
+      <h3 className="text-sm font-black text-gray-700 uppercase tracking-wider">
+        By Product
+      </h3>
+      <SimpleTable
+        columns={[
+          { key: "name", label: "Product" },
+          { key: "barcode", label: "Barcode" },
+          { key: "events", label: "Events", align: "right" },
+          { key: "units", label: "Units", align: "right" },
+          {
+            key: "cost",
+            label: "Cost",
+            align: "right",
+            render: (r) => rwf(r.cost),
+          },
+        ]}
+        rows={reportData.by_product || []}
+      />
+    </div>
+  ); // ← closes the return
+};
+
+export default Reports;
